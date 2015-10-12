@@ -1,36 +1,396 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on Hugo Blog Template for GitHub Pages</title>
-    <link>http://asya999.github.io/post/</link>
-    <description>Recent content in Posts on Hugo Blog Template for GitHub Pages</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Thu, 20 Feb 2014 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://asya999.github.io/post/index.xml" rel="self" type="application/rss+xml" />
-    
-    <item>
-      <title>Can I use more replica nodes to scale?</title>
-      <link>http://asya999.github.io/post/CanReplicasHelpScaling/</link>
-      <pubDate>Thu, 20 Feb 2014 00:00:00 +0000</pubDate>
-      
-      <guid>http://asya999.github.io/post/CanReplicasHelpScaling/</guid>
-      <description>
+    <title>Ask Asya </title>
+    <link>http://localhost:54380/post/</link>
+    <language>en-us</language>
+    <author></author>
+    <rights>(C) 2014</rights>
+    <updated>2014-04-15 00:00:00 &#43;0000 UTC</updated>
 
-&lt;h3 id=&#34;question:4d24c85545f4030c8e9fbee403dc78c8&#34;&gt;Question:&lt;/h3&gt;
+    
+      
+        <item>
+          <title>How to Model Dynamic Attributes</title>
+          <link>http://localhost:54380/post/DynamicAttributes/</link>
+          <pubDate>Tue, 15 Apr 2014 00:00:00 UTC</pubDate>
+          <author></author>
+          <guid>http://localhost:54380/post/DynamicAttributes/</guid>
+          <description>
+
+&lt;h3 id=&#34;question:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Question:&lt;/h3&gt;
+
+&lt;p&gt;I&amp;rsquo;ve heard that MongoDB can be effectively used to model &amp;ldquo;dynamic attributes&amp;rdquo; - where you don&amp;rsquo;t know up front all the different attributes and not all attributes apply to all items.  Can you describe how that can be done, and in particular how it can be effectively indexed?&lt;/p&gt;
+
+&lt;h3 id=&#34;answer:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Answer:&lt;/h3&gt;
+
+&lt;h5 id=&#34;the-problem:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;The problem:&lt;/h5&gt;
+
+&lt;p&gt;Imagine you are building an e-commerce site and you aspire to be as big as amazon.com some day, which means you will be selling many different types of products.  It&amp;rsquo;s easy to see that there will be sets of attributes that will only apply to some of the products you sell.&lt;/p&gt;
+
+&lt;p&gt;Product document may look like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    {
+      SKU&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;XRD12349&amp;quot;&lt;/span&gt;,
+      type&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;book&amp;quot;&lt;/span&gt;,
+      title&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;MongoDB, The Definitive Guide&amp;quot;&lt;/span&gt;,
+      ISBN&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;xxx&amp;quot;&lt;/span&gt;,
+      author&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Kristina Chodorow&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Mike Dieroff&amp;quot;&lt;/span&gt;],
+      genre&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;computing&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;databases&amp;quot;&lt;/span&gt;]
+    }
+&lt;/pre&gt;&lt;/div&gt;
+
+or this:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    {
+      SKU&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Y32944EW&amp;quot;&lt;/span&gt;,
+      type&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shoes&amp;quot;&lt;/span&gt;,
+      manufacturer&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ShoesForAll&amp;quot;&lt;/span&gt;,
+      color&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;,
+      style&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;comfort&amp;quot;&lt;/span&gt;,
+      size&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;7B&amp;quot;&lt;/span&gt;
+    }
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;You can see how it would be extremely challenging to manage a collection that has an incredibly wide variety of document &amp;ldquo;shapes&amp;rdquo;.  Now, while some people call MongoDB &amp;ldquo;schemaless&amp;rdquo; I am not a fan of this designation.  The schema of each document is defined by the document itself.  To be able to build a robust applications you need to decide what the schema of the documents will be, otherwise your application will spend as much time examining the documents to learn their schema as providing actual functionality.&lt;/p&gt;
+
+&lt;h5 id=&#34;possible-solutions:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Possible solutions:&lt;/h5&gt;
+
+&lt;p&gt;One way to index the attributes you want to be able to search by is by creating an index on each such attribute in a schema like the one above.  This is not practical, even if you use &lt;a href=&#34;http://docs.mongodb.org/manual/core/index-sparse/&#34;&gt;&amp;ldquo;sparse&amp;rdquo; indexes&lt;/a&gt; (since many attributes will be set only on a small subset of the products), because you may end up with dozens, if not hundreds of indexes.  In addition, every time a new attribute is introduced, a new index has to be added on the collection.  Not very practical.&lt;/p&gt;
+
+&lt;p&gt;The other solution, which is a nice generalization of storing attributes which are numerous and not known up-front, is to use an array of key-value pairs.&lt;/p&gt;
+
+&lt;p&gt;Our two sample documents might then become:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    {
+      SKU&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;XRD12349&amp;quot;&lt;/span&gt;,
+      type&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;book&amp;quot;&lt;/span&gt;,
+      attr&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;title&amp;quot;&lt;/span&gt;, 
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;MongoDB, The Definitive Guide, 1st Edition&amp;quot;&lt;/span&gt;
+          },
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ISBN&amp;quot;&lt;/span&gt;,
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;xxx&amp;quot;&lt;/span&gt;
+          },
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;author&amp;quot;&lt;/span&gt;,
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Kristina Chodorow&amp;quot;&lt;/span&gt;
+          },
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;author&amp;quot;&lt;/span&gt;,
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Mike Dieroff&amp;quot;&lt;/span&gt;
+          },
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;genre&amp;quot;&lt;/span&gt;,
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;computing&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;databases&amp;quot;&lt;/span&gt;] 
+          }
+      ]
+    }
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;and&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    {
+      SKU&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Y32944EW&amp;quot;&lt;/span&gt;,
+      type&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shoes&amp;quot;&lt;/span&gt;,
+      attr&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;manufacturer&amp;quot;&lt;/span&gt;, 
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ShoesForAll&amp;quot;&lt;/span&gt;,
+          },
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;, 
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;,
+          },
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;style&amp;quot;&lt;/span&gt;, 
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;comfort&amp;quot;&lt;/span&gt;,
+          },
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;size&amp;quot;&lt;/span&gt;, 
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;7B&amp;quot;&lt;/span&gt;
+          }
+      ]
+    }
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Note that for an attribute that can have multiple values you have a choice of storing it as an array in a single &amp;ldquo;key&amp;rdquo; or you can repeat keys that can have more than one value.&lt;/p&gt;
+
+&lt;p&gt;Now we can index all of these attribute values with the following:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    PRIMARY(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; db.products.ensureIndex( { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr.k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr.v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } )
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s take a look at how the queries will execute and use the index by using the &amp;ldquo;explain()&amp;rdquo; helper in MongoDB shell.  When filtering based on attribute key-value pair, remember to use the &lt;code&gt;$elemMatch&lt;/code&gt; operator to indicate that both conditions must be satisfied by the same element of the array.&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    PRIMARY(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; db.products.find( 
+           { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$elemMatch&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;size&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;8B&amp;quot;&lt;/span&gt; } }
+               } ).explain()
+    {
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;cursor&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;BtreeCursor attr.k_1_attr.v_1&amp;quot;&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isMultiKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;n&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;104&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjects&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;104&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscanned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;104&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjectsAllPlans&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;104&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedAllPlans&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;104&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;scanAndOrder&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexOnly&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nYields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nChunkSkips&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;millis&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;2&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexBounds&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr.k&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+			[
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;size&amp;quot;&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;size&amp;quot;&lt;/span&gt;
+			]
+		],
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr.v&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+			[
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;8B&amp;quot;&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;8B&amp;quot;&lt;/span&gt;
+			]
+		]
+	},
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;server&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;asyasmacbook.local:27017&amp;quot;&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;filterSet&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;
+    }
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    PRIMARY(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; db.products.find(
+             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;  { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$elemMatch&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;}}
+          } ).explain()
+    {
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;cursor&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;BtreeCursor attr.k_1_attr.v_1&amp;quot;&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isMultiKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;n&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjects&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscanned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjectsAllPlans&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedAllPlans&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;scanAndOrder&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexOnly&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nYields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nChunkSkips&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;millis&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexBounds&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr.k&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+			[
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;
+			]
+		],
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr.v&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+			[
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;
+			]
+		]
+	},
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;server&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;asyasmacbook.local:27017&amp;quot;&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;filterSet&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;
+    }
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Now I&amp;rsquo;ll use both criteria, and I&amp;rsquo;ll add another one for attribute &amp;ldquo;style&amp;rdquo; - since I want to match only when &lt;em&gt;all&lt;/em&gt; are true (rather than when any is true) I will use the &lt;code&gt;$all&lt;/code&gt; operator.  Passing &amp;ldquo;true&amp;rdquo; as an argument to explain will show all considered plans and not just the winning plan.&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    PRIMARY(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; db.products.find( { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$all&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ 
+                    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$elemMatch&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;style&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;comfort&amp;quot;&lt;/span&gt; } }, 
+                    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$elemMatch&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt; } },
+                    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$elemMatch&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;size&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;8B&amp;quot;&lt;/span&gt; } } 
+                  ] } } ).explain(&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;)
+    {
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;cursor&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;BtreeCursor attr.k_1_attr.v_1&amp;quot;&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isMultiKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;n&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjects&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscanned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjectsAllPlans&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;296&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedAllPlans&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;298&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;scanAndOrder&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexOnly&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nYields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;2&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nChunkSkips&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;millis&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexBounds&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr.k&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+			[
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;
+			]
+		],
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr.v&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+			[
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;
+			]
+		]
+	},
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;allPlans&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+		{
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;cursor&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;BtreeCursor attr.k_1_attr.v_1&amp;quot;&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isMultiKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;n&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjects&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscanned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;scanAndOrder&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexOnly&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nChunkSkips&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexBounds&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attributes.name&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+					[
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;
+					]
+				],
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attributes.value&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+					[
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;
+					]
+				]
+			}
+		},
+		{
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;cursor&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;BtreeCursor attr.k_1_attr.v_1&amp;quot;&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isMultiKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;n&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjects&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;99&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscanned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;100&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;scanAndOrder&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexOnly&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nChunkSkips&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexBounds&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attributes.name&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+					[
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;style&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;style&amp;quot;&lt;/span&gt;
+					]
+				],
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attributes.value&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+					[
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;comfort&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;comfort&amp;quot;&lt;/span&gt;
+					]
+				]
+			}
+		},
+		{
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;cursor&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;BtreeCursor attr.k_1_attr.v_1&amp;quot;&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isMultiKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;n&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjects&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;99&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscanned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;100&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;scanAndOrder&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexOnly&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nChunkSkips&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexBounds&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attributes.name&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+					[
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;size&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;size&amp;quot;&lt;/span&gt;
+					]
+				],
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attributes.value&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+					[
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;8B&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;8B&amp;quot;&lt;/span&gt;
+					]
+				]
+			}
+		}
+	],
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;server&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;asyasmacbook.local:27017&amp;quot;&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;filterSet&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;stats&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;type&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;KEEP_MUTATIONS&amp;quot;&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;works&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;100&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;yields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;2&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;unyields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;2&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;invalidates&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;advanced&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;needTime&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;97&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;needFetch&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isEOF&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;children&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+			{
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;type&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FETCH&amp;quot;&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;works&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;99&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;yields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;2&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;unyields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;2&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;invalidates&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;advanced&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;needTime&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;97&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;needFetch&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isEOF&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;alreadyHasObj&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;forcedFetches&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;matchTested&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;children&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+					{
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;type&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;IXSCAN&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;works&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;yields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;2&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;unyields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;2&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;invalidates&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;advanced&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;needTime&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;needFetch&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isEOF&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;keyPattern&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;{ attr.k: 1.0, attr.v: 1.0 }&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;boundsVerbose&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;field #0[&amp;#39;attr.k&amp;#39;]: [\&amp;quot;color\&amp;quot;, \&amp;quot;color\&amp;quot;], field #1[&amp;#39;attr.v&amp;#39;]: [\&amp;quot;blue\&amp;quot;, \&amp;quot;blue\&amp;quot;]&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isMultiKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;yieldMovedCursor&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;dupsTested&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;dupsDropped&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;seenInvalidated&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;matchTested&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;keysExamined&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;children&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ ]
+					}
+				]
+			}
+		]
+	}
+    }
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;What does this mean?   If we look at &lt;code&gt;allPlans&lt;/code&gt; we see that the optimizer tried our attribute index separately (but in parallel) with each of the clauses inside the $all array.  The winning plan was for &amp;ldquo;color&amp;rdquo; attribute because it turned out to be the most selective.&lt;/p&gt;
+
+&lt;p&gt;In MongoDB 2.4 this was not possible and unfortunately the optimizer would use the index for the first clause of the &lt;code&gt;$all&lt;/code&gt; expression.  If it happened to have low selectivity, then you didn&amp;rsquo;t get as good performance as you might have, had you ordered your conditions differently.  In 2.6 the order of expressions inside &lt;code&gt;$all&lt;/code&gt; does not make a difference as the one that&amp;rsquo;s most selective will be the one used by the query optimizer.&lt;/p&gt;
+
+&lt;p&gt;Depending on how you need to query your attributes, there are different ways of structuring the attribute array.  You can use key-value pairs as I showed, you can use the attribute name as the key value, or you can even store a single string value &amp;ldquo;attrname::attrvalue&amp;rdquo; - best thing is to take a look at the types of queries and updates you will be running and try it different ways, benchmark which one works best and use that one.&lt;/p&gt;
+
+&lt;p&gt;Note: not all versions behave the same way with this schema.  Test your data.&lt;/p&gt;
+</description>
+        </item>
+      
+    
+      
+        <item>
+          <title>Can I use more replica nodes to scale?</title>
+          <link>http://localhost:54380/post/CanReplicasHelpScaling/</link>
+          <pubDate>Thu, 20 Feb 2014 11:03:42 -0700</pubDate>
+          <author></author>
+          <guid>http://localhost:54380/post/CanReplicasHelpScaling/</guid>
+          <description>
+
+&lt;h3 id=&#34;question:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;Do replica sets help with read scaling?  If there are more servers to service all my read requests, why wouldn&amp;rsquo;t they be able to service more read requests, or service the same number of read requests faster?&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:4d24c85545f4030c8e9fbee403dc78c8&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Answer:&lt;/h3&gt;
 
-&lt;h5 id=&#34;replica-sets:4d24c85545f4030c8e9fbee403dc78c8&#34;&gt;Replica Sets.&lt;/h5&gt;
+&lt;h5 id=&#34;replica-sets:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Replica Sets.&lt;/h5&gt;
 
 &lt;p&gt;Replica sets are an awesome feature of MongoDB.  They give you &amp;ldquo;High Availability&amp;rdquo; - meaning that when the primary node becomes unavailable (crashes, gets unplugged from the network, gets DOS&amp;rsquo;ed by another process on the same box) the rest of the nodes will &lt;strong&gt;elect&lt;/strong&gt; a new primary and the driver (which your application uses to communicate with MongoDB) will automatically track all nodes and when the primary role changes from one server to another, it will automatically detect to send requests there.&lt;/p&gt;
 
-&lt;h5 id=&#34;single-master:4d24c85545f4030c8e9fbee403dc78c8&#34;&gt;Single Master:&lt;/h5&gt;
+&lt;h5 id=&#34;single-master:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Single Master:&lt;/h5&gt;
 
 &lt;p&gt;MongoDB Replica Sets are a &amp;ldquo;single master&amp;rdquo; architecture.  That means that all writes must go to the one primary and from there they are asynchronously replicated to all secondaries.   Your reads also go to the primary, meaning you can always read your own writes.  Your read requests would &lt;em&gt;never&lt;/em&gt; be sent to a secondary unless your application &lt;em&gt;explicitly&lt;/em&gt; requests that the read go somewhere other than the primary, so you would never be getting &amp;ldquo;stale&amp;rdquo; data without being aware of it.&lt;/p&gt;
 
-&lt;h5 id=&#34;the-questions-we-have-are:4d24c85545f4030c8e9fbee403dc78c8&#34;&gt;The questions we have are:&lt;/h5&gt;
+&lt;h5 id=&#34;the-questions-we-have-are:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;The questions we have are:&lt;/h5&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Should you use secondary reads?&lt;br /&gt;
@@ -45,11 +405,11 @@
 
 &lt;p&gt;Because secondary reads create complexity for your application which now needs to handle (possibly very) stale data and situations where just-made-write is not available for read, I would caution users to be sure that they are getting some benefits from secondary reads.  I’m going to look at possible benefits and discuss whether they are likely to be realized using secondary replica nodes or not.&lt;/p&gt;
 
-&lt;h5 id=&#34;will-more-servers-help-you-handle-same-reads-faster:4d24c85545f4030c8e9fbee403dc78c8&#34;&gt;Will more servers help you handle same reads faster?&lt;/h5&gt;
+&lt;h5 id=&#34;will-more-servers-help-you-handle-same-reads-faster:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Will more servers help you handle same reads faster?&lt;/h5&gt;
 
 &lt;p&gt;I think the answer for simple operational reads is obviously no.  If a read takes 10μs then it&amp;rsquo;s not likely to take 1/5th of that just because there are five servers - this is a single unit of work.  That&amp;rsquo;s the actual duration of the read.&lt;/p&gt;
 
-&lt;h5 id=&#34;will-more-servers-help-you-handle-more-reads:4d24c85545f4030c8e9fbee403dc78c8&#34;&gt;Will more servers help you handle more reads?&lt;/h5&gt;
+&lt;h5 id=&#34;will-more-servers-help-you-handle-more-reads:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Will more servers help you handle more reads?&lt;/h5&gt;
 
 &lt;p&gt;Intuitively, it feels like the answer should be “yes” - but that would only be the case if the reads somehow interfered with each other on the single node.  If they are reading the same “hot” data then they can be working in parallel up to the limit of your CPUs.   So in real life, the answer to whether all your replica nodes together can handle more reads than just your primary is maybe yes and maybe no. Usually no. It all depends on why your single primary cannot handle all of the reads by itself.&lt;/p&gt;
 
@@ -77,7 +437,7 @@ secondary?   &lt;strong&gt;You gave up HA&lt;/strong&gt;.  Remember, if you can 
 
 &lt;p&gt;Of course, this is not the complete story.  It turns out that there are some excellent use cases for secondary reads, some more common, some less so.&lt;/p&gt;
 
-&lt;h5 id=&#34;the-types-of-reads-to-route-to-secondaries:4d24c85545f4030c8e9fbee403dc78c8&#34;&gt;The types of reads to route to secondaries&lt;/h5&gt;
+&lt;h5 id=&#34;the-types-of-reads-to-route-to-secondaries:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;The types of reads to route to secondaries&lt;/h5&gt;
 
 &lt;p&gt;There are two types of use cases for reads that you do want to route to secondaries. One I already alluded to: if you have a read heavy system and reads are not super-sensitive to staleness of data but they &lt;em&gt;are&lt;/em&gt; super sensitive to overall latency of satisfying a read request, you can realize a big win reading from the nearest member of the replica set rather than the primary.  If your SLA says reads must return in under 100ms but your one way network latency to the primary is 75ms how can you satisfy the SLA from various parts of the world? That&amp;rsquo;s a use case for distributing data all over the world via secondaries in your replica set!  If you have nodes in data centers on different continents (and the PRIMARY near your write source) you can specify read preference of &amp;ldquo;nearest&amp;rdquo; and make sure that each read request goes to the node that has the lowest network latency from the requester.&lt;/p&gt;
 
@@ -97,7 +457,158 @@ secondary?   &lt;strong&gt;You gave up HA&lt;/strong&gt;.  Remember, if you can 
 
 &lt;p&gt;†  By the way, this is exactly what happens when you have a query that doesn&amp;rsquo;t have a good index to use - it does a full collection scan - more on that in a future &amp;ldquo;answer&amp;rdquo;.&lt;/p&gt;
 </description>
-    </item>
+        </item>
+      
     
+      
+        <item>
+          <title>How to Balance Collections Across Your Sharded Cluster</title>
+          <link>http://localhost:54380/post/TaggedCollectionBalancing/</link>
+          <pubDate>Mon, 01 Jan 0001 00:00:00 UTC</pubDate>
+          <author></author>
+          <guid>http://localhost:54380/post/TaggedCollectionBalancing/</guid>
+          <description>
+
+&lt;h3 id=&#34;question:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;Question:&lt;/h3&gt;
+
+&lt;p&gt;Is it possible to use [&amp;ldquo;Tag aware sharding&amp;rdquo;] [1]  feature without having to use a special shard key?  The example in the tutorial makes it look like we would have to change our shard key to have a prefix value that we can define tag ranges on but we&amp;rsquo;re already sharded.  We have many collections in this database and we want to limit each collection to a subset of the shards so we can isolate the busy ones from each other.&lt;/p&gt;
+
+&lt;h3 id=&#34;answer:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;Answer:&lt;/h3&gt;
+
+&lt;p&gt;Yes, that is absolutely possible, and it&amp;rsquo;s one of the cool capabilities of tag aware sharding.   A quick review of the feature.&lt;/p&gt;
+
+&lt;h5 id=&#34;tag-aware-sharding-feature:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;Tag aware sharding feature&lt;/h5&gt;
+
+&lt;p&gt;Tags associate specific ranges of shard key values with specific shards for use in managing deployment patterns.
+What this means is that in your sharded cluster you can assign zero, one or more tags (or labels) to each shard.  Then you can assign ranges of shard key values in various sharded collections to these tags.  The balancer then moves the appropriate chunks to appropriate shards to keep things the way you &amp;ldquo;assigned&amp;rdquo; them.
+#####The Balancer: Diversion into migration details
+The whole balancing and migrations process is worthy of its own separate write-up but for now, I will simplify most of it and point out at the high level that the balancer is a thread that runs on mongos that wakes up periodically and checks (1) if it should be running (2) if there is anything for it to do.†  For the balancer &amp;ldquo;something to do&amp;rdquo; is always about moving chunks between shards.  The priorities that it considers when deciding which chunks need to be moved are as follows:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;draining shards: if one of the shards is &amp;ldquo;draining&amp;rdquo; - i.e. you plan to decommission it - then this will always be the first priority for all migrations unless it has no data left.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;tagged shards: if any chunks are on the &amp;ldquo;wrong&amp;rdquo; tagged shard for  its range, then it has to be moved to a &amp;ldquo;correct&amp;rdquo; shard.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;balance the remaining chunks: if the shard with the most chunks has nine+ more chunks than the shard with the fewest chunks, then the balancer will move chunks to try to keep things in balance.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h5 id=&#34;how-do-you-tag-shards-and-ranges:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;How do you tag shards and ranges?&lt;/h5&gt;
+
+&lt;p&gt;All you have to do for tagging to work is mark some shards with &amp;ldquo;tags&amp;rdquo; and specify which ranges of shard key values will be associated with that tag.   The relevant commands are &lt;code&gt;sh.addTag(&amp;quot;shardName&amp;quot;,&amp;quot;tagName&amp;quot;)&lt;/code&gt; and &lt;code&gt;sh.addTagRange(&amp;quot;namespace&amp;quot;, { shardKey: minValue }, { shardKey: maxValue }, &amp;quot;tagName&amp;quot;)&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;The MongoDB docs have a great tutorial that you always see used as an example for tag aware sharding - your shard key has to include a prefix field that can be used to figure out which geographical region the user is in, and the range of shard key values that starts with certain regions will be associated with shards in that data center.&lt;/p&gt;
+
+&lt;p&gt;That&amp;rsquo;s all fine and good, but I&amp;rsquo;ll show you that it doesn&amp;rsquo;t have to be nearly that complex.
+#####How you can use tags to designate which shards a sharded collection can use.
+Let&amp;rsquo;s walk through an example.   I have three shards in my test cluster:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; db.getSiblingDB(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;config&amp;quot;&lt;/span&gt;).shards.find()
+    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0000&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30000&amp;quot;&lt;/span&gt; }
+    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30001&amp;quot;&lt;/span&gt; }
+    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0002&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30002&amp;quot;&lt;/span&gt; }
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;I will add two tags, each to two shards.  Let&amp;rsquo;s say that shards 0000 and 0001 have a lot of RAM, and shards 0001 and 0002 have very fast flash storage and I plan to distribute my data to take advantage of the different physical resources:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0000&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt;)
+    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0002&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt;)
+    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt;)
+    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt;)
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Now that I tagged my shards, I will add tag ranges to two different collections.  Note, I don&amp;rsquo;t have these collections yet, and I haven&amp;rsquo;t even sharded them yet, but I want to have the tags ready for them when they get created:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addTagRange(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigidx&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MinKey},{_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MaxKey},&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt;);
+    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addTagRange(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigdata&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MinKey},{_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MaxKey},&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt;);
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;I have a collection with big indexes (called bigidx) that I want to constrain only to shards tagged &amp;ldquo;HI_MEM&amp;rdquo; and I have another collection with a lot of data (called bigdata) that I want to keep on shards that have flash storage because I know the data will be read from disk a lot.  Note that I only needed to know what I will be using as my shard key, and I specified MinKey to MaxKey as my range - that means &lt;em&gt;all&lt;/em&gt; of the chunks!&lt;/p&gt;
+
+&lt;p&gt;I will now shard the collections and take a look at how things are shaping up:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.enableSharding(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb&amp;quot;&lt;/span&gt;)
+{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ok&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
+tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.shardCollection(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigdata&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;hashed&amp;quot;&lt;/span&gt;})
+{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;collectionsharded&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigdata&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ok&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
+tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.shardCollection(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigidx&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;hashed&amp;quot;&lt;/span&gt;})
+{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;collectionsharded&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigidx&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ok&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
+tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.status()
+&lt;span style=&#34;color: #666666&#34;&gt;---&lt;/span&gt; Sharding Status &lt;span style=&#34;color: #666666&#34;&gt;---&lt;/span&gt;
+  sharding version&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;version&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;4&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;minCompatibleVersion&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;4&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;currentVersion&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;5&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;clusterId&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; ObjectId(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;535be5d7d5274545e9d01426&amp;quot;&lt;/span&gt;)
+  }
+  shards&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
+	{  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0000&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30000&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tags&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt; ] }
+	{  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30001&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tags&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt; ] }
+	{  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0002&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30002&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tags&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt; ] }
+  databases&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
+	{  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;admin&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;partitioned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;primary&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;config&amp;quot;&lt;/span&gt; }
+	{  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;partitioned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;primary&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt; }
+		tagdb.bigdata
+			shard key&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;hashed&amp;quot;&lt;/span&gt; }
+			chunks&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
+				shard0001	&lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;
+				shard0002	&lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;
+			{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
+			{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0002
+			{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
+			{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
+			{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0002
+			{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0002
+			 tag&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; FLASH  { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } }
+		tagdb.bigidx
+			shard key&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;hashed&amp;quot;&lt;/span&gt; }
+			chunks&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
+				shard0000	&lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;
+				shard0001	&lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;
+			{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0000
+			{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0000
+			{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
+			{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
+			{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0000
+			{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
+			 tag&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; HI_MEM  { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } }
+&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;div &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;highlight&amp;quot;&lt;/span&gt; style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;background: #f0f0f0&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&amp;lt;&lt;/span&gt;pre style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;line-height: 125%&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;border: 1px solid #FF0000&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;#####&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt; How you can use tags to make collection migrate from one shard to another&lt;/span&gt;
+What &lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color: #007020; font-weight: bold&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;if&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt; you have a number of unsharded collections &amp;lt;span style=&amp;quot;color: #007020; font-weight: bold&amp;quot;&amp;gt;in&amp;lt;/span&amp;gt; your sharded database and you don&amp;lt;span style=&amp;quot;border: 1px solid #FF0000&amp;quot;&amp;gt;&amp;#39;&amp;lt;/span&amp;gt;t want &amp;lt;span style=&amp;quot;color: #007020; font-weight: bold&amp;quot;&amp;gt;for&amp;lt;/span&amp;gt; all of them to hang out on the primary shard &amp;lt;span style=&amp;quot;color: #007020; font-weight: bold&amp;quot;&amp;gt;for&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #007020; font-weight: bold&amp;quot;&amp;gt;this&amp;lt;/span&amp;gt; DB&amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;?&amp;lt;/span&amp;gt;   Well, you might need unique tags &amp;lt;span style=&amp;quot;color: #007020; font-weight: bold&amp;quot;&amp;gt;for&amp;lt;/span&amp;gt; each shard, but then you can &amp;lt;span style=&amp;quot;color: #007020; font-weight: bold&amp;quot;&amp;gt;do&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #007020; font-weight: bold&amp;quot;&amp;gt;this&amp;lt;/span&amp;gt; to move collection one to &amp;lt;span style=&amp;quot;border: 1px solid #FF0000&amp;quot;&amp;gt;`&amp;lt;/span&amp;gt;shard0001&amp;lt;span style=&amp;quot;border: 1px solid #FF0000&amp;quot;&amp;gt;`&amp;lt;/span&amp;gt;&amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt;&lt;/span&gt;
+ 
+&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color: #666666&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&amp;lt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt;pre &amp;lt;span style=&amp;quot;color: #007020; font-weight: bold&amp;quot;&amp;gt;class&amp;lt;/span&amp;gt;&amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;=&amp;lt;/span&amp;gt;&amp;lt;span style=&amp;quot;color: #4070a0&amp;quot;&amp;gt;&amp;quot;prettyprint lang-js&amp;quot;&amp;lt;/span&amp;gt;&amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;&amp;gt;&amp;lt;/span&amp;gt;&lt;/span&gt;
+tagdb&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;border: 1px solid #FF0000&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt;mongos(&amp;lt;span style=&amp;quot;color: #40a070&amp;quot;&amp;gt;2.6&amp;lt;/span&amp;gt;.&amp;lt;span style=&amp;quot;color: #40a070&amp;quot;&amp;gt;0&amp;lt;/span&amp;gt;) &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;&amp;gt;&amp;lt;/span&amp;gt; sh.addShardTag(&amp;lt;span style=&amp;quot;color: #4070a0&amp;quot;&amp;gt;&amp;quot;shard0002&amp;quot;&amp;lt;/span&amp;gt;,&amp;lt;span style=&amp;quot;color: #4070a0&amp;quot;&amp;gt;&amp;quot;shard2&amp;quot;&amp;lt;/span&amp;gt;)&lt;/span&gt;
+tagdb&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;border: 1px solid #FF0000&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt;mongos(&amp;lt;span style=&amp;quot;color: #40a070&amp;quot;&amp;gt;2.6&amp;lt;/span&amp;gt;.&amp;lt;span style=&amp;quot;color: #40a070&amp;quot;&amp;gt;0&amp;lt;/span&amp;gt;) &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;&amp;gt;&amp;lt;/span&amp;gt; sh.addTagRange(&amp;lt;span style=&amp;quot;color: #4070a0&amp;quot;&amp;gt;&amp;quot;tagdb.one&amp;quot;&amp;lt;/span&amp;gt;, {_id&amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt;MinKey},{_id&amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt;MaxKey},&amp;lt;span style=&amp;quot;color: #4070a0&amp;quot;&amp;gt;&amp;quot;shard2&amp;quot;&amp;lt;/span&amp;gt;)&lt;/span&gt;
+tagdb&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;border: 1px solid #FF0000&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt;mongos(&amp;lt;span style=&amp;quot;color: #40a070&amp;quot;&amp;gt;2.6&amp;lt;/span&amp;gt;.&amp;lt;span style=&amp;quot;color: #40a070&amp;quot;&amp;gt;0&amp;lt;/span&amp;gt;) &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;&amp;gt;&amp;lt;/span&amp;gt; sh.shardCollection(&amp;lt;span style=&amp;quot;color: #4070a0&amp;quot;&amp;gt;&amp;quot;tagdb.one&amp;quot;&amp;lt;/span&amp;gt;,{_id&amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt;&amp;lt;span style=&amp;quot;color: #40a070&amp;quot;&amp;gt;1&amp;lt;/span&amp;gt;})&lt;/span&gt;
+{ &lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color: #4070a0&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;collectionsharded&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #4070a0&amp;quot;&amp;gt;&amp;quot;tagdb.one&amp;quot;&amp;lt;/span&amp;gt;, &amp;lt;span style=&amp;quot;color: #4070a0&amp;quot;&amp;gt;&amp;quot;ok&amp;quot;&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #40a070&amp;quot;&amp;gt;1&amp;lt;/span&amp;gt; }&lt;/span&gt;
+tagdb&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;border: 1px solid #FF0000&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt;mongos(&amp;lt;span style=&amp;quot;color: #40a070&amp;quot;&amp;gt;2.6&amp;lt;/span&amp;gt;.&amp;lt;span style=&amp;quot;color: #40a070&amp;quot;&amp;gt;0&amp;lt;/span&amp;gt;) &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;&amp;gt;&amp;lt;/span&amp;gt; sh.status()&lt;/span&gt;
+   ...
+ 		tagdb.one
+			shard key&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color: #666666&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;:&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt; { &amp;lt;span style=&amp;quot;color: #4070a0&amp;quot;&amp;gt;&amp;quot;_id&amp;quot;&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #40a070&amp;quot;&amp;gt;1&amp;lt;/span&amp;gt; }&lt;/span&gt;
+			chunks&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color: #666666&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;:&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt;&lt;/span&gt;
+				shard0002	&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color: #40a070&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt;&lt;/span&gt;
+			{ &lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color: #4070a0&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt; { &amp;lt;span style=&amp;quot;color: #4070a0&amp;quot;&amp;gt;&amp;quot;$minKey&amp;quot;&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #40a070&amp;quot;&amp;gt;1&amp;lt;/span&amp;gt; } } &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;--&amp;gt;&amp;gt;&amp;lt;/span&amp;gt; { &amp;lt;span style=&amp;quot;color: #4070a0&amp;quot;&amp;gt;&amp;quot;_id&amp;quot;&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt; { &amp;lt;span style=&amp;quot;color: #4070a0&amp;quot;&amp;gt;&amp;quot;$maxKey&amp;quot;&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #40a070&amp;quot;&amp;gt;1&amp;lt;/span&amp;gt; } } on &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt; shard0002&lt;/span&gt;
+			 tag&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color: #666666&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;:&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt; shard2  { &amp;lt;span style=&amp;quot;color: #4070a0&amp;quot;&amp;gt;&amp;quot;_id&amp;quot;&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt; { &amp;lt;span style=&amp;quot;color: #4070a0&amp;quot;&amp;gt;&amp;quot;$minKey&amp;quot;&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #40a070&amp;quot;&amp;gt;1&amp;lt;/span&amp;gt; } } &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;--&amp;gt;&amp;gt;&amp;lt;/span&amp;gt; { &amp;lt;span style=&amp;quot;color: #4070a0&amp;quot;&amp;gt;&amp;quot;_id&amp;quot;&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt; { &amp;lt;span style=&amp;quot;color: #4070a0&amp;quot;&amp;gt;&amp;quot;$maxKey&amp;quot;&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color: #40a070&amp;quot;&amp;gt;1&amp;lt;/span&amp;gt; } }&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color: #666666&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&amp;lt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt;&amp;lt;span style=&amp;quot;border: 1px solid #FF0000&amp;quot;&amp;gt;/pre&amp;gt;&amp;lt;/span&amp;gt;&lt;/span&gt;
+
+If we peek inside the config database, we should see our tags &lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color: #007020; font-weight: bold&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;in&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt; the &amp;lt;span style=&amp;quot;border: 1px solid #FF0000&amp;quot;&amp;gt;`&amp;lt;/span&amp;gt;config.tags&amp;lt;span style=&amp;quot;border: 1px solid #FF0000&amp;quot;&amp;gt;`&amp;lt;/span&amp;gt; collection, our shard ranges attached to chunks &amp;lt;span style=&amp;quot;color: #007020; font-weight: bold&amp;quot;&amp;gt;in&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;border: 1px solid #FF0000&amp;quot;&amp;gt;`&amp;lt;/span&amp;gt;config.chunks&amp;lt;span style=&amp;quot;border: 1px solid #FF0000&amp;quot;&amp;gt;`&amp;lt;/span&amp;gt; and we can find evidence of the chunk moves due to tag policy &amp;lt;span style=&amp;quot;color: #007020; font-weight: bold&amp;quot;&amp;gt;in&amp;lt;/span&amp;gt; the &amp;lt;span style=&amp;quot;border: 1px solid #FF0000&amp;quot;&amp;gt;`&amp;lt;/span&amp;gt;config.changelog&amp;lt;span style=&amp;quot;border: 1px solid #FF0000&amp;quot;&amp;gt;`&amp;lt;/span&amp;gt; collection, as well as the &amp;lt;span style=&amp;quot;border: 1px solid #FF0000&amp;quot;&amp;gt;`&amp;lt;/span&amp;gt;mongos&amp;lt;span style=&amp;quot;border: 1px solid #FF0000&amp;quot;&amp;gt;`&amp;lt;/span&amp;gt; and &amp;lt;span style=&amp;quot;border: 1px solid #FF0000&amp;quot;&amp;gt;`&amp;lt;/span&amp;gt;mongod&amp;lt;span style=&amp;quot;border: 1px solid #FF0000&amp;quot;&amp;gt;`&amp;lt;/span&amp;gt; log files.&lt;/span&gt;
+
+To summarize&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color: #666666&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;:&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt; tag aware sharding can be easily used to distribute a single collection a particular way across all shards,  to isolate whole collections on a subset of shards, and even to move an entire collection from one shard to another.&lt;/span&gt;
+
+&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color: #666666&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;---&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt;&lt;/span&gt;
+
+&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;border: 1px solid #FF0000&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;†&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt; This is definitely a gross simplification of all the steps the balancer goes through &amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;-&amp;lt;/span&amp;gt; look &amp;lt;span style=&amp;quot;color: #007020; font-weight: bold&amp;quot;&amp;gt;for&amp;lt;/span&amp;gt; a more detailed write&amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;-&amp;lt;/span&amp;gt;up demystifying the inner workings of migrations some time soon.&lt;/span&gt;
+
+[&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;span style&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color: #40a070&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/span&amp;gt;]&amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt; http&amp;lt;span style=&amp;quot;color: #666666&amp;quot;&amp;gt;:&amp;lt;/span&amp;gt;&amp;lt;span style=&amp;quot;color: #60a0b0; font-style: italic&amp;quot;&amp;gt;//docs.mongodb.org/manual/core/tag-aware-sharding/&amp;lt;/span&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;/pre&amp;gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+</description>
+        </item>
+      
+    
+
   </channel>
 </rss>
