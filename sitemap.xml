@@ -2,28 +2,29 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://localhost:54380/</loc>
-    <lastmod>2014-04-15T00:00:00+00:00</lastmod>
+    <loc>http://askasya.com/</loc>
+    <lastmod>2014-04-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://localhost:54380/post/DynamicAttributes/</loc>
+    <loc>http://askasya.com/post/TaggedCollectionBalancing/</loc>
+    <lastmod>2014-04-29T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://askasya.com/post/DynamicAttributes/</loc>
     <lastmod>2014-04-15T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://localhost:54380/about/</loc>
+    <loc>http://askasya.com/about/</loc>
     <lastmod>2014-04-09T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://localhost:54380/post/CanReplicasHelpScaling/</loc>
+    <loc>http://askasya.com/post/CanReplicasHelpScaling/</loc>
     <lastmod>2014-02-20T11:03:42-07:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://localhost:54380/post/TaggedCollectionBalancing/</loc>
   </url>
   
 </urlset>

@@ -2,20 +2,20 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Ask Asya </title>
-    <link>http://localhost:54380/tags/sharding/</link>
+    <link>http://askasya.com/tags/sharding/</link>
     <language>en-us</language>
     <author></author>
     <rights>(C) 2014</rights>
-    <updated>0001-01-01 00:00:00 &#43;0000 UTC</updated>
+    <updated>2014-04-29 00:00:00 &#43;0000 UTC</updated>
 
     
       
         <item>
           <title>How to Balance Collections Across Your Sharded Cluster</title>
-          <link>http://localhost:54380/post/TaggedCollectionBalancing/</link>
-          <pubDate>Mon, 01 Jan 0001 00:00:00 UTC</pubDate>
+          <link>http://askasya.com/post/TaggedCollectionBalancing/</link>
+          <pubDate>Tue, 29 Apr 2014 00:00:00 UTC</pubDate>
           <author></author>
-          <guid>http://localhost:54380/post/TaggedCollectionBalancing/</guid>
+          <guid>http://askasya.com/post/TaggedCollectionBalancing/</guid>
           <description>
 
 &lt;h3 id=&#34;question:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;Question:&lt;/h3&gt;
