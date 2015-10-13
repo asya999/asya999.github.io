@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ask Asya </title>
+    <link>http://asya999.github.io/tags/modeling/</link>
+    <language>en-us</language>
+    <author></author>
+    <rights>(C) 2014</rights>
+    <updated>2014-04-15 00:00:00 &#43;0000 UTC</updated>
+
+    
+      
+        <item>
+          <title>How to Model Dynamic Attributes</title>
+          <link>http://asya999.github.io/post/DynamicAttributes/</link>
+          <pubDate>Tue, 15 Apr 2014 00:00:00 UTC</pubDate>
+          <author></author>
+          <guid>http://asya999.github.io/post/DynamicAttributes/</guid>
+          <description>
+
+&lt;h3 id=&#34;question:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Question:&lt;/h3&gt;
+
+&lt;p&gt;I&amp;rsquo;ve heard that MongoDB can be effectively used to model &amp;ldquo;dynamic attributes&amp;rdquo; - where you don&amp;rsquo;t know up front all the different attributes and not all attributes apply to all items.  Can you describe how that can be done, and in particular how it can be effectively indexed?&lt;/p&gt;
+
+&lt;h3 id=&#34;answer:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Answer:&lt;/h3&gt;
+
+&lt;h5 id=&#34;the-problem:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;The problem:&lt;/h5&gt;
+
+&lt;p&gt;Imagine you are building an e-commerce site and you aspire to be as big as amazon.com some day, which means you will be selling many different types of products.  It&amp;rsquo;s easy to see that there will be sets of attributes that will only apply to some of the products you sell.&lt;/p&gt;
+
+&lt;p&gt;Product document may look like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    {
+      SKU&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;XRD12349&amp;quot;&lt;/span&gt;,
+      type&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;book&amp;quot;&lt;/span&gt;,
+      title&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;MongoDB, The Definitive Guide&amp;quot;&lt;/span&gt;,
+      ISBN&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;xxx&amp;quot;&lt;/span&gt;,
+      author&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Kristina Chodorow&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Mike Dieroff&amp;quot;&lt;/span&gt;],
+      genre&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;computing&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;databases&amp;quot;&lt;/span&gt;]
+    }
+&lt;/pre&gt;&lt;/div&gt;
+
+or this:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    {
+      SKU&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Y32944EW&amp;quot;&lt;/span&gt;,
+      type&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shoes&amp;quot;&lt;/span&gt;,
+      manufacturer&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ShoesForAll&amp;quot;&lt;/span&gt;,
+      color&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;,
+      style&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;comfort&amp;quot;&lt;/span&gt;,
+      size&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;7B&amp;quot;&lt;/span&gt;
+    }
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;You can see how it would be extremely challenging to manage a collection that has an incredibly wide variety of document &amp;ldquo;shapes&amp;rdquo;.  Now, while some people call MongoDB &amp;ldquo;schemaless&amp;rdquo; I am not a fan of this designation.  The schema of each document is defined by the document itself.  To be able to build a robust applications you need to decide what the schema of the documents will be, otherwise your application will spend as much time examining the documents to learn their schema as providing actual functionality.&lt;/p&gt;
+
+&lt;h5 id=&#34;possible-solutions:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Possible solutions:&lt;/h5&gt;
+
+&lt;p&gt;One way to index the attributes you want to be able to search by is by creating an index on each such attribute in a schema like the one above.  This is not practical, even if you use &lt;a href=&#34;http://docs.mongodb.org/manual/core/index-sparse/&#34;&gt;&amp;ldquo;sparse&amp;rdquo; indexes&lt;/a&gt; (since many attributes will be set only on a small subset of the products), because you may end up with dozens, if not hundreds of indexes.  In addition, every time a new attribute is introduced, a new index has to be added on the collection.  Not very practical.&lt;/p&gt;
+
+&lt;p&gt;The other solution, which is a nice generalization of storing attributes which are numerous and not known up-front, is to use an array of key-value pairs.&lt;/p&gt;
+
+&lt;p&gt;Our two sample documents might then become:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    {
+      SKU&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;XRD12349&amp;quot;&lt;/span&gt;,
+      type&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;book&amp;quot;&lt;/span&gt;,
+      attr&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;title&amp;quot;&lt;/span&gt;, 
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;MongoDB, The Definitive Guide, 1st Edition&amp;quot;&lt;/span&gt;
+          },
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ISBN&amp;quot;&lt;/span&gt;,
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;xxx&amp;quot;&lt;/span&gt;
+          },
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;author&amp;quot;&lt;/span&gt;,
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Kristina Chodorow&amp;quot;&lt;/span&gt;
+          },
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;author&amp;quot;&lt;/span&gt;,
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Mike Dieroff&amp;quot;&lt;/span&gt;
+          },
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;genre&amp;quot;&lt;/span&gt;,
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;computing&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;databases&amp;quot;&lt;/span&gt;] 
+          }
+      ]
+    }
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;and&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    {
+      SKU&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Y32944EW&amp;quot;&lt;/span&gt;,
+      type&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shoes&amp;quot;&lt;/span&gt;,
+      attr&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;manufacturer&amp;quot;&lt;/span&gt;, 
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ShoesForAll&amp;quot;&lt;/span&gt;,
+          },
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;, 
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;,
+          },
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;style&amp;quot;&lt;/span&gt;, 
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;comfort&amp;quot;&lt;/span&gt;,
+          },
+          { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;size&amp;quot;&lt;/span&gt;, 
+            &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;7B&amp;quot;&lt;/span&gt;
+          }
+      ]
+    }
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Note that for an attribute that can have multiple values you have a choice of storing it as an array in a single &amp;ldquo;key&amp;rdquo; or you can repeat keys that can have more than one value.&lt;/p&gt;
+
+&lt;p&gt;Now we can index all of these attribute values with the following:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    PRIMARY(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; db.products.ensureIndex( { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr.k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr.v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } )
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s take a look at how the queries will execute and use the index by using the &amp;ldquo;explain()&amp;rdquo; helper in MongoDB shell.  When filtering based on attribute key-value pair, remember to use the &lt;code&gt;$elemMatch&lt;/code&gt; operator to indicate that both conditions must be satisfied by the same element of the array.&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    PRIMARY(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; db.products.find( 
+           { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$elemMatch&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;size&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;8B&amp;quot;&lt;/span&gt; } }
+               } ).explain()
+    {
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;cursor&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;BtreeCursor attr.k_1_attr.v_1&amp;quot;&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isMultiKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;n&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;104&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjects&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;104&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscanned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;104&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjectsAllPlans&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;104&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedAllPlans&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;104&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;scanAndOrder&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexOnly&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nYields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nChunkSkips&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;millis&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;2&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexBounds&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr.k&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+			[
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;size&amp;quot;&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;size&amp;quot;&lt;/span&gt;
+			]
+		],
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr.v&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+			[
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;8B&amp;quot;&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;8B&amp;quot;&lt;/span&gt;
+			]
+		]
+	},
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;server&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;asyasmacbook.local:27017&amp;quot;&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;filterSet&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;
+    }
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    PRIMARY(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; db.products.find(
+             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;  { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$elemMatch&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;}}
+          } ).explain()
+    {
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;cursor&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;BtreeCursor attr.k_1_attr.v_1&amp;quot;&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isMultiKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;n&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjects&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscanned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjectsAllPlans&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedAllPlans&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;scanAndOrder&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexOnly&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nYields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nChunkSkips&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;millis&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexBounds&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr.k&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+			[
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;
+			]
+		],
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr.v&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+			[
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;
+			]
+		]
+	},
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;server&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;asyasmacbook.local:27017&amp;quot;&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;filterSet&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;
+    }
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Now I&amp;rsquo;ll use both criteria, and I&amp;rsquo;ll add another one for attribute &amp;ldquo;style&amp;rdquo; - since I want to match only when &lt;em&gt;all&lt;/em&gt; are true (rather than when any is true) I will use the &lt;code&gt;$all&lt;/code&gt; operator.  Passing &amp;ldquo;true&amp;rdquo; as an argument to explain will show all considered plans and not just the winning plan.&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    PRIMARY(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; db.products.find( { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$all&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ 
+                    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$elemMatch&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;style&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;comfort&amp;quot;&lt;/span&gt; } }, 
+                    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$elemMatch&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt; } },
+                    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$elemMatch&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;size&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;8B&amp;quot;&lt;/span&gt; } } 
+                  ] } } ).explain(&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;)
+    {
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;cursor&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;BtreeCursor attr.k_1_attr.v_1&amp;quot;&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isMultiKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;n&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjects&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscanned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjectsAllPlans&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;296&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedAllPlans&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;298&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;scanAndOrder&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexOnly&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nYields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;2&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nChunkSkips&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;millis&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexBounds&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr.k&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+			[
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;
+			]
+		],
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attr.v&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+			[
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;
+			]
+		]
+	},
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;allPlans&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+		{
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;cursor&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;BtreeCursor attr.k_1_attr.v_1&amp;quot;&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isMultiKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;n&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjects&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscanned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;scanAndOrder&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexOnly&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nChunkSkips&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexBounds&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attributes.name&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+					[
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;color&amp;quot;&lt;/span&gt;
+					]
+				],
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attributes.value&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+					[
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;blue&amp;quot;&lt;/span&gt;
+					]
+				]
+			}
+		},
+		{
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;cursor&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;BtreeCursor attr.k_1_attr.v_1&amp;quot;&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isMultiKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;n&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjects&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;99&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscanned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;100&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;scanAndOrder&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexOnly&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nChunkSkips&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexBounds&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attributes.name&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+					[
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;style&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;style&amp;quot;&lt;/span&gt;
+					]
+				],
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attributes.value&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+					[
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;comfort&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;comfort&amp;quot;&lt;/span&gt;
+					]
+				]
+			}
+		},
+		{
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;cursor&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;BtreeCursor attr.k_1_attr.v_1&amp;quot;&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isMultiKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;n&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscannedObjects&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;99&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nscanned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;100&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;scanAndOrder&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexOnly&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;nChunkSkips&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+			&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;indexBounds&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attributes.name&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+					[
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;size&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;size&amp;quot;&lt;/span&gt;
+					]
+				],
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;attributes.value&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+					[
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;8B&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;8B&amp;quot;&lt;/span&gt;
+					]
+				]
+			}
+		}
+	],
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;server&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;asyasmacbook.local:27017&amp;quot;&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;filterSet&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,
+	&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;stats&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;type&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;KEEP_MUTATIONS&amp;quot;&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;works&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;100&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;yields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;2&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;unyields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;2&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;invalidates&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;advanced&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;needTime&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;97&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;needFetch&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isEOF&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+		&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;children&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+			{
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;type&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FETCH&amp;quot;&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;works&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;99&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;yields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;2&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;unyields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;2&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;invalidates&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;advanced&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;needTime&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;97&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;needFetch&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isEOF&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;alreadyHasObj&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;forcedFetches&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;matchTested&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+				&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;children&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [
+					{
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;type&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;IXSCAN&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;works&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;yields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;2&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;unyields&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;2&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;invalidates&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;advanced&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;needTime&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;needFetch&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isEOF&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;keyPattern&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;{ attr.k: 1.0, attr.v: 1.0 }&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;boundsVerbose&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;field #0[&amp;#39;attr.k&amp;#39;]: [\&amp;quot;color\&amp;quot;, \&amp;quot;color\&amp;quot;], field #1[&amp;#39;attr.v&amp;#39;]: [\&amp;quot;blue\&amp;quot;, \&amp;quot;blue\&amp;quot;]&amp;quot;&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;isMultiKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;yieldMovedCursor&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;dupsTested&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;dupsDropped&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;seenInvalidated&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;matchTested&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;keysExamined&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;98&lt;/span&gt;,
+						&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;children&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ ]
+					}
+				]
+			}
+		]
+	}
+    }
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;What does this mean?   If we look at &lt;code&gt;allPlans&lt;/code&gt; we see that the optimizer tried our attribute index separately (but in parallel) with each of the clauses inside the $all array.  The winning plan was for &amp;ldquo;color&amp;rdquo; attribute because it turned out to be the most selective.&lt;/p&gt;
+
+&lt;p&gt;In MongoDB 2.4 this was not possible and unfortunately the optimizer would use the index for the first clause of the &lt;code&gt;$all&lt;/code&gt; expression.  If it happened to have low selectivity, then you didn&amp;rsquo;t get as good performance as you might have, had you ordered your conditions differently.  In 2.6 the order of expressions inside &lt;code&gt;$all&lt;/code&gt; does not make a difference as the one that&amp;rsquo;s most selective will be the one used by the query optimizer.&lt;/p&gt;
+
+&lt;p&gt;Depending on how you need to query your attributes, there are different ways of structuring the attribute array.  You can use key-value pairs as I showed, you can use the attribute name as the key value, or you can even store a single string value &amp;ldquo;attrname::attrvalue&amp;rdquo; - best thing is to take a look at the types of queries and updates you will be running and try it different ways, benchmark which one works best and use that one.&lt;/p&gt;
+
+&lt;p&gt;Note: not all versions behave the same way with this schema.  Test your data.&lt;/p&gt;
+</description>
+        </item>
+      
+    
+
+  </channel>
+</rss>
