@@ -3,17 +3,52 @@
   
   <url>
     <loc>http://asya999.github.io/</loc>
-    <lastmod>2014-04-29T00:00:00+00:00</lastmod>
+    <lastmod>2014-10-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://asya999.github.io/post/TaggedCollectionBalancing/</loc>
+    <loc>http://asya999.github.io/post/findkillslowqueries/</loc>
+    <lastmod>2014-10-29T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://asya999.github.io/post/revisitversions/</loc>
+    <lastmod>2014-09-07T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://asya999.github.io/post/socialstatusfeed/</loc>
+    <lastmod>2014-08-27T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://asya999.github.io/post/bestversion/</loc>
+    <lastmod>2014-05-30T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://asya999.github.io/post/mergeshapes/</loc>
+    <lastmod>2014-05-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://asya999.github.io/post/trackversions/</loc>
+    <lastmod>2014-05-21T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://asya999.github.io/post/findandmodify/</loc>
+    <lastmod>2014-05-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://asya999.github.io/post/taggedcollectionbalancing/</loc>
     <lastmod>2014-04-29T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://asya999.github.io/post/DynamicAttributes/</loc>
+    <loc>http://asya999.github.io/post/dynamicattributes/</loc>
     <lastmod>2014-04-15T00:00:00+00:00</lastmod>
   </url>
   
@@ -23,8 +58,13 @@
   </url>
   
   <url>
-    <loc>http://asya999.github.io/post/CanReplicasHelpScaling/</loc>
-    <lastmod>2014-02-20T11:03:42-07:00</lastmod>
+    <loc>http://asya999.github.io/post/embedorlink/</loc>
+    <lastmod>2014-03-29T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://asya999.github.io/post/canreplicashelpscaling/</loc>
+    <lastmod>2014-02-20T00:00:00+00:00</lastmod>
   </url>
   
 </urlset>

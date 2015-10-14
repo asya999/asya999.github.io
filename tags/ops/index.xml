@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ask Asya </title>
+    <link>http://asya999.github.io/tags/ops/</link>
+    <language>en-us</language>
+    <author></author>
+    <rights>(C) 2014</rights>
+    <updated>2014-10-29 00:00:00 &#43;0000 UTC</updated>
+
+    
+      
+        <item>
+          <title>How to Find and Kill Slow Running Queries</title>
+          <link>http://asya999.github.io/post/findkillslowqueries/</link>
+          <pubDate>Wed, 29 Oct 2014 00:00:00 UTC</pubDate>
+          <author></author>
+          <guid>http://asya999.github.io/post/findkillslowqueries/</guid>
+          <description>
+
+&lt;h3 id=&#34;question:18aaff1e2e315456fa60158351f7ffe2&#34;&gt;Question:&lt;/h3&gt;
+
+&lt;p&gt;Is there a way that I can prevent slow queries in MongoDB?  I&amp;rsquo;d like to be able to set something on the server that will kill all queries running longer than a certain amount of time.&lt;/p&gt;
+
+&lt;h3 id=&#34;answer:18aaff1e2e315456fa60158351f7ffe2&#34;&gt;Answer:&lt;/h3&gt;
+
+&lt;p&gt;There are some options available on the &lt;strong&gt;client&lt;/strong&gt; side, for example &lt;a href=&#34;http://docs.mongodb.org/manual/reference/operator/meta/maxTimeMS/&#34;&gt;$maxTimeMS&lt;/a&gt; starting in 2.6 release.  This gives you a way to inject an option to your queries &lt;em&gt;before&lt;/em&gt; they get to the server that tells the server to kill this query if it takes longer than a certain amount of time.  However, this does not help with any query which already got to the server without having this option added to it.&lt;/p&gt;
+
+&lt;p&gt;On the &lt;strong&gt;server&lt;/strong&gt; side, there is no global option, because it would impact all databases and all operations, even ones that the system needs to be long running for internal operation (for example tailing the oplog for replication).  In addition, it may be okay for some of your queries to be longer running by design but not others.&lt;/p&gt;
+
+&lt;p&gt;The correct way to solve this would be to monitor currently running queries via a script and kill the ones that are both long running &lt;em&gt;and&lt;/em&gt; user/client initiated - you can then build in exceptions for queries that are long running by design, or have different thresholds for different queries/collections/etc.&lt;/p&gt;
+
+&lt;p&gt;The way to implement this script is by using &lt;a href=&#34;http://docs.mongodb.org/manual/reference/method/db.currentOp/&#34;&gt;db.currentOp() command&lt;/a&gt; (in the shell) to see all currently running operations.  The field &amp;ldquo;secs_running&amp;rdquo; indicates how long the operation has been running.  Other fields visible to you will be the namespace (&amp;ldquo;ns&amp;rdquo;) whether the operation is &amp;ldquo;active&amp;rdquo;, whether it&amp;rsquo;s waiting on a lock and for how long.   The &lt;a href=&#34;http://docs.mongodb.org/manual/reference/method/db.currentOp/#examples&#34;&gt;docs contain some good examples&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Be careful not to kill any long running operations that are not initiated by your application/client - it may be a necessary system operation, like chunk migration in a sharded cluster as just one example, replication threads would be another.&lt;/p&gt;
+</description>
+        </item>
+      
+    
+      
+        <item>
+          <title>Can I use more replica nodes to scale?</title>
+          <link>http://asya999.github.io/post/canreplicashelpscaling/</link>
+          <pubDate>Thu, 20 Feb 2014 00:00:00 UTC</pubDate>
+          <author></author>
+          <guid>http://asya999.github.io/post/canreplicashelpscaling/</guid>
+          <description>
+
+&lt;h3 id=&#34;question:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Question:&lt;/h3&gt;
+
+&lt;p&gt;Do replica sets help with read scaling?  If there are more servers to service all my read requests, why wouldn&amp;rsquo;t they be able to service more read requests, or service the same number of read requests faster?&lt;/p&gt;
+
+&lt;h3 id=&#34;answer:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Answer:&lt;/h3&gt;
+
+&lt;h5 id=&#34;replica-sets:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Replica Sets.&lt;/h5&gt;
+
+&lt;p&gt;Replica sets are an awesome feature of MongoDB.  They give you &amp;ldquo;High Availability&amp;rdquo; - meaning that when the primary node becomes unavailable (crashes, gets unplugged from the network, gets DOS&amp;rsquo;ed by another process on the same box) the rest of the nodes will &lt;strong&gt;elect&lt;/strong&gt; a new primary and the driver (which your application uses to communicate with MongoDB) will automatically track all nodes and when the primary role changes from one server to another, it will automatically detect to send requests there.&lt;/p&gt;
+
+&lt;h5 id=&#34;single-master:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Single Master:&lt;/h5&gt;
+
+&lt;p&gt;MongoDB Replica Sets are a &amp;ldquo;single master&amp;rdquo; architecture.  That means that all writes must go to the one primary and from there they are asynchronously replicated to all secondaries.   Your reads also go to the primary, meaning you can always read your own writes.  Your read requests would &lt;em&gt;never&lt;/em&gt; be sent to a secondary unless your application &lt;em&gt;explicitly&lt;/em&gt; requests that the read go somewhere other than the primary, so you would never be getting &amp;ldquo;stale&amp;rdquo; data without being aware of it.&lt;/p&gt;
+
+&lt;h5 id=&#34;the-questions-we-have-are:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;The questions we have are:&lt;/h5&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Should you use secondary reads?&lt;br /&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Will they help you handle more reads?&lt;/li&gt;
+&lt;li&gt;Will they help you handle same reads faster?&lt;/li&gt;
+&lt;li&gt;Are there downsides?&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;When should you use secondary reads?&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Because secondary reads create complexity for your application which now needs to handle (possibly very) stale data and situations where just-made-write is not available for read, I would caution users to be sure that they are getting some benefits from secondary reads.  I’m going to look at possible benefits and discuss whether they are likely to be realized using secondary replica nodes or not.&lt;/p&gt;
+
+&lt;h5 id=&#34;will-more-servers-help-you-handle-same-reads-faster:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Will more servers help you handle same reads faster?&lt;/h5&gt;
+
+&lt;p&gt;I think the answer for simple operational reads is obviously no.  If a read takes 10μs then it&amp;rsquo;s not likely to take 1/5th of that just because there are five servers - this is a single unit of work.  That&amp;rsquo;s the actual duration of the read.&lt;/p&gt;
+
+&lt;h5 id=&#34;will-more-servers-help-you-handle-more-reads:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Will more servers help you handle more reads?&lt;/h5&gt;
+
+&lt;p&gt;Intuitively, it feels like the answer should be “yes” - but that would only be the case if the reads somehow interfered with each other on the single node.  If they are reading the same “hot” data then they can be working in parallel up to the limit of your CPUs.   So in real life, the answer to whether all your replica nodes together can handle more reads than just your primary is maybe yes and maybe no. Usually no. It all depends on why your single primary cannot handle all of the reads by itself.&lt;/p&gt;
+
+&lt;p&gt;My assumption is if your primary can handle all of the reads by itself, then you would have very little reason to even consider reading stale data from a secondary - you gain very little and lose strong consistency of data. There can be some scenarios where reading from a secondary will reduce the latency to the server (not the actual duration of the read) but those are rather specific use cases I’ll point out at the end of the article.&lt;/p&gt;
+
+&lt;p&gt;Okay, so that leaves us with the sad case of a primary that is not able to handle all the reads all by itself. Now we must ask ourselves why it cannot handle all the reads. Depending on the reason why, we can try to predict whether directing some of those reads to secondaries will help the overall situation.&lt;/p&gt;
+
+&lt;p&gt;If reads are not handled by primary alone because they are too slow then it doesn&amp;rsquo;t matter why they are too slow - they will be too slow on the secondaries as well. You can try to tune your queries, but it’s more likely that the queries are slow because of underlying root causes&amp;hellip; let&amp;rsquo;s look at those&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Indexes don&amp;rsquo;t fit in RAM - oops! we know that every replica set member has identical data so if indexes don&amp;rsquo;t fit in RAM on the primary, they don&amp;rsquo;t fit in RAM on the secondary either!&lt;/li&gt;
+&lt;li&gt;Too much data being scanned (usually because working set doesn&amp;rsquo;t fit in RAM) and the disks are slow - pretty much the same as (1) since the secondaries will have the same limitation&lt;/li&gt;
+&lt;li&gt;The large number of writes are starving out the reads (i.e. readers have to wait for writers and if there are too many writers when writers yield other writers go and reads can get starved in extreme cases).  But the writes that happen on the primary also have to happen on the secondary!  So moving the readers to the secondary will just starve them on the secondary instead of starving them on the primary.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;I know what some of you may be thinking on (3) - you&amp;rsquo;re thinking that all the reads may be starving on the primary but if you split the reads between the primary and the secondary maybe they won&amp;rsquo;t get starved?&lt;/p&gt;
+
+&lt;p&gt;Maybe.  But you know what you did when you achieved your read
+requirements by splitting the load between the primary and the
+secondary?   &lt;strong&gt;You gave up HA&lt;/strong&gt;.  Remember, if you can only service the incoming load when all of your nodes are up, then you don&amp;rsquo;t have &lt;em&gt;any&lt;/em&gt; high availability, as losing a node will basically start starving out some of the incoming requests which means you won&amp;rsquo;t meet your SLAs.&lt;/p&gt;
+
+&lt;p&gt;Since replication is for High Availability, it means some of its capacity simply must not be tied up so that it can be “standing by” in case of a failover. If you want to use some extra capacity that you perceive is otherwise going &amp;ldquo;wasted&amp;rdquo; to service your every day load, maybe you can do it, as long as you have a very clear understanding that you may have given up some of that High Availability, and I would definitely recommend against that.&lt;/p&gt;
+
+&lt;p&gt;One thing I invite you to try is to set up a simple test &lt;code&gt;mongod&lt;/code&gt; instance where you take some collection with some indexes that all fit in RAM and start up a bunch of multi-threaded clients (from other machines otherwise you&amp;rsquo;ll be testing something else) and have those clients hammer the server with read requests. See how many clients you have to add and how many requests you have to throw at &lt;code&gt;mongod&lt;/code&gt; before you can&amp;rsquo;t add any more clients requesting more reads without performance of existing reads suffering.  Trying it out will give you an idea of the maximum read throughput that a single node can handle.&lt;/p&gt;
+
+&lt;p&gt;Of course, this is not the complete story.  It turns out that there are some excellent use cases for secondary reads, some more common, some less so.&lt;/p&gt;
+
+&lt;h5 id=&#34;the-types-of-reads-to-route-to-secondaries:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;The types of reads to route to secondaries&lt;/h5&gt;
+
+&lt;p&gt;There are two types of use cases for reads that you do want to route to secondaries. One I already alluded to: if you have a read heavy system and reads are not super-sensitive to staleness of data but they &lt;em&gt;are&lt;/em&gt; super sensitive to overall latency of satisfying a read request, you can realize a big win reading from the nearest member of the replica set rather than the primary.  If your SLA says reads must return in under 100ms but your one way network latency to the primary is 75ms how can you satisfy the SLA from various parts of the world? That&amp;rsquo;s a use case for distributing data all over the world via secondaries in your replica set!  If you have nodes in data centers on different continents (and the PRIMARY near your write source) you can specify read preference of &amp;ldquo;nearest&amp;rdquo; and make sure that each read request goes to the node that has the lowest network latency from the requester.&lt;/p&gt;
+
+&lt;p&gt;Note that this is &lt;em&gt;not&lt;/em&gt; technically &amp;ldquo;scaling&amp;rdquo; your read capacity, this is basically taking advantage of replication already having pulled the data over the long network connection and reducing your network latency to the DB.  Don’t forget that if you are relying on reading from “nearest” to meet your SLAs for total round trip to get the data, you have to consider whether your SLAs will still be met if a secondary in a particular region fails.&lt;/p&gt;
+
+&lt;p&gt;The second use case is about reads that are not &amp;ldquo;typical&amp;rdquo; of your &amp;ldquo;normal&amp;rdquo; operational load.  Now, “typical” and “normal” is going to be different for different use cases, but some common examples are things like nightly ETL jobs, ad hoc &amp;ldquo;historical&amp;rdquo; or analytical queries, regular backup jobs, or a Hadoop job.  It could also be something else.  The reason you want to isolate this “atypical” load to the secondary is because it will &amp;ldquo;mess up&amp;rdquo; your memory-resident data set on the primary!&lt;/p&gt;
+
+&lt;p&gt;Imagine you worked very hard to optimize your queries so that indexes are always in RAM and there is just enough RAM left over for the &amp;ldquo;hot&amp;rdquo; subset of data to give you excellent performance. You then start running an analytics query and it&amp;rsquo;s pulling &lt;em&gt;all&lt;/em&gt; the data from mongo which means your entire data set, hot and cold, now gets pulled into resident memory. Guess what just got evicted to make room for it? Yep, your &amp;ldquo;normal&amp;rdquo; data set, or at least a very large portion of it.†&lt;/p&gt;
+
+&lt;p&gt;To keep &amp;ldquo;atypical&amp;rdquo; jobs from interfering with your &amp;ldquo;typical&amp;rdquo; work load, configure the atypical ones to use read preference Secondary. Note that Secondary is different from SecondaryPreferred as the latter will go to the Primary if there is no available Secondary but the former will return an error if there is no Secondary to read from.  Since these jobs are usually not urgent, you’d rather have them wait and retry later than interfere with operational responsiveness of your app anyway.  You can even use &lt;a href=&#34;http://docs.mongodb.org/manual/tutorial/configure-replica-set-tag-sets/&#34;&gt;&amp;ldquo;tags&amp;rdquo;&lt;/a&gt; to isolate different jobs to specific nodes even further.&lt;/p&gt;
+
+&lt;p&gt;#####Bottom line#####&lt;/p&gt;
+
+&lt;p&gt;Make your primary do the work that the application relies on every second.  Make sure that &lt;em&gt;at least&lt;/em&gt; one secondary is idle and ready to take over for the primary in case of failure.  Use additional secondaries (&lt;em&gt;not&lt;/em&gt; the hot standby one!) for all other needs whether it’s backups, analytical reports, ad hoc queries, ETL, etc.  This way, you know that you can handle the application requirements after a failover just as well as before.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;†  By the way, this is exactly what happens when you have a query that doesn&amp;rsquo;t have a good index to use - it does a full collection scan - more on that in a future &amp;ldquo;answer&amp;rdquo;.&lt;/p&gt;
+</description>
+        </item>
+      
+    
+
+  </channel>
+</rss>

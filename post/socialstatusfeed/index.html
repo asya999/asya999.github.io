@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      Social Status Feed in MongoDB &middot; 
+    
+  </title>
+
+  
+  <link rel="stylesheet" href="http://asya999.github.io/css/poole.css">
+  <link rel="stylesheet" href="http://asya999.github.io/css/syntax.css">
+  <link rel="stylesheet" href="http://asya999.github.io/css/lanyon.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700|PT+Sans:400">
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://asya999.github.io/assets/apple-touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" href="http://asya999.github.io/assets/favicon.ico">
+
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http://asya999.github.io/atom.xml">
+</head>
+
+
+  <body class="theme-base-0b">
+
+    
+<input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
+
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-item">
+    <p>A reserved <a href="http://jekyllrb.com" target="_blank">Jekyll</a> theme that places the utmost gravity on content with a hidden drawer. Made by <a href="https://twitter.com/mdo" target="_blank">@mdo</a>.</p>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="sidebar-nav-item " href="http://asya999.github.io/">Home</a>
+    <a class="sidebar-nav-item " href="http://asya999.github.io/post">Posts</a>
+
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a class="sidebar-nav-item " href="http://asya999.github.io/about/">About</a>
+      
+    
+      
+    
+      
+    
+
+    <a class="sidebar-nav-item" href="http://github.com/asya999/bits-n-pieces">GitHub project</a>
+    <span class="sidebar-nav-item">Currently on master</span>
+  </nav>
+
+  <div class="sidebar-item">
+    <p>&copy; 2014. All rights reserved.</p>
+  </div>
+</div>
+
+
+    
+    <div class="wrap">
+      <div class="masthead">
+        <div class="container">
+          <h3 class="masthead-title">
+            <a href="http://asya999.github.io/" title="Home"></a>
+            <small></small>
+          </h3>
+        </div>
+      </div>
+
+      <div class="container content">
+
+
+<div class="post">
+  <h1 class="post-title">Social Status Feed in MongoDB</h1>
+  
+  <span class="post-date">Wed, Aug  27, 2014</span>
+  
+  
+
+<h3 id="socialite:36d9d7ac96775ede158c079032b00e59">Socialite</h3>
+
+<p>At MongoDBWorld, my colleague Darren Wood and I gave <a href="http://www.mongodb.com/search/google/socialite?query=socialite&amp;cx=017213726194841070573%3Ak6mpwzohlje&amp;cof=FORID%3A9&amp;sitesearch=">three back-to-back presentations</a> about an <a href="http://github.com/10gen-labs/socialite">open source project called Socialite</a> which is a reference architecture implementation of a social status feed service.  Darren was the one who wrote the bulk of the source code and I installed and ran extensive performance tests in different configurations to determine how the different schema and indexing options scale and to get an understanding of the resources required for various sizes and distributions of workloads.</p>
+
+<p>The recordings and slides are <a href="http://www.mongodb.com/search/google/socialite?query=socialite&amp;cx=017213726194841070573%3Ak6mpwzohlje&amp;cof=FORID%3A9&amp;sitesearch=">now available on MongoDB website</a>, if you want to jump in and watch, but since we had to race through the material,  I&rsquo;m going to blog about some of the more interesting questions it raised, mainly about schema design, indexing and sharding choices and how to benchmark a large, complex application.</p>
+
+<p>There were three talks because there was a large amount of material and because there are several rather complex orthogonal topics when considering a social status feed:</p>
+
+<ol>
+<li>How will you store the content long term</li>
+<li>How will you store the user graph</li>
+<li>How will you serve up the status feed for a particular user when they log in</li>
+</ol>
+
+<p>The last one is probably most interesting in that it has the most possible approaches, though as it turns out, some have very big downsides and would only be appropriate to pretty small systems.  User graph is fascinating because of its relevance to so many different domains beyond social networks of friends.  And performance considerations are complex and interdependent among all of them.   For each of the three talks we had two parts - Darren discussed possible schema designs, indexing considerations and if appropriate sharding implications, and I walked through the actual testing I did and whether each option held up as expected.</p>
+
+<p>Unfortunately even across three sessions we were quite time limited, so all the various bits of material we have that didn&rsquo;t make it into these presentations will end up in one of several spots:</p>
+
+<ul>
+<li>here</li>
+<li><a href="http://blog.mongodb.org">mongodb.org blog</a></li>
+<li>advanced schema design class at <a href="https://univerity.mongodb.com">MongoDB University</a> (coming soon!)</li>
+</ul>
+
+<p>I get a lot of questions about schema design, and social data is both popular and very doable in MongoDB but the naive approach is usually bound to meet with failure, so the schema needs to be carefully considered with an eye towards the following two most important considerations:</p>
+
+<ul>
+<li>enduser latency</li>
+<li>linear scaling</li>
+</ul>
+
+<p>As we said during the presentations, for every single decision, we had to consider as the most important goals keeping the user&rsquo;s first read latency as low and constant as possible (or else they would leave and go somewhere else) and our ability to scale any design we had linearly with scaling.  That meant that every single workload had to be scalable or partitionable in a way that would isolate the workload to a subset of data.</p>
+
+<p>Over the next few months as I write up different parts of the system, and consider the schema, indexes and possible shard data distribution, you will see me return to these two litmus tests again and again.   In order to have highest chance of success at large scale any option that hinders one of these goals should be out of the running.</p>
+
+</div>
+
+      </div>
+    </div>
+
+    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
+
+  </body>
+</html>
+

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      How to Merge Shapes with Aggregation Framework &middot; 
+    
+  </title>
+
+  
+  <link rel="stylesheet" href="http://asya999.github.io/css/poole.css">
+  <link rel="stylesheet" href="http://asya999.github.io/css/syntax.css">
+  <link rel="stylesheet" href="http://asya999.github.io/css/lanyon.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700|PT+Sans:400">
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://asya999.github.io/assets/apple-touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" href="http://asya999.github.io/assets/favicon.ico">
+
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http://asya999.github.io/atom.xml">
+</head>
+
+
+  <body class="theme-base-0b">
+
+    
+<input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
+
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-item">
+    <p>A reserved <a href="http://jekyllrb.com" target="_blank">Jekyll</a> theme that places the utmost gravity on content with a hidden drawer. Made by <a href="https://twitter.com/mdo" target="_blank">@mdo</a>.</p>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="sidebar-nav-item " href="http://asya999.github.io/">Home</a>
+    <a class="sidebar-nav-item " href="http://asya999.github.io/post">Posts</a>
+
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a class="sidebar-nav-item " href="http://asya999.github.io/about/">About</a>
+      
+    
+      
+    
+      
+    
+
+    <a class="sidebar-nav-item" href="http://github.com/asya999/bits-n-pieces">GitHub project</a>
+    <span class="sidebar-nav-item">Currently on master</span>
+  </nav>
+
+  <div class="sidebar-item">
+    <p>&copy; 2014. All rights reserved.</p>
+  </div>
+</div>
+
+
+    
+    <div class="wrap">
+      <div class="masthead">
+        <div class="container">
+          <h3 class="masthead-title">
+            <a href="http://asya999.github.io/" title="Home"></a>
+            <small></small>
+          </h3>
+        </div>
+      </div>
+
+      <div class="container content">
+
+
+<div class="post">
+  <h1 class="post-title">How to Merge Shapes with Aggregation Framework</h1>
+  
+  <span class="post-date">Sat, May  24, 2014</span>
+  
+  
+
+<h3 id="question:03d96d95380719f8d4c3b2ad2c7c545e">Question:</h3>
+
+<p>Consider two separate shapes of data like this in a single collection:</p>
+
+<pre><code>{   type: &quot;A&quot;,
+    level: 0,
+    color: &quot;red&quot;,
+    locale: &quot;USA&quot;
+}
+{   type: &quot;A&quot;,
+    level: 1,
+    color: &quot;blue&quot;
+}
+</code></pre>
+
+<p>The goal is to present a merged shape to the application with the level n data overridden by level n+1 if level n+1 data exists for type A, starting with n = 0.  In other words, the app wants to see this shape:</p>
+
+<pre><code>{   type: &quot;A&quot;,
+    level: 1, 
+    color: &quot;blue&quot;,
+    locale: &quot;USA&quot;
+}
+</code></pre>
+
+<p>If no level 1 data exists, the app would see the default (level 0) shape.   Think of it as a layered merge.</p>
+
+<h3 id="answer:03d96d95380719f8d4c3b2ad2c7c545e">Answer:</h3>
+
+<p>In the <a href="http://askasya.com/post/trackversions">previous &ldquo;AskAsya&rdquo; on tracking versions</a> we looked at different ways of tracking all versions of changing objects, and this happens to be a complex variant of that problem that we considered as &ldquo;schema 4&rdquo; - it&rsquo;s a possible approach to versioning, but it presents an interesting challenge returning the &ldquo;full&rdquo; current object back to the client.</p>
+
+<h4 id="merging-different-shapes:03d96d95380719f8d4c3b2ad2c7c545e">Merging Different Shapes</h4>
+
+<p>This problem would be easily solved with aggregation framework query, except for the problem that we need to know the names of all the keys/fields, and we might not  know all of the possible fields that could exist in our documents. Without this information, the only way we have of merging documents is using MapReduce, which is both more complex <em>and</em> slower.   I will show both solutions and I&rsquo;ll leave it up to you to determine which will be more performant in your scenario (or whether you want to switch to a different versioning schema).</p>
+
+<h5 id="aggregation-framework:03d96d95380719f8d4c3b2ad2c7c545e">Aggregation Framework</h5>
+
+<p>This will be the fastest way if you either have all possible attribute names that your documents could have, or get them via a scan of the entire collection (note that the latter immediately becomes stale, as new documents with new attributes could show up as soon as you start querying, but that&rsquo;s inherently an issue that always exists in any system that doesn&rsquo;t provide repeatable read isolation).</p>
+
+<p>Get the possible attribute names (I&rsquo;m assuming <code>type</code> and <code>level</code> are your &lsquo;id&rsquo; and &lsquo;version&rsquo;):</p>
+
+<pre><code>var att = { };
+var attrs = [ ];
+db.coll.find( {}, {_id:0, type:0, level:0} ).forEach( function(d) {
+    for ( i in d)
+         if ( !att.hasOwnProperty(i) ) {
+             att[i]=1;
+             attrs.push(i);
+         }
+} );                   
+</code></pre>
+
+<p>You now have an array <code>attrs</code> which holds all the strings representing different attributes in your collection.</p>
+
+<p>We now programmatically generate stage for <code>$project</code> that turns each attribute into a subdocument with its level first and attribute itself second.</p>
+
+<pre><code>proj1={$project:{type:1, level:1}};
+attrs.forEach(function(attr) { 
+    _a=&quot;_&quot;+attr; 
+    a=&quot;$&quot;+attr;   
+    proj1[&quot;$project&quot;][_a]={}; 
+    proj1[&quot;$project&quot;][_a][&quot;l&quot;]={&quot;$cond&quot;:{}};
+    proj1[&quot;$project&quot;][_a][&quot;l&quot;][&quot;$cond&quot;]={if:{&quot;$gt&quot;:[a,null]},then:&quot;$level&quot;,else:-1};
+    proj1[&quot;$project&quot;][_a][attr]=a;
+} );
+</code></pre>
+
+<p>Since levels are increasing, this set us to be able to <code>$group</code> using the <code>$max</code> operator to keep the highest level for each attribute.</p>
+
+<pre><code>group={$group:{_id:&quot;$type&quot;,lvl:{$max:&quot;$level&quot;}}};
+attrs.forEach(function(attr) { 
+    a=&quot;$_&quot;+attr;
+    group[&quot;$group&quot;][attr]={&quot;$max&quot;:a};
+} )
+</code></pre>
+
+<p>The last <code>$project</code> just transforms the fields of our document back into the same key names they had before.</p>
+
+<pre><code>proj2={$project:{_id:0,type:&quot;$_id&quot;, level:&quot;$lvl&quot;}}
+attrs.forEach(function(attr) {
+    a=&quot;$&quot;+attr;  
+    proj2[&quot;$project&quot;][attr]=a+&quot;.&quot;+attr;
+} )
+</code></pre>
+
+<p>We are now all set to run the aggregation with your programmatically generated stages:</p>
+
+<pre><code>db.coll.aggregate( proj1, group, proj2 );
+</code></pre>
+
+<p>To recap,<code>proj1</code> is the stage where we converted every attribute into a subdocument which included &ldquo;level&rdquo; (first) and attribute value (second).  If a given attribute didn&rsquo;t exist in a document, it went in with level:-1 and value:null.</p>
+
+<p><code>group</code> is where we grouped by <code>type</code> which is our <code>docId</code> and kept the highest (max) &ldquo;subdocument&rdquo; for each possible attribute.  This works because MongoDB allows you to compare any types (including BSON) and level:-1 is always going to &ldquo;lose&rdquo; to a higher level.</p>
+
+<p><code>proj2</code> is when we turned all the fields into readable format, or at least format resembling our initial document.</p>
+
+<p>This now returned to us the merged documents.</p>
+
+<p>If we had original documents like these:</p>
+
+<pre><code>&gt; db.coll.find({},{_id:0}).sort({type:1,level:1})
+{ &quot;type&quot; : &quot;A&quot;, &quot;level&quot; : 0, &quot;color&quot; : &quot;red&quot;, &quot;locale&quot; : &quot;USA&quot; }
+{ &quot;type&quot; : &quot;A&quot;, &quot;level&quot; : 1, &quot;color&quot; : &quot;blue&quot; }
+{ &quot;type&quot; : &quot;A&quot;, &quot;level&quot; : 2, &quot;priority&quot; : 5 }
+{ &quot;type&quot; : &quot;A&quot;, &quot;level&quot; : 3, &quot;locale&quot; : &quot;EMEA&quot; }
+{ &quot;type&quot; : &quot;B&quot;, &quot;level&quot; : 0, &quot;priority&quot; : 1 }
+{ &quot;type&quot; : &quot;B&quot;, &quot;level&quot; : 1, &quot;color&quot; : &quot;purple&quot;, &quot;locale&quot; : &quot;Canada&quot; }
+{ &quot;type&quot; : &quot;B&quot;, &quot;level&quot; : 2, &quot;color&quot; : &quot;green&quot; }
+{ &quot;type&quot; : &quot;B&quot;, &quot;level&quot; : 3, &quot;priority&quot; : 2, &quot;locale&quot; : &quot;USA&quot; }
+{ &quot;type&quot; : &quot;B&quot;, &quot;level&quot; : 4, &quot;color&quot; : &quot;NONE&quot; }
+</code></pre>
+
+<p>We got back results that looked like this:</p>
+
+<pre><code>&gt; db.coll.aggregate( proj1, group, proj2 );
+{ &quot;color&quot; : &quot;NONE&quot;, &quot;locale&quot; : &quot;USA&quot;, &quot;priority&quot; : 2, &quot;type&quot; : &quot;B&quot;, &quot;level&quot; : 4 }
+{ &quot;color&quot; : &quot;blue&quot;, &quot;locale&quot; : &quot;EMEA&quot;, &quot;priority&quot; : 5, &quot;type&quot; : &quot;A&quot;, &quot;level&quot; : 3 }
+</code></pre>
+
+<p>Note that this is not performant for filtering on attributes since we can&rsquo;t apply the filter until we have &ldquo;merged&rdquo; all the documents, and that means that indexes can&rsquo;t be used effectively.  While this aggregation may be a good exercise, unless you are saving this output into a new collection that you then index by attributes for querying, it won&rsquo;t be a good schema if you need very fast responses.</p>
+
+<p>Here is MapReduce for the same functionality:</p>
+
+<pre><code>map = function () {
+    var doc=this;
+    delete(doc._id);
+    var level=this.level;
+    delete(doc.level);
+    var t=this.type;
+    delete(doc.type);
+    for (i in doc) {
+         val={level:level};
+         val[i]={ l:level, v:doc[i]};
+         emit(t, val);
+    }
+}
+
+reduce = function (key,values) {
+  result={level:-1};
+  values.forEach(function(val) {
+    if (result.level&lt;val.level) result.level=val.level;
+    var attr=null;
+    for (a in val) if (a!=&quot;level&quot;) { attr=a; break; }
+    if (!result.hasOwnProperty(attr) || result[attr].l&lt;=val[attr].l) {
+          result[attr]=val[attr];
+
+    }
+  })
+  return result;
+}
+</code></pre>
+
+</div>
+
+      </div>
+    </div>
+
+    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
+
+  </body>
+</html>
+

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ask Asya </title>
+    <link>http://asya999.github.io/tags/embed/</link>
+    <language>en-us</language>
+    <author></author>
+    <rights>(C) 2014</rights>
+    <updated>2014-03-29 00:00:00 &#43;0000 UTC</updated>
+
+    
+      
+        <item>
+          <title>Schema Design - Blog Posts and Comments revisited</title>
+          <link>http://asya999.github.io/post/embedorlink/</link>
+          <pubDate>Sat, 29 Mar 2014 00:00:00 UTC</pubDate>
+          <author></author>
+          <guid>http://asya999.github.io/post/embedorlink/</guid>
+          <description>
+
+&lt;h3 id=&#34;question:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Question:&lt;/h3&gt;
+
+&lt;p&gt;I have a question about whether I should store comments inside the blog post entry or in a separate collection. It&amp;rsquo;d be nice to see examples of how to access various fields in both cases, how to index and in general how to know when to embed and when to link.&lt;/p&gt;
+
+&lt;h3 id=&#34;answer:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Answer:&lt;/h3&gt;
+
+&lt;h4 id=&#34;the-blog-schema:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;The Blog Schema&lt;/h4&gt;
+
+&lt;p&gt;There has been a lot of discussion and write-ups about how to model a simple blog that allows comments on posts - it&amp;rsquo;s a fairly simple example that everyone can understand, and at the same time it offers several opportunities to choose different ways to structure the schema.  The example usually consists of four concepts: users(or authors), posts, tags on posts and comments on posts.&lt;/p&gt;
+
+&lt;h5 id=&#34;authors:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Authors&lt;/h5&gt;
+
+&lt;p&gt;Typically everyone agrees that the authors or users are stored in a  collection of their own where you keep their information - everything from their username, password, when they last logged in, when they signed up for the service, etc.&lt;/p&gt;
+
+&lt;h5 id=&#34;posts:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Posts&lt;/h5&gt;
+
+&lt;p&gt;There is also little argument that posts should be stored separately from authors - I don&amp;rsquo;t think I&amp;rsquo;ve ever heard anyone advocate for embedding posts within author document - that makes no sense for many reason, not the least of them are the fact that you want to avoid unbounded growth of the author document, and querying over posts is a natural function of the use case so posts really should be first class object.&lt;/p&gt;
+
+&lt;p&gt;What isn&amp;rsquo;t always agreed on is whether the author of the post should have just their unique primary key (or username) saved in each post or whether some of the information, like their full name, should also be denormalized into each post.&lt;/p&gt;
+
+&lt;h5 id=&#34;tags:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Tags&lt;/h5&gt;
+
+&lt;p&gt;Tags being simple strings should be stored inside the post document.  The it advantage of document model over relational is that it allows you to embed an array with multiple values without sacrificing the ability to index the tags:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{ &amp;quot;_id&amp;quot; : &amp;lt;Id&amp;gt;,
+    &amp;quot;author&amp;quot; :  { &amp;quot;id&amp;quot; :  &amp;lt;authorId&amp;gt;, &amp;quot;name&amp;quot; :  &amp;quot;Asya Kamsky&amp;quot; },
+    &amp;quot;tags&amp;quot; :  [ &amp;quot;schema&amp;quot;, &amp;quot;embed&amp;quot;, &amp;quot;link&amp;quot; ],
+    ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We can index tags with &lt;code&gt;db.posts.ensureIndex( { tags:1 } )&lt;/code&gt; which will be used in queries like
+    db.posts.find( { &amp;ldquo;tags&amp;rdquo; : { &amp;ldquo;$in&amp;rdquo;:  [&amp;ldquo;schema&amp;rdquo;, &amp;ldquo;performance&amp;rdquo;] } } )&lt;/p&gt;
+
+&lt;p&gt;You probably noticed that I happen to think it&amp;rsquo;s right to denormalize the author&amp;rsquo;s name into the post - I&amp;rsquo;m a strong believer in optimizing for the common case, not exceptional one&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:7db8f99d4cb4bf37c187790fa7b90df5:fn-f1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:7db8f99d4cb4bf37c187790fa7b90df5:fn-f1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; and I think optimizing query performance is more important than trying to minimize storage at the cost of performance.&lt;/p&gt;
+
+&lt;h5 id=&#34;comments:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Comments&lt;/h5&gt;
+
+&lt;p&gt;Comment documents, or rather where to store them, usually generates the most discussion and disagreement.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s consider both options and see what we can gain from each:&lt;/p&gt;
+
+&lt;h6 id=&#34;embed-comments:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;embed comments&lt;/h6&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+     _id: &amp;lt;Id&amp;gt;,
+     author: { id: &amp;lt;authorId&amp;gt;, name: &amp;quot;Asya Kamsky&amp;quot; },
+     tags: [ &amp;quot;schema&amp;quot;, &amp;quot;embed&amp;quot;, &amp;quot;link&amp;quot; ],
+     comments: [
+         { author : { id:&amp;lt;authorId&amp;gt;,name:&amp;quot;Joe Shmoe&amp;quot;}, 
+           date:ISODate(&amp;quot; &amp;quot;), 
+           text:&amp;quot;Blah Blah Blah&amp;quot; },
+         { author : { id:&amp;lt;authorId&amp;gt;,name:&amp;quot;Jane Doe&amp;quot;}, 
+           date:ISODate(&amp;quot; &amp;quot;), 
+           text:&amp;quot;Blah Blah Blah&amp;quot; },
+         { author : { id:&amp;lt;authorId&amp;gt;,name:&amp;quot;Asya Kamsky&amp;quot;}, 
+           date:ISODate(&amp;quot; &amp;quot;), 
+           text:&amp;quot;Blah Blah Blah&amp;quot; },
+         ...
+     ]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In addition to other indexes we already plan to have on posts, we will probably need to add several indexes to support querying for comments or by comments.  For example, when someone logs in, I can see wanting to show them all the threads/posts that they commented on, which means we need to index on &amp;ldquo;comments.author.id&amp;rdquo; so that we can query for posts that this author commented on.  We also might need to include fields inside the comments array to track which comments are responses to which other comments, and the biggest downside of them all, if the discussion in comments gets really heated, we will end up with a huge array inside this post.&lt;/p&gt;
+
+&lt;h6 id=&#34;have-separate-comments-collection:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;have separate comments collection&lt;/h6&gt;
+
+&lt;pre&gt;&lt;code&gt;{  post : &amp;lt;postId&amp;gt;,
+    author : { id:&amp;lt;authorId&amp;gt;,name:&amp;quot;Joe Shmoe&amp;quot;}, 
+    date:ISODate(&amp;quot; &amp;quot;), 
+    text:&amp;quot;Blah Blah Blah&amp;quot; 
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A collection of comments would have to have an index on the postId so that we can look up the comments for a particular post, probably compound index with date so that we can query for the most recent posts.  We would want to index author.id and date as well.  But the nice thing is that here we can control how many comments we want returned, and even though querying for all comments for a post might involve some random IO, we can minimize it by only querying for as many comments as we intend to display.  The fact is that most of the time the reader of the blog post won&amp;rsquo;t even look at the comments, and if they do then they might read a few and never click on &amp;ldquo;show more&amp;rdquo; which we would normally have.&lt;/p&gt;
+
+&lt;p&gt;Is there a third option?&lt;/p&gt;
+
+&lt;h6 id=&#34;hybrid-option:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;hybrid option&lt;/h6&gt;
+
+&lt;p&gt;The nice thing about flexible schema is that in cases like these you can keep comments in separate collection but also choose to denormalize some small number of comments into the post itself, either first few or the last few or whatever fits your requirements best.&lt;/p&gt;
+
+&lt;p&gt;This hybrid approach may be analogous to the product collection for an e-commerce site where they store reviews of products separately from the product itself, but keep the highest voted reviews  (one positive and one negative) embedded in the product. This is a good schema because when you display the product, you want to display a few most helpful reviews, but you don&amp;rsquo;t need to display all the reviews at that time.&lt;/p&gt;
+
+&lt;h4 id=&#34;summary:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Summary&lt;/h4&gt;
+
+&lt;p&gt;The general principal to use when trying to decide between embedding and linking is this:
+- consider which objects are first class entities and which are properties of such entities
+- consider what your use case requires to display fast and what allows for additional queries
+- when two choices both seem to be viable, prototype both and see which works better&lt;/p&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+
+&lt;hr /&gt;
+
+&lt;ol&gt;
+&lt;li id=&#34;fn:7db8f99d4cb4bf37c187790fa7b90df5:fn-f1&#34;&gt;Someone always brings up the possibility that the author will change their name, as if that&amp;rsquo;s an everyday occurrence
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:7db8f99d4cb4bf37c187790fa7b90df5:fn-f1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
+        </item>
+      
+    
+
+  </channel>
+</rss>

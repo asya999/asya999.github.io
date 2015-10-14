@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ask Asya </title>
+    <link>http://asya999.github.io/tags/slow/</link>
+    <language>en-us</language>
+    <author></author>
+    <rights>(C) 2014</rights>
+    <updated>2014-10-29 00:00:00 &#43;0000 UTC</updated>
+
+    
+      
+        <item>
+          <title>How to Find and Kill Slow Running Queries</title>
+          <link>http://asya999.github.io/post/findkillslowqueries/</link>
+          <pubDate>Wed, 29 Oct 2014 00:00:00 UTC</pubDate>
+          <author></author>
+          <guid>http://asya999.github.io/post/findkillslowqueries/</guid>
+          <description>
+
+&lt;h3 id=&#34;question:18aaff1e2e315456fa60158351f7ffe2&#34;&gt;Question:&lt;/h3&gt;
+
+&lt;p&gt;Is there a way that I can prevent slow queries in MongoDB?  I&amp;rsquo;d like to be able to set something on the server that will kill all queries running longer than a certain amount of time.&lt;/p&gt;
+
+&lt;h3 id=&#34;answer:18aaff1e2e315456fa60158351f7ffe2&#34;&gt;Answer:&lt;/h3&gt;
+
+&lt;p&gt;There are some options available on the &lt;strong&gt;client&lt;/strong&gt; side, for example &lt;a href=&#34;http://docs.mongodb.org/manual/reference/operator/meta/maxTimeMS/&#34;&gt;$maxTimeMS&lt;/a&gt; starting in 2.6 release.  This gives you a way to inject an option to your queries &lt;em&gt;before&lt;/em&gt; they get to the server that tells the server to kill this query if it takes longer than a certain amount of time.  However, this does not help with any query which already got to the server without having this option added to it.&lt;/p&gt;
+
+&lt;p&gt;On the &lt;strong&gt;server&lt;/strong&gt; side, there is no global option, because it would impact all databases and all operations, even ones that the system needs to be long running for internal operation (for example tailing the oplog for replication).  In addition, it may be okay for some of your queries to be longer running by design but not others.&lt;/p&gt;
+
+&lt;p&gt;The correct way to solve this would be to monitor currently running queries via a script and kill the ones that are both long running &lt;em&gt;and&lt;/em&gt; user/client initiated - you can then build in exceptions for queries that are long running by design, or have different thresholds for different queries/collections/etc.&lt;/p&gt;
+
+&lt;p&gt;The way to implement this script is by using &lt;a href=&#34;http://docs.mongodb.org/manual/reference/method/db.currentOp/&#34;&gt;db.currentOp() command&lt;/a&gt; (in the shell) to see all currently running operations.  The field &amp;ldquo;secs_running&amp;rdquo; indicates how long the operation has been running.  Other fields visible to you will be the namespace (&amp;ldquo;ns&amp;rdquo;) whether the operation is &amp;ldquo;active&amp;rdquo;, whether it&amp;rsquo;s waiting on a lock and for how long.   The &lt;a href=&#34;http://docs.mongodb.org/manual/reference/method/db.currentOp/#examples&#34;&gt;docs contain some good examples&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Be careful not to kill any long running operations that are not initiated by your application/client - it may be a necessary system operation, like chunk migration in a sharded cluster as just one example, replication threads would be another.&lt;/p&gt;
+</description>
+        </item>
+      
+    
+
+  </channel>
+</rss>

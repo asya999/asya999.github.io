@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ask Asya </title>
+    <link>http://asya999.github.io/tags/aggregation/</link>
+    <language>en-us</language>
+    <author></author>
+    <rights>(C) 2014</rights>
+    <updated>2014-05-24 00:00:00 &#43;0000 UTC</updated>
+
+    
+      
+        <item>
+          <title>How to Merge Shapes with Aggregation Framework</title>
+          <link>http://asya999.github.io/post/mergeshapes/</link>
+          <pubDate>Sat, 24 May 2014 00:00:00 UTC</pubDate>
+          <author></author>
+          <guid>http://asya999.github.io/post/mergeshapes/</guid>
+          <description>
+
+&lt;h3 id=&#34;question:03d96d95380719f8d4c3b2ad2c7c545e&#34;&gt;Question:&lt;/h3&gt;
+
+&lt;p&gt;Consider two separate shapes of data like this in a single collection:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{   type: &amp;quot;A&amp;quot;,
+    level: 0,
+    color: &amp;quot;red&amp;quot;,
+    locale: &amp;quot;USA&amp;quot;
+}
+{   type: &amp;quot;A&amp;quot;,
+    level: 1,
+    color: &amp;quot;blue&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The goal is to present a merged shape to the application with the level n data overridden by level n+1 if level n+1 data exists for type A, starting with n = 0.  In other words, the app wants to see this shape:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{   type: &amp;quot;A&amp;quot;,
+    level: 1, 
+    color: &amp;quot;blue&amp;quot;,
+    locale: &amp;quot;USA&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If no level 1 data exists, the app would see the default (level 0) shape.   Think of it as a layered merge.&lt;/p&gt;
+
+&lt;h3 id=&#34;answer:03d96d95380719f8d4c3b2ad2c7c545e&#34;&gt;Answer:&lt;/h3&gt;
+
+&lt;p&gt;In the &lt;a href=&#34;http://askasya.com/post/trackversions&#34;&gt;previous &amp;ldquo;AskAsya&amp;rdquo; on tracking versions&lt;/a&gt; we looked at different ways of tracking all versions of changing objects, and this happens to be a complex variant of that problem that we considered as &amp;ldquo;schema 4&amp;rdquo; - it&amp;rsquo;s a possible approach to versioning, but it presents an interesting challenge returning the &amp;ldquo;full&amp;rdquo; current object back to the client.&lt;/p&gt;
+
+&lt;h4 id=&#34;merging-different-shapes:03d96d95380719f8d4c3b2ad2c7c545e&#34;&gt;Merging Different Shapes&lt;/h4&gt;
+
+&lt;p&gt;This problem would be easily solved with aggregation framework query, except for the problem that we need to know the names of all the keys/fields, and we might not  know all of the possible fields that could exist in our documents. Without this information, the only way we have of merging documents is using MapReduce, which is both more complex &lt;em&gt;and&lt;/em&gt; slower.   I will show both solutions and I&amp;rsquo;ll leave it up to you to determine which will be more performant in your scenario (or whether you want to switch to a different versioning schema).&lt;/p&gt;
+
+&lt;h5 id=&#34;aggregation-framework:03d96d95380719f8d4c3b2ad2c7c545e&#34;&gt;Aggregation Framework&lt;/h5&gt;
+
+&lt;p&gt;This will be the fastest way if you either have all possible attribute names that your documents could have, or get them via a scan of the entire collection (note that the latter immediately becomes stale, as new documents with new attributes could show up as soon as you start querying, but that&amp;rsquo;s inherently an issue that always exists in any system that doesn&amp;rsquo;t provide repeatable read isolation).&lt;/p&gt;
+
+&lt;p&gt;Get the possible attribute names (I&amp;rsquo;m assuming &lt;code&gt;type&lt;/code&gt; and &lt;code&gt;level&lt;/code&gt; are your &amp;lsquo;id&amp;rsquo; and &amp;lsquo;version&amp;rsquo;):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var att = { };
+var attrs = [ ];
+db.coll.find( {}, {_id:0, type:0, level:0} ).forEach( function(d) {
+    for ( i in d)
+         if ( !att.hasOwnProperty(i) ) {
+             att[i]=1;
+             attrs.push(i);
+         }
+} );                   
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You now have an array &lt;code&gt;attrs&lt;/code&gt; which holds all the strings representing different attributes in your collection.&lt;/p&gt;
+
+&lt;p&gt;We now programmatically generate stage for &lt;code&gt;$project&lt;/code&gt; that turns each attribute into a subdocument with its level first and attribute itself second.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;proj1={$project:{type:1, level:1}};
+attrs.forEach(function(attr) { 
+    _a=&amp;quot;_&amp;quot;+attr; 
+    a=&amp;quot;$&amp;quot;+attr;   
+    proj1[&amp;quot;$project&amp;quot;][_a]={}; 
+    proj1[&amp;quot;$project&amp;quot;][_a][&amp;quot;l&amp;quot;]={&amp;quot;$cond&amp;quot;:{}};
+    proj1[&amp;quot;$project&amp;quot;][_a][&amp;quot;l&amp;quot;][&amp;quot;$cond&amp;quot;]={if:{&amp;quot;$gt&amp;quot;:[a,null]},then:&amp;quot;$level&amp;quot;,else:-1};
+    proj1[&amp;quot;$project&amp;quot;][_a][attr]=a;
+} );
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Since levels are increasing, this set us to be able to &lt;code&gt;$group&lt;/code&gt; using the &lt;code&gt;$max&lt;/code&gt; operator to keep the highest level for each attribute.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;group={$group:{_id:&amp;quot;$type&amp;quot;,lvl:{$max:&amp;quot;$level&amp;quot;}}};
+attrs.forEach(function(attr) { 
+    a=&amp;quot;$_&amp;quot;+attr;
+    group[&amp;quot;$group&amp;quot;][attr]={&amp;quot;$max&amp;quot;:a};
+} )
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The last &lt;code&gt;$project&lt;/code&gt; just transforms the fields of our document back into the same key names they had before.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;proj2={$project:{_id:0,type:&amp;quot;$_id&amp;quot;, level:&amp;quot;$lvl&amp;quot;}}
+attrs.forEach(function(attr) {
+    a=&amp;quot;$&amp;quot;+attr;  
+    proj2[&amp;quot;$project&amp;quot;][attr]=a+&amp;quot;.&amp;quot;+attr;
+} )
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We are now all set to run the aggregation with your programmatically generated stages:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.coll.aggregate( proj1, group, proj2 );
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To recap,&lt;code&gt;proj1&lt;/code&gt; is the stage where we converted every attribute into a subdocument which included &amp;ldquo;level&amp;rdquo; (first) and attribute value (second).  If a given attribute didn&amp;rsquo;t exist in a document, it went in with level:-1 and value:null.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;group&lt;/code&gt; is where we grouped by &lt;code&gt;type&lt;/code&gt; which is our &lt;code&gt;docId&lt;/code&gt; and kept the highest (max) &amp;ldquo;subdocument&amp;rdquo; for each possible attribute.  This works because MongoDB allows you to compare any types (including BSON) and level:-1 is always going to &amp;ldquo;lose&amp;rdquo; to a higher level.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;proj2&lt;/code&gt; is when we turned all the fields into readable format, or at least format resembling our initial document.&lt;/p&gt;
+
+&lt;p&gt;This now returned to us the merged documents.&lt;/p&gt;
+
+&lt;p&gt;If we had original documents like these:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.coll.find({},{_id:0}).sort({type:1,level:1})
+{ &amp;quot;type&amp;quot; : &amp;quot;A&amp;quot;, &amp;quot;level&amp;quot; : 0, &amp;quot;color&amp;quot; : &amp;quot;red&amp;quot;, &amp;quot;locale&amp;quot; : &amp;quot;USA&amp;quot; }
+{ &amp;quot;type&amp;quot; : &amp;quot;A&amp;quot;, &amp;quot;level&amp;quot; : 1, &amp;quot;color&amp;quot; : &amp;quot;blue&amp;quot; }
+{ &amp;quot;type&amp;quot; : &amp;quot;A&amp;quot;, &amp;quot;level&amp;quot; : 2, &amp;quot;priority&amp;quot; : 5 }
+{ &amp;quot;type&amp;quot; : &amp;quot;A&amp;quot;, &amp;quot;level&amp;quot; : 3, &amp;quot;locale&amp;quot; : &amp;quot;EMEA&amp;quot; }
+{ &amp;quot;type&amp;quot; : &amp;quot;B&amp;quot;, &amp;quot;level&amp;quot; : 0, &amp;quot;priority&amp;quot; : 1 }
+{ &amp;quot;type&amp;quot; : &amp;quot;B&amp;quot;, &amp;quot;level&amp;quot; : 1, &amp;quot;color&amp;quot; : &amp;quot;purple&amp;quot;, &amp;quot;locale&amp;quot; : &amp;quot;Canada&amp;quot; }
+{ &amp;quot;type&amp;quot; : &amp;quot;B&amp;quot;, &amp;quot;level&amp;quot; : 2, &amp;quot;color&amp;quot; : &amp;quot;green&amp;quot; }
+{ &amp;quot;type&amp;quot; : &amp;quot;B&amp;quot;, &amp;quot;level&amp;quot; : 3, &amp;quot;priority&amp;quot; : 2, &amp;quot;locale&amp;quot; : &amp;quot;USA&amp;quot; }
+{ &amp;quot;type&amp;quot; : &amp;quot;B&amp;quot;, &amp;quot;level&amp;quot; : 4, &amp;quot;color&amp;quot; : &amp;quot;NONE&amp;quot; }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We got back results that looked like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.coll.aggregate( proj1, group, proj2 );
+{ &amp;quot;color&amp;quot; : &amp;quot;NONE&amp;quot;, &amp;quot;locale&amp;quot; : &amp;quot;USA&amp;quot;, &amp;quot;priority&amp;quot; : 2, &amp;quot;type&amp;quot; : &amp;quot;B&amp;quot;, &amp;quot;level&amp;quot; : 4 }
+{ &amp;quot;color&amp;quot; : &amp;quot;blue&amp;quot;, &amp;quot;locale&amp;quot; : &amp;quot;EMEA&amp;quot;, &amp;quot;priority&amp;quot; : 5, &amp;quot;type&amp;quot; : &amp;quot;A&amp;quot;, &amp;quot;level&amp;quot; : 3 }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that this is not performant for filtering on attributes since we can&amp;rsquo;t apply the filter until we have &amp;ldquo;merged&amp;rdquo; all the documents, and that means that indexes can&amp;rsquo;t be used effectively.  While this aggregation may be a good exercise, unless you are saving this output into a new collection that you then index by attributes for querying, it won&amp;rsquo;t be a good schema if you need very fast responses.&lt;/p&gt;
+
+&lt;p&gt;Here is MapReduce for the same functionality:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;map = function () {
+    var doc=this;
+    delete(doc._id);
+    var level=this.level;
+    delete(doc.level);
+    var t=this.type;
+    delete(doc.type);
+    for (i in doc) {
+         val={level:level};
+         val[i]={ l:level, v:doc[i]};
+         emit(t, val);
+    }
+}
+
+reduce = function (key,values) {
+  result={level:-1};
+  values.forEach(function(val) {
+    if (result.level&amp;lt;val.level) result.level=val.level;
+    var attr=null;
+    for (a in val) if (a!=&amp;quot;level&amp;quot;) { attr=a; break; }
+    if (!result.hasOwnProperty(attr) || result[attr].l&amp;lt;=val[attr].l) {
+          result[attr]=val[attr];
+
+    }
+  })
+  return result;
+}
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+        </item>
+      
+    
+
+  </channel>
+</rss>

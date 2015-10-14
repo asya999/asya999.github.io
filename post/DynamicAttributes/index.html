@@ -51,7 +51,23 @@
       
     
       
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
         <a class="sidebar-nav-item " href="http://asya999.github.io/about/">About</a>
+      
+    
       
     
       
@@ -100,28 +116,27 @@
 
 <p>Product document may look like this:</p>
 
-<p><div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%">    {
-      SKU<span style="color: #666666">:</span> <span style="color: #4070a0">&quot;XRD12349&quot;</span>,
-      type<span style="color: #666666">:</span> <span style="color: #4070a0">&quot;book&quot;</span>,
-      title<span style="color: #666666">:</span> <span style="color: #4070a0">&quot;MongoDB, The Definitive Guide&quot;</span>,
-      ISBN<span style="color: #666666">:</span> <span style="color: #4070a0">&quot;xxx&quot;</span>,
-      author<span style="color: #666666">:</span> [ <span style="color: #4070a0">&quot;Kristina Chodorow&quot;</span>, <span style="color: #4070a0">&quot;Mike Dieroff&quot;</span>],
-      genre<span style="color: #666666">:</span> [<span style="color: #4070a0">&quot;computing&quot;</span>, <span style="color: #4070a0">&quot;databases&quot;</span>]
-    }
-</pre></div>
+<pre><code>{
+  SKU: &quot;XRD12349&quot;,
+  type: &quot;book&quot;,
+  title: &quot;MongoDB, The Definitive Guide&quot;,
+  ISBN: &quot;xxx&quot;,
+  author: [ &quot;Kristina Chodorow&quot;, &quot;Mike Dieroff&quot;],
+  genre: [&quot;computing&quot;, &quot;databases&quot;]
+}
+</code></pre>
 
-or this:</p>
+<p>or this:</p>
 
-<p><div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%">    {
-      SKU<span style="color: #666666">:</span> <span style="color: #4070a0">&quot;Y32944EW&quot;</span>,
-      type<span style="color: #666666">:</span> <span style="color: #4070a0">&quot;shoes&quot;</span>,
-      manufacturer<span style="color: #666666">:</span> <span style="color: #4070a0">&quot;ShoesForAll&quot;</span>,
-      color<span style="color: #666666">:</span> <span style="color: #4070a0">&quot;blue&quot;</span>,
-      style<span style="color: #666666">:</span> <span style="color: #4070a0">&quot;comfort&quot;</span>,
-      size<span style="color: #666666">:</span> <span style="color: #4070a0">&quot;7B&quot;</span>
-    }
-</pre></div>
-</p>
+<pre><code>{
+  SKU: &quot;Y32944EW&quot;,
+  type: &quot;shoes&quot;,
+  manufacturer: &quot;ShoesForAll&quot;,
+  color: &quot;blue&quot;,
+  style: &quot;comfort&quot;,
+  size: &quot;7B&quot;
+}
+</code></pre>
 
 <p>You can see how it would be extremely challenging to manage a collection that has an incredibly wide variety of document &ldquo;shapes&rdquo;.  Now, while some people call MongoDB &ldquo;schemaless&rdquo; I am not a fan of this designation.  The schema of each document is defined by the document itself.  To be able to build a robust applications you need to decide what the schema of the documents will be, otherwise your application will spend as much time examining the documents to learn their schema as providing actual functionality.</p>
 
@@ -133,306 +148,302 @@ or this:</p>
 
 <p>Our two sample documents might then become:</p>
 
-<p><div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%">    {
-      SKU<span style="color: #666666">:</span> <span style="color: #4070a0">&quot;XRD12349&quot;</span>,
-      type<span style="color: #666666">:</span> <span style="color: #4070a0">&quot;book&quot;</span>,
-      attr<span style="color: #666666">:</span> [
-          { <span style="color: #4070a0">&quot;k&quot;</span><span style="color: #666666">:</span> <span style="color: #4070a0">&quot;title&quot;</span>, 
-            <span style="color: #4070a0">&quot;v&quot;</span><span style="color: #666666">:</span> <span style="color: #4070a0">&quot;MongoDB, The Definitive Guide, 1st Edition&quot;</span>
-          },
-          { <span style="color: #4070a0">&quot;k&quot;</span><span style="color: #666666">:</span> <span style="color: #4070a0">&quot;ISBN&quot;</span>,
-            <span style="color: #4070a0">&quot;v&quot;</span><span style="color: #666666">:</span> <span style="color: #4070a0">&quot;xxx&quot;</span>
-          },
-          { <span style="color: #4070a0">&quot;k&quot;</span><span style="color: #666666">:</span> <span style="color: #4070a0">&quot;author&quot;</span>,
-            <span style="color: #4070a0">&quot;v&quot;</span><span style="color: #666666">:</span> <span style="color: #4070a0">&quot;Kristina Chodorow&quot;</span>
-          },
-          { <span style="color: #4070a0">&quot;k&quot;</span><span style="color: #666666">:</span> <span style="color: #4070a0">&quot;author&quot;</span>,
-            <span style="color: #4070a0">&quot;v&quot;</span><span style="color: #666666">:</span> <span style="color: #4070a0">&quot;Mike Dieroff&quot;</span>
-          },
-          { <span style="color: #4070a0">&quot;k&quot;</span><span style="color: #666666">:</span> <span style="color: #4070a0">&quot;genre&quot;</span>,
-            <span style="color: #4070a0">&quot;v&quot;</span><span style="color: #666666">:</span> [<span style="color: #4070a0">&quot;computing&quot;</span>, <span style="color: #4070a0">&quot;databases&quot;</span>] 
-          }
-      ]
-    }
-</pre></div>
-</p>
+<pre><code>{
+  SKU: &quot;XRD12349&quot;,
+  type: &quot;book&quot;,
+  attr: [
+      { &quot;k&quot;: &quot;title&quot;, 
+        &quot;v&quot;: &quot;MongoDB, The Definitive Guide, 1st Edition&quot;
+      },
+      { &quot;k&quot;: &quot;ISBN&quot;,
+        &quot;v&quot;: &quot;xxx&quot;
+      },
+      { &quot;k&quot;: &quot;author&quot;,
+        &quot;v&quot;: &quot;Kristina Chodorow&quot;
+      },
+      { &quot;k&quot;: &quot;author&quot;,
+        &quot;v&quot;: &quot;Mike Dieroff&quot;
+      },
+      { &quot;k&quot;: &quot;genre&quot;,
+        &quot;v&quot;: [&quot;computing&quot;, &quot;databases&quot;] 
+      }
+  ]
+}
+</code></pre>
 
 <p>and</p>
 
-<p><div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%">    {
-      SKU<span style="color: #666666">:</span> <span style="color: #4070a0">&quot;Y32944EW&quot;</span>,
-      type<span style="color: #666666">:</span> <span style="color: #4070a0">&quot;shoes&quot;</span>,
-      attr<span style="color: #666666">:</span> [
-          { <span style="color: #4070a0">&quot;k&quot;</span><span style="color: #666666">:</span> <span style="color: #4070a0">&quot;manufacturer&quot;</span>, 
-            <span style="color: #4070a0">&quot;v&quot;</span><span style="color: #666666">:</span> <span style="color: #4070a0">&quot;ShoesForAll&quot;</span>,
-          },
-          { <span style="color: #4070a0">&quot;k&quot;</span><span style="color: #666666">:</span> <span style="color: #4070a0">&quot;color&quot;</span>, 
-            <span style="color: #4070a0">&quot;v&quot;</span><span style="color: #666666">:</span> <span style="color: #4070a0">&quot;blue&quot;</span>,
-          },
-          { <span style="color: #4070a0">&quot;k&quot;</span><span style="color: #666666">:</span> <span style="color: #4070a0">&quot;style&quot;</span>, 
-            <span style="color: #4070a0">&quot;v&quot;</span><span style="color: #666666">:</span> <span style="color: #4070a0">&quot;comfort&quot;</span>,
-          },
-          { <span style="color: #4070a0">&quot;k&quot;</span><span style="color: #666666">:</span> <span style="color: #4070a0">&quot;size&quot;</span>, 
-            <span style="color: #4070a0">&quot;v&quot;</span><span style="color: #666666">:</span> <span style="color: #4070a0">&quot;7B&quot;</span>
-          }
-      ]
-    }
-</pre></div>
-</p>
+<pre><code>{
+  SKU: &quot;Y32944EW&quot;,
+  type: &quot;shoes&quot;,
+  attr: [
+      { &quot;k&quot;: &quot;manufacturer&quot;, 
+        &quot;v&quot;: &quot;ShoesForAll&quot;,
+      },
+      { &quot;k&quot;: &quot;color&quot;, 
+        &quot;v&quot;: &quot;blue&quot;,
+      },
+      { &quot;k&quot;: &quot;style&quot;, 
+        &quot;v&quot;: &quot;comfort&quot;,
+      },
+      { &quot;k&quot;: &quot;size&quot;, 
+        &quot;v&quot;: &quot;7B&quot;
+      }
+  ]
+}
+</code></pre>
 
 <p>Note that for an attribute that can have multiple values you have a choice of storing it as an array in a single &ldquo;key&rdquo; or you can repeat keys that can have more than one value.</p>
 
 <p>Now we can index all of these attribute values with the following:</p>
 
-<p><div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%">    PRIMARY(<span style="color: #40a070">2.6</span>.<span style="color: #40a070">0</span>) <span style="color: #666666">&gt;</span> db.products.ensureIndex( { <span style="color: #4070a0">&quot;attr.k&quot;</span><span style="color: #666666">:</span><span style="color: #40a070">1</span>, <span style="color: #4070a0">&quot;attr.v&quot;</span><span style="color: #666666">:</span><span style="color: #40a070">1</span> } )
-</pre></div>
-</p>
+<pre class="prettyprint lang-js">
+PRIMARY(2.6.0) > db.products.ensureIndex( { "attr.k":1, "attr.v":1 } )
+</pre>
 
 <p>Let&rsquo;s take a look at how the queries will execute and use the index by using the &ldquo;explain()&rdquo; helper in MongoDB shell.  When filtering based on attribute key-value pair, remember to use the <code>$elemMatch</code> operator to indicate that both conditions must be satisfied by the same element of the array.</p>
 
-<p><div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%">    PRIMARY(<span style="color: #40a070">2.6</span>.<span style="color: #40a070">0</span>) <span style="color: #666666">&gt;</span> db.products.find( 
-           { <span style="color: #4070a0">&quot;attr&quot;</span><span style="color: #666666">:</span> { <span style="color: #4070a0">&quot;$elemMatch&quot;</span> <span style="color: #666666">:</span> { <span style="color: #4070a0">&quot;k&quot;</span><span style="color: #666666">:</span><span style="color: #4070a0">&quot;size&quot;</span>, <span style="color: #4070a0">&quot;v&quot;</span><span style="color: #666666">:</span><span style="color: #4070a0">&quot;8B&quot;</span> } }
-               } ).explain()
-    {
-	<span style="color: #4070a0">&quot;cursor&quot;</span> <span style="color: #666666">:</span> <span style="color: #4070a0">&quot;BtreeCursor attr.k_1_attr.v_1&quot;</span>,
-	<span style="color: #4070a0">&quot;isMultiKey&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">true</span>,
-	<span style="color: #4070a0">&quot;n&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">104</span>,
-	<span style="color: #4070a0">&quot;nscannedObjects&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">104</span>,
-	<span style="color: #4070a0">&quot;nscanned&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">104</span>,
-	<span style="color: #4070a0">&quot;nscannedObjectsAllPlans&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">104</span>,
-	<span style="color: #4070a0">&quot;nscannedAllPlans&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">104</span>,
-	<span style="color: #4070a0">&quot;scanAndOrder&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">false</span>,
-	<span style="color: #4070a0">&quot;indexOnly&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">false</span>,
-	<span style="color: #4070a0">&quot;nYields&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-	<span style="color: #4070a0">&quot;nChunkSkips&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-	<span style="color: #4070a0">&quot;millis&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">2</span>,
-	<span style="color: #4070a0">&quot;indexBounds&quot;</span> <span style="color: #666666">:</span> {
-		<span style="color: #4070a0">&quot;attr.k&quot;</span> <span style="color: #666666">:</span> [
-			[
-				<span style="color: #4070a0">&quot;size&quot;</span>,
-				<span style="color: #4070a0">&quot;size&quot;</span>
-			]
-		],
-		<span style="color: #4070a0">&quot;attr.v&quot;</span> <span style="color: #666666">:</span> [
-			[
-				<span style="color: #4070a0">&quot;8B&quot;</span>,
-				<span style="color: #4070a0">&quot;8B&quot;</span>
-			]
-		]
-	},
-	<span style="color: #4070a0">&quot;server&quot;</span> <span style="color: #666666">:</span> <span style="color: #4070a0">&quot;asyasmacbook.local:27017&quot;</span>,
-	<span style="color: #4070a0">&quot;filterSet&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">false</span>
-    }
-</pre></div>
-</p>
+<pre class="prettyprint lang-js">
+PRIMARY(2.6.0) > db.products.find( 
+                                { "attr": { "$elemMatch" : { "k":"size", "v":"8B" } }
+                     } ).explain()
+{
+    "cursor" : "BtreeCursor attr.k_1_attr.v_1",
+    "isMultiKey" : true,
+    "n" : 104,
+    "nscannedObjects" : 104,
+    "nscanned" : 104,
+    "nscannedObjectsAllPlans" : 104,
+    "nscannedAllPlans" : 104,
+    "scanAndOrder" : false,
+    "indexOnly" : false,
+    "nYields" : 0,
+    "nChunkSkips" : 0,
+    "millis" : 2,
+    "indexBounds" : {
+        "attr.k" : [
+            [
+                "size",
+                "size"
+            ]
+        ],
+        "attr.v" : [
+            [
+                "8B",
+                "8B"
+            ]
+        ]
+    },
+    "server" : "asyasmacbook.local:27017",
+    "filterSet" : false
+}
+</pre>
 
-<p><div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%">    PRIMARY(<span style="color: #40a070">2.6</span>.<span style="color: #40a070">0</span>) <span style="color: #666666">&gt;</span> db.products.find(
-             { <span style="color: #4070a0">&quot;attr&quot;</span> <span style="color: #666666">:</span>  { <span style="color: #4070a0">&quot;$elemMatch&quot;</span> <span style="color: #666666">:</span> { <span style="color: #4070a0">&quot;k&quot;</span><span style="color: #666666">:</span><span style="color: #4070a0">&quot;color&quot;</span>, <span style="color: #4070a0">&quot;v&quot;</span><span style="color: #666666">:</span><span style="color: #4070a0">&quot;blue&quot;</span>}}
-          } ).explain()
-    {
-	<span style="color: #4070a0">&quot;cursor&quot;</span> <span style="color: #666666">:</span> <span style="color: #4070a0">&quot;BtreeCursor attr.k_1_attr.v_1&quot;</span>,
-	<span style="color: #4070a0">&quot;isMultiKey&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">true</span>,
-	<span style="color: #4070a0">&quot;n&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">98</span>,
-	<span style="color: #4070a0">&quot;nscannedObjects&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">98</span>,
-	<span style="color: #4070a0">&quot;nscanned&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">98</span>,
-	<span style="color: #4070a0">&quot;nscannedObjectsAllPlans&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">98</span>,
-	<span style="color: #4070a0">&quot;nscannedAllPlans&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">98</span>,
-	<span style="color: #4070a0">&quot;scanAndOrder&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">false</span>,
-	<span style="color: #4070a0">&quot;indexOnly&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">false</span>,
-	<span style="color: #4070a0">&quot;nYields&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-	<span style="color: #4070a0">&quot;nChunkSkips&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-	<span style="color: #4070a0">&quot;millis&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-	<span style="color: #4070a0">&quot;indexBounds&quot;</span> <span style="color: #666666">:</span> {
-		<span style="color: #4070a0">&quot;attr.k&quot;</span> <span style="color: #666666">:</span> [
-			[
-				<span style="color: #4070a0">&quot;color&quot;</span>,
-				<span style="color: #4070a0">&quot;color&quot;</span>
-			]
-		],
-		<span style="color: #4070a0">&quot;attr.v&quot;</span> <span style="color: #666666">:</span> [
-			[
-				<span style="color: #4070a0">&quot;blue&quot;</span>,
-				<span style="color: #4070a0">&quot;blue&quot;</span>
-			]
-		]
-	},
-	<span style="color: #4070a0">&quot;server&quot;</span> <span style="color: #666666">:</span> <span style="color: #4070a0">&quot;asyasmacbook.local:27017&quot;</span>,
-	<span style="color: #4070a0">&quot;filterSet&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">false</span>
-    }
-</pre></div>
-</p>
+<pre class="prettyprint lang-js">
+PRIMARY(2.6.0) > db.products.find(
+                  { "attr" :  { "$elemMatch" : { "k":"color", "v":"blue"}}
+              } ).explain()
+{
+    "cursor" : "BtreeCursor attr.k_1_attr.v_1",
+    "isMultiKey" : true,
+    "n" : 98,
+    "nscannedObjects" : 98,
+    "nscanned" : 98,
+    "nscannedObjectsAllPlans" : 98,
+    "nscannedAllPlans" : 98,
+    "scanAndOrder" : false,
+    "indexOnly" : false,
+    "nYields" : 0,
+    "nChunkSkips" : 0,
+    "millis" : 0,
+    "indexBounds" : {
+        "attr.k" : [
+            [
+                "color",
+                "color"
+            ]
+        ],
+        "attr.v" : [
+            [
+                "blue",
+                "blue"
+            ]
+        ]
+    },
+    "server" : "asyasmacbook.local:27017",
+    "filterSet" : false
+}
+</pre>
 
 <p>Now I&rsquo;ll use both criteria, and I&rsquo;ll add another one for attribute &ldquo;style&rdquo; - since I want to match only when <em>all</em> are true (rather than when any is true) I will use the <code>$all</code> operator.  Passing &ldquo;true&rdquo; as an argument to explain will show all considered plans and not just the winning plan.</p>
 
-<p><div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%">    PRIMARY(<span style="color: #40a070">2.6</span>.<span style="color: #40a070">0</span>) <span style="color: #666666">&gt;</span> db.products.find( { <span style="color: #4070a0">&quot;attr&quot;</span> <span style="color: #666666">:</span> { <span style="color: #4070a0">&quot;$all&quot;</span> <span style="color: #666666">:</span> [ 
-                    { <span style="color: #4070a0">&quot;$elemMatch&quot;</span> <span style="color: #666666">:</span> { <span style="color: #4070a0">&quot;k&quot;</span><span style="color: #666666">:</span><span style="color: #4070a0">&quot;style&quot;</span>, <span style="color: #4070a0">&quot;v&quot;</span><span style="color: #666666">:</span><span style="color: #4070a0">&quot;comfort&quot;</span> } }, 
-                    { <span style="color: #4070a0">&quot;$elemMatch&quot;</span> <span style="color: #666666">:</span> { <span style="color: #4070a0">&quot;k&quot;</span><span style="color: #666666">:</span><span style="color: #4070a0">&quot;color&quot;</span>, <span style="color: #4070a0">&quot;v&quot;</span><span style="color: #666666">:</span><span style="color: #4070a0">&quot;blue&quot;</span> } },
-                    { <span style="color: #4070a0">&quot;$elemMatch&quot;</span> <span style="color: #666666">:</span> { <span style="color: #4070a0">&quot;k&quot;</span><span style="color: #666666">:</span><span style="color: #4070a0">&quot;size&quot;</span>, <span style="color: #4070a0">&quot;v&quot;</span><span style="color: #666666">:</span><span style="color: #4070a0">&quot;8B&quot;</span> } } 
-                  ] } } ).explain(<span style="color: #007020; font-weight: bold">true</span>)
-    {
-	<span style="color: #4070a0">&quot;cursor&quot;</span> <span style="color: #666666">:</span> <span style="color: #4070a0">&quot;BtreeCursor attr.k_1_attr.v_1&quot;</span>,
-	<span style="color: #4070a0">&quot;isMultiKey&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">true</span>,
-	<span style="color: #4070a0">&quot;n&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">1</span>,
-	<span style="color: #4070a0">&quot;nscannedObjects&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">98</span>,
-	<span style="color: #4070a0">&quot;nscanned&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">98</span>,
-	<span style="color: #4070a0">&quot;nscannedObjectsAllPlans&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">296</span>,
-	<span style="color: #4070a0">&quot;nscannedAllPlans&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">298</span>,
-	<span style="color: #4070a0">&quot;scanAndOrder&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">false</span>,
-	<span style="color: #4070a0">&quot;indexOnly&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">false</span>,
-	<span style="color: #4070a0">&quot;nYields&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">2</span>,
-	<span style="color: #4070a0">&quot;nChunkSkips&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-	<span style="color: #4070a0">&quot;millis&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">1</span>,
-	<span style="color: #4070a0">&quot;indexBounds&quot;</span> <span style="color: #666666">:</span> {
-		<span style="color: #4070a0">&quot;attr.k&quot;</span> <span style="color: #666666">:</span> [
-			[
-				<span style="color: #4070a0">&quot;color&quot;</span>,
-				<span style="color: #4070a0">&quot;color&quot;</span>
-			]
-		],
-		<span style="color: #4070a0">&quot;attr.v&quot;</span> <span style="color: #666666">:</span> [
-			[
-				<span style="color: #4070a0">&quot;blue&quot;</span>,
-				<span style="color: #4070a0">&quot;blue&quot;</span>
-			]
-		]
-	},
-	<span style="color: #4070a0">&quot;allPlans&quot;</span> <span style="color: #666666">:</span> [
-		{
-			<span style="color: #4070a0">&quot;cursor&quot;</span> <span style="color: #666666">:</span> <span style="color: #4070a0">&quot;BtreeCursor attr.k_1_attr.v_1&quot;</span>,
-			<span style="color: #4070a0">&quot;isMultiKey&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">true</span>,
-			<span style="color: #4070a0">&quot;n&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">1</span>,
-			<span style="color: #4070a0">&quot;nscannedObjects&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">98</span>,
-			<span style="color: #4070a0">&quot;nscanned&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">98</span>,
-			<span style="color: #4070a0">&quot;scanAndOrder&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">false</span>,
-			<span style="color: #4070a0">&quot;indexOnly&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">false</span>,
-			<span style="color: #4070a0">&quot;nChunkSkips&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-			<span style="color: #4070a0">&quot;indexBounds&quot;</span> <span style="color: #666666">:</span> {
-				<span style="color: #4070a0">&quot;attributes.name&quot;</span> <span style="color: #666666">:</span> [
-					[
-						<span style="color: #4070a0">&quot;color&quot;</span>,
-						<span style="color: #4070a0">&quot;color&quot;</span>
-					]
-				],
-				<span style="color: #4070a0">&quot;attributes.value&quot;</span> <span style="color: #666666">:</span> [
-					[
-						<span style="color: #4070a0">&quot;blue&quot;</span>,
-						<span style="color: #4070a0">&quot;blue&quot;</span>
-					]
-				]
-			}
-		},
-		{
-			<span style="color: #4070a0">&quot;cursor&quot;</span> <span style="color: #666666">:</span> <span style="color: #4070a0">&quot;BtreeCursor attr.k_1_attr.v_1&quot;</span>,
-			<span style="color: #4070a0">&quot;isMultiKey&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">true</span>,
-			<span style="color: #4070a0">&quot;n&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">1</span>,
-			<span style="color: #4070a0">&quot;nscannedObjects&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">99</span>,
-			<span style="color: #4070a0">&quot;nscanned&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">100</span>,
-			<span style="color: #4070a0">&quot;scanAndOrder&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">false</span>,
-			<span style="color: #4070a0">&quot;indexOnly&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">false</span>,
-			<span style="color: #4070a0">&quot;nChunkSkips&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-			<span style="color: #4070a0">&quot;indexBounds&quot;</span> <span style="color: #666666">:</span> {
-				<span style="color: #4070a0">&quot;attributes.name&quot;</span> <span style="color: #666666">:</span> [
-					[
-						<span style="color: #4070a0">&quot;style&quot;</span>,
-						<span style="color: #4070a0">&quot;style&quot;</span>
-					]
-				],
-				<span style="color: #4070a0">&quot;attributes.value&quot;</span> <span style="color: #666666">:</span> [
-					[
-						<span style="color: #4070a0">&quot;comfort&quot;</span>,
-						<span style="color: #4070a0">&quot;comfort&quot;</span>
-					]
-				]
-			}
-		},
-		{
-			<span style="color: #4070a0">&quot;cursor&quot;</span> <span style="color: #666666">:</span> <span style="color: #4070a0">&quot;BtreeCursor attr.k_1_attr.v_1&quot;</span>,
-			<span style="color: #4070a0">&quot;isMultiKey&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">true</span>,
-			<span style="color: #4070a0">&quot;n&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">1</span>,
-			<span style="color: #4070a0">&quot;nscannedObjects&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">99</span>,
-			<span style="color: #4070a0">&quot;nscanned&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">100</span>,
-			<span style="color: #4070a0">&quot;scanAndOrder&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">false</span>,
-			<span style="color: #4070a0">&quot;indexOnly&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">false</span>,
-			<span style="color: #4070a0">&quot;nChunkSkips&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-			<span style="color: #4070a0">&quot;indexBounds&quot;</span> <span style="color: #666666">:</span> {
-				<span style="color: #4070a0">&quot;attributes.name&quot;</span> <span style="color: #666666">:</span> [
-					[
-						<span style="color: #4070a0">&quot;size&quot;</span>,
-						<span style="color: #4070a0">&quot;size&quot;</span>
-					]
-				],
-				<span style="color: #4070a0">&quot;attributes.value&quot;</span> <span style="color: #666666">:</span> [
-					[
-						<span style="color: #4070a0">&quot;8B&quot;</span>,
-						<span style="color: #4070a0">&quot;8B&quot;</span>
-					]
-				]
-			}
-		}
-	],
-	<span style="color: #4070a0">&quot;server&quot;</span> <span style="color: #666666">:</span> <span style="color: #4070a0">&quot;asyasmacbook.local:27017&quot;</span>,
-	<span style="color: #4070a0">&quot;filterSet&quot;</span> <span style="color: #666666">:</span> <span style="color: #007020; font-weight: bold">false</span>,
-	<span style="color: #4070a0">&quot;stats&quot;</span> <span style="color: #666666">:</span> {
-		<span style="color: #4070a0">&quot;type&quot;</span> <span style="color: #666666">:</span> <span style="color: #4070a0">&quot;KEEP_MUTATIONS&quot;</span>,
-		<span style="color: #4070a0">&quot;works&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">100</span>,
-		<span style="color: #4070a0">&quot;yields&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">2</span>,
-		<span style="color: #4070a0">&quot;unyields&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">2</span>,
-		<span style="color: #4070a0">&quot;invalidates&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-		<span style="color: #4070a0">&quot;advanced&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">1</span>,
-		<span style="color: #4070a0">&quot;needTime&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">97</span>,
-		<span style="color: #4070a0">&quot;needFetch&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-		<span style="color: #4070a0">&quot;isEOF&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">1</span>,
-		<span style="color: #4070a0">&quot;children&quot;</span> <span style="color: #666666">:</span> [
-			{
-				<span style="color: #4070a0">&quot;type&quot;</span> <span style="color: #666666">:</span> <span style="color: #4070a0">&quot;FETCH&quot;</span>,
-				<span style="color: #4070a0">&quot;works&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">99</span>,
-				<span style="color: #4070a0">&quot;yields&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">2</span>,
-				<span style="color: #4070a0">&quot;unyields&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">2</span>,
-				<span style="color: #4070a0">&quot;invalidates&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-				<span style="color: #4070a0">&quot;advanced&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">1</span>,
-				<span style="color: #4070a0">&quot;needTime&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">97</span>,
-				<span style="color: #4070a0">&quot;needFetch&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-				<span style="color: #4070a0">&quot;isEOF&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">1</span>,
-				<span style="color: #4070a0">&quot;alreadyHasObj&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-				<span style="color: #4070a0">&quot;forcedFetches&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-				<span style="color: #4070a0">&quot;matchTested&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">1</span>,
-				<span style="color: #4070a0">&quot;children&quot;</span> <span style="color: #666666">:</span> [
-					{
-						<span style="color: #4070a0">&quot;type&quot;</span> <span style="color: #666666">:</span> <span style="color: #4070a0">&quot;IXSCAN&quot;</span>,
-						<span style="color: #4070a0">&quot;works&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">98</span>,
-						<span style="color: #4070a0">&quot;yields&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">2</span>,
-						<span style="color: #4070a0">&quot;unyields&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">2</span>,
-						<span style="color: #4070a0">&quot;invalidates&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-						<span style="color: #4070a0">&quot;advanced&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">98</span>,
-						<span style="color: #4070a0">&quot;needTime&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-						<span style="color: #4070a0">&quot;needFetch&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-						<span style="color: #4070a0">&quot;isEOF&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">1</span>,
-						<span style="color: #4070a0">&quot;keyPattern&quot;</span> <span style="color: #666666">:</span> <span style="color: #4070a0">&quot;{ attr.k: 1.0, attr.v: 1.0 }&quot;</span>,
-						<span style="color: #4070a0">&quot;boundsVerbose&quot;</span> <span style="color: #666666">:</span> <span style="color: #4070a0">&quot;field #0[&#39;attr.k&#39;]: [\&quot;color\&quot;, \&quot;color\&quot;], field #1[&#39;attr.v&#39;]: [\&quot;blue\&quot;, \&quot;blue\&quot;]&quot;</span>,
-						<span style="color: #4070a0">&quot;isMultiKey&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">1</span>,
-						<span style="color: #4070a0">&quot;yieldMovedCursor&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-						<span style="color: #4070a0">&quot;dupsTested&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">98</span>,
-						<span style="color: #4070a0">&quot;dupsDropped&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-						<span style="color: #4070a0">&quot;seenInvalidated&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-						<span style="color: #4070a0">&quot;matchTested&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">0</span>,
-						<span style="color: #4070a0">&quot;keysExamined&quot;</span> <span style="color: #666666">:</span> <span style="color: #40a070">98</span>,
-						<span style="color: #4070a0">&quot;children&quot;</span> <span style="color: #666666">:</span> [ ]
-					}
-				]
-			}
-		]
-	}
+<pre class="prettyprint lang-js">
+PRIMARY(2.6.0) > db.products.find( { "attr" : { "$all" : [ 
+                    { "$elemMatch" : { "k":"style", "v":"comfort" } }, 
+                    { "$elemMatch" : { "k":"color", "v":"blue" } },
+                    { "$elemMatch" : { "k":"size", "v":"8B" } } 
+                  ] } } ).explain(true)
+{
+    "cursor" : "BtreeCursor attr.k_1_attr.v_1",
+    "isMultiKey" : true,
+    "n" : 1,
+    "nscannedObjects" : 98,
+    "nscanned" : 98,
+    "nscannedObjectsAllPlans" : 296,
+    "nscannedAllPlans" : 298,
+    "scanAndOrder" : false,
+    "indexOnly" : false,
+    "nYields" : 2,
+    "nChunkSkips" : 0,
+    "millis" : 1,
+    "indexBounds" : {
+        "attr.k" : [
+            [
+                "color",
+                "color"
+            ]
+        ],
+        "attr.v" : [
+            [
+                "blue",
+                "blue"
+            ]
+        ]
+    },
+    "allPlans" : [
+        {
+            "cursor" : "BtreeCursor attr.k_1_attr.v_1",
+            "isMultiKey" : true,
+            "n" : 1,
+            "nscannedObjects" : 98,
+            "nscanned" : 98,
+            "scanAndOrder" : false,
+            "indexOnly" : false,
+            "nChunkSkips" : 0,
+            "indexBounds" : {
+                "attributes.name" : [
+                    [
+                        "color",
+                        "color"
+                    ]
+                ],
+                "attributes.value" : [
+                    [
+                        "blue",
+                        "blue"
+                    ]
+                ]
+            }
+        },
+        {
+            "cursor" : "BtreeCursor attr.k_1_attr.v_1",
+            "isMultiKey" : true,
+            "n" : 1,
+            "nscannedObjects" : 99,
+            "nscanned" : 100,
+            "scanAndOrder" : false,
+            "indexOnly" : false,
+            "nChunkSkips" : 0,
+            "indexBounds" : {
+                "attributes.name" : [
+                    [
+                        "style",
+                        "style"
+                    ]
+                ],
+                "attributes.value" : [
+                    [
+                        "comfort",
+                        "comfort"
+                    ]
+                ]
+            }
+        },
+        {
+            "cursor" : "BtreeCursor attr.k_1_attr.v_1",
+            "isMultiKey" : true,
+            "n" : 1,
+            "nscannedObjects" : 99,
+            "nscanned" : 100,
+            "scanAndOrder" : false,
+            "indexOnly" : false,
+            "nChunkSkips" : 0,
+            "indexBounds" : {
+                "attributes.name" : [
+                    [
+                        "size",
+                        "size"
+                    ]
+                ],
+                "attributes.value" : [
+                    [
+                        "8B",
+                        "8B"
+                    ]
+                ]
+            }
+        }
+    ],
+    "server" : "asyasmacbook.local:27017",
+    "filterSet" : false,
+    "stats" : {
+        "type" : "KEEP_MUTATIONS",
+        "works" : 100,
+        "yields" : 2,
+        "unyields" : 2,
+        "invalidates" : 0,
+        "advanced" : 1,
+        "needTime" : 97,
+        "needFetch" : 0,
+        "isEOF" : 1,
+        "children" : [
+            {
+                "type" : "FETCH",
+                "works" : 99,
+                "yields" : 2,
+                "unyields" : 2,
+                "invalidates" : 0,
+                "advanced" : 1,
+                "needTime" : 97,
+                "needFetch" : 0,
+                "isEOF" : 1,
+                "alreadyHasObj" : 0,
+                "forcedFetches" : 0,
+                "matchTested" : 1,
+                "children" : [
+                    {
+                        "type" : "IXSCAN",
+                        "works" : 98,
+                        "yields" : 2,
+                        "unyields" : 2,
+                        "invalidates" : 0,
+                        "advanced" : 98,
+                        "needTime" : 0,
+                        "needFetch" : 0,
+                        "isEOF" : 1,
+                        "keyPattern" : "{ attr.k: 1.0, attr.v: 1.0 }",
+                        "boundsVerbose" : "field #0['attr.k']: [\"color\", \"color\"], field #1['attr.v']: [\"blue\", \"blue\"]",
+                        "isMultiKey" : 1,
+                        "yieldMovedCursor" : 0,
+                        "dupsTested" : 98,
+                        "dupsDropped" : 0,
+                        "seenInvalidated" : 0,
+                        "matchTested" : 0,
+                        "keysExamined" : 98,
+                        "children" : [ ]
+                    }
+                ]
+            }
+        ]
     }
-</pre></div>
-</p>
+}
+</pre>
 
 <p>What does this mean?   If we look at <code>allPlans</code> we see that the optimizer tried our attribute index separately (but in parallel) with each of the clauses inside the $all array.  The winning plan was for &ldquo;color&rdquo; attribute because it turned out to be the most selective.</p>
 
 <p>In MongoDB 2.4 this was not possible and unfortunately the optimizer would use the index for the first clause of the <code>$all</code> expression.  If it happened to have low selectivity, then you didn&rsquo;t get as good performance as you might have, had you ordered your conditions differently.  In 2.6 the order of expressions inside <code>$all</code> does not make a difference as the one that&rsquo;s most selective will be the one used by the query optimizer.</p>
 
 <p>Depending on how you need to query your attributes, there are different ways of structuring the attribute array.  You can use key-value pairs as I showed, you can use the attribute name as the key value, or you can even store a single string value &ldquo;attrname::attrvalue&rdquo; - best thing is to take a look at the types of queries and updates you will be running and try it different ways, benchmark which one works best and use that one.</p>
-
-<p>Note: not all versions behave the same way with this schema.  Test your data.</p>
 
 </div>
 

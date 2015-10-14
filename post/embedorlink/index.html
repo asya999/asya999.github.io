@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      Schema Design - Blog Posts and Comments revisited &middot; 
+    
+  </title>
+
+  
+  <link rel="stylesheet" href="http://asya999.github.io/css/poole.css">
+  <link rel="stylesheet" href="http://asya999.github.io/css/syntax.css">
+  <link rel="stylesheet" href="http://asya999.github.io/css/lanyon.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700|PT+Sans:400">
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://asya999.github.io/assets/apple-touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" href="http://asya999.github.io/assets/favicon.ico">
+
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http://asya999.github.io/atom.xml">
+</head>
+
+
+  <body class="theme-base-0b">
+
+    
+<input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
+
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-item">
+    <p>A reserved <a href="http://jekyllrb.com" target="_blank">Jekyll</a> theme that places the utmost gravity on content with a hidden drawer. Made by <a href="https://twitter.com/mdo" target="_blank">@mdo</a>.</p>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="sidebar-nav-item " href="http://asya999.github.io/">Home</a>
+    <a class="sidebar-nav-item " href="http://asya999.github.io/post">Posts</a>
+
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a class="sidebar-nav-item " href="http://asya999.github.io/about/">About</a>
+      
+    
+      
+    
+      
+    
+
+    <a class="sidebar-nav-item" href="http://github.com/asya999/bits-n-pieces">GitHub project</a>
+    <span class="sidebar-nav-item">Currently on master</span>
+  </nav>
+
+  <div class="sidebar-item">
+    <p>&copy; 2014. All rights reserved.</p>
+  </div>
+</div>
+
+
+    
+    <div class="wrap">
+      <div class="masthead">
+        <div class="container">
+          <h3 class="masthead-title">
+            <a href="http://asya999.github.io/" title="Home"></a>
+            <small></small>
+          </h3>
+        </div>
+      </div>
+
+      <div class="container content">
+
+
+<div class="post">
+  <h1 class="post-title">Schema Design - Blog Posts and Comments revisited</h1>
+  
+  <span class="post-date">Sat, Mar  29, 2014</span>
+  
+  
+
+<h3 id="question:7db8f99d4cb4bf37c187790fa7b90df5">Question:</h3>
+
+<p>I have a question about whether I should store comments inside the blog post entry or in a separate collection. It&rsquo;d be nice to see examples of how to access various fields in both cases, how to index and in general how to know when to embed and when to link.</p>
+
+<h3 id="answer:7db8f99d4cb4bf37c187790fa7b90df5">Answer:</h3>
+
+<h4 id="the-blog-schema:7db8f99d4cb4bf37c187790fa7b90df5">The Blog Schema</h4>
+
+<p>There has been a lot of discussion and write-ups about how to model a simple blog that allows comments on posts - it&rsquo;s a fairly simple example that everyone can understand, and at the same time it offers several opportunities to choose different ways to structure the schema.  The example usually consists of four concepts: users(or authors), posts, tags on posts and comments on posts.</p>
+
+<h5 id="authors:7db8f99d4cb4bf37c187790fa7b90df5">Authors</h5>
+
+<p>Typically everyone agrees that the authors or users are stored in a  collection of their own where you keep their information - everything from their username, password, when they last logged in, when they signed up for the service, etc.</p>
+
+<h5 id="posts:7db8f99d4cb4bf37c187790fa7b90df5">Posts</h5>
+
+<p>There is also little argument that posts should be stored separately from authors - I don&rsquo;t think I&rsquo;ve ever heard anyone advocate for embedding posts within author document - that makes no sense for many reason, not the least of them are the fact that you want to avoid unbounded growth of the author document, and querying over posts is a natural function of the use case so posts really should be first class object.</p>
+
+<p>What isn&rsquo;t always agreed on is whether the author of the post should have just their unique primary key (or username) saved in each post or whether some of the information, like their full name, should also be denormalized into each post.</p>
+
+<h5 id="tags:7db8f99d4cb4bf37c187790fa7b90df5">Tags</h5>
+
+<p>Tags being simple strings should be stored inside the post document.  The it advantage of document model over relational is that it allows you to embed an array with multiple values without sacrificing the ability to index the tags:</p>
+
+<pre><code>{ &quot;_id&quot; : &lt;Id&gt;,
+    &quot;author&quot; :  { &quot;id&quot; :  &lt;authorId&gt;, &quot;name&quot; :  &quot;Asya Kamsky&quot; },
+    &quot;tags&quot; :  [ &quot;schema&quot;, &quot;embed&quot;, &quot;link&quot; ],
+    ...
+}
+</code></pre>
+
+<p>We can index tags with <code>db.posts.ensureIndex( { tags:1 } )</code> which will be used in queries like
+    db.posts.find( { &ldquo;tags&rdquo; : { &ldquo;$in&rdquo;:  [&ldquo;schema&rdquo;, &ldquo;performance&rdquo;] } } )</p>
+
+<p>You probably noticed that I happen to think it&rsquo;s right to denormalize the author&rsquo;s name into the post - I&rsquo;m a strong believer in optimizing for the common case, not exceptional one<sup class="footnote-ref" id="fnref:7db8f99d4cb4bf37c187790fa7b90df5:fn-f1"><a rel="footnote" href="#fn:7db8f99d4cb4bf37c187790fa7b90df5:fn-f1">1</a></sup> and I think optimizing query performance is more important than trying to minimize storage at the cost of performance.</p>
+
+<h5 id="comments:7db8f99d4cb4bf37c187790fa7b90df5">Comments</h5>
+
+<p>Comment documents, or rather where to store them, usually generates the most discussion and disagreement.</p>
+
+<p>Let&rsquo;s consider both options and see what we can gain from each:</p>
+
+<h6 id="embed-comments:7db8f99d4cb4bf37c187790fa7b90df5">embed comments</h6>
+
+<pre><code>{
+     _id: &lt;Id&gt;,
+     author: { id: &lt;authorId&gt;, name: &quot;Asya Kamsky&quot; },
+     tags: [ &quot;schema&quot;, &quot;embed&quot;, &quot;link&quot; ],
+     comments: [
+         { author : { id:&lt;authorId&gt;,name:&quot;Joe Shmoe&quot;}, 
+           date:ISODate(&quot; &quot;), 
+           text:&quot;Blah Blah Blah&quot; },
+         { author : { id:&lt;authorId&gt;,name:&quot;Jane Doe&quot;}, 
+           date:ISODate(&quot; &quot;), 
+           text:&quot;Blah Blah Blah&quot; },
+         { author : { id:&lt;authorId&gt;,name:&quot;Asya Kamsky&quot;}, 
+           date:ISODate(&quot; &quot;), 
+           text:&quot;Blah Blah Blah&quot; },
+         ...
+     ]
+}
+</code></pre>
+
+<p>In addition to other indexes we already plan to have on posts, we will probably need to add several indexes to support querying for comments or by comments.  For example, when someone logs in, I can see wanting to show them all the threads/posts that they commented on, which means we need to index on &ldquo;comments.author.id&rdquo; so that we can query for posts that this author commented on.  We also might need to include fields inside the comments array to track which comments are responses to which other comments, and the biggest downside of them all, if the discussion in comments gets really heated, we will end up with a huge array inside this post.</p>
+
+<h6 id="have-separate-comments-collection:7db8f99d4cb4bf37c187790fa7b90df5">have separate comments collection</h6>
+
+<pre><code>{  post : &lt;postId&gt;,
+    author : { id:&lt;authorId&gt;,name:&quot;Joe Shmoe&quot;}, 
+    date:ISODate(&quot; &quot;), 
+    text:&quot;Blah Blah Blah&quot; 
+}
+</code></pre>
+
+<p>A collection of comments would have to have an index on the postId so that we can look up the comments for a particular post, probably compound index with date so that we can query for the most recent posts.  We would want to index author.id and date as well.  But the nice thing is that here we can control how many comments we want returned, and even though querying for all comments for a post might involve some random IO, we can minimize it by only querying for as many comments as we intend to display.  The fact is that most of the time the reader of the blog post won&rsquo;t even look at the comments, and if they do then they might read a few and never click on &ldquo;show more&rdquo; which we would normally have.</p>
+
+<p>Is there a third option?</p>
+
+<h6 id="hybrid-option:7db8f99d4cb4bf37c187790fa7b90df5">hybrid option</h6>
+
+<p>The nice thing about flexible schema is that in cases like these you can keep comments in separate collection but also choose to denormalize some small number of comments into the post itself, either first few or the last few or whatever fits your requirements best.</p>
+
+<p>This hybrid approach may be analogous to the product collection for an e-commerce site where they store reviews of products separately from the product itself, but keep the highest voted reviews  (one positive and one negative) embedded in the product. This is a good schema because when you display the product, you want to display a few most helpful reviews, but you don&rsquo;t need to display all the reviews at that time.</p>
+
+<h4 id="summary:7db8f99d4cb4bf37c187790fa7b90df5">Summary</h4>
+
+<p>The general principal to use when trying to decide between embedding and linking is this:
+- consider which objects are first class entities and which are properties of such entities
+- consider what your use case requires to display fast and what allows for additional queries
+- when two choices both seem to be viable, prototype both and see which works better</p>
+<div class="footnotes">
+
+<hr />
+
+<ol>
+<li id="fn:7db8f99d4cb4bf37c187790fa7b90df5:fn-f1">Someone always brings up the possibility that the author will change their name, as if that&rsquo;s an everyday occurrence
+ <a class="footnote-return" href="#fnref:7db8f99d4cb4bf37c187790fa7b90df5:fn-f1"><sup>[return]</sup></a></li>
+</ol>
+</div>
+
+</div>
+
+      </div>
+    </div>
+
+    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
+
+  </body>
+</html>
+

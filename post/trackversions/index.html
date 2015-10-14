@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      How to Track Versions with MongoDB &middot; 
+    
+  </title>
+
+  
+  <link rel="stylesheet" href="http://asya999.github.io/css/poole.css">
+  <link rel="stylesheet" href="http://asya999.github.io/css/syntax.css">
+  <link rel="stylesheet" href="http://asya999.github.io/css/lanyon.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700|PT+Sans:400">
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://asya999.github.io/assets/apple-touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" href="http://asya999.github.io/assets/favicon.ico">
+
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http://asya999.github.io/atom.xml">
+</head>
+
+
+  <body class="theme-base-0b">
+
+    
+<input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
+
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-item">
+    <p>A reserved <a href="http://jekyllrb.com" target="_blank">Jekyll</a> theme that places the utmost gravity on content with a hidden drawer. Made by <a href="https://twitter.com/mdo" target="_blank">@mdo</a>.</p>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="sidebar-nav-item " href="http://asya999.github.io/">Home</a>
+    <a class="sidebar-nav-item " href="http://asya999.github.io/post">Posts</a>
+
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a class="sidebar-nav-item " href="http://asya999.github.io/about/">About</a>
+      
+    
+      
+    
+      
+    
+
+    <a class="sidebar-nav-item" href="http://github.com/asya999/bits-n-pieces">GitHub project</a>
+    <span class="sidebar-nav-item">Currently on master</span>
+  </nav>
+
+  <div class="sidebar-item">
+    <p>&copy; 2014. All rights reserved.</p>
+  </div>
+</div>
+
+
+    
+    <div class="wrap">
+      <div class="masthead">
+        <div class="container">
+          <h3 class="masthead-title">
+            <a href="http://asya999.github.io/" title="Home"></a>
+            <small></small>
+          </h3>
+        </div>
+      </div>
+
+      <div class="container content">
+
+
+<div class="post">
+  <h1 class="post-title">How to Track Versions with MongoDB</h1>
+  
+  <span class="post-date">Wed, May  21, 2014</span>
+  
+  
+
+<h3 id="question:4d494242d33833a567dbfba012f85510">Question:</h3>
+
+<p>Consider requirement that we have to be able to recreate/query any version of a document that ever existed in a particular collection.   So we start out with:</p>
+
+<pre><code>{   docId: &quot;A&quot;,
+    version: 1,
+    color: &quot;red&quot;,
+    locale: &quot;USA&quot;
+}
+</code></pre>
+
+<p>If we need to set color to &ldquo;blue&rdquo;, instead of updating the &ldquo;color&rdquo; field from &ldquo;red&rdquo; to &ldquo;blue&rdquo;, we have to create a new version of the document which now has its full &ldquo;current&rdquo; state, and preserve somehow the old version of the document.   So we insert</p>
+
+<pre><code>{   docId: &quot;A&quot;,
+    version: 2,
+    color: &quot;blue&quot;,
+    locale: &quot;USA&quot;
+}
+</code></pre>
+
+<p>The goal is to preserve every state for each object, but we only respond to queries with the &ldquo;current&rdquo; or &ldquo;latest&rdquo; version, we just have a requirement to be able to have an audit (which would be very infrequent so it&rsquo;s okay if it&rsquo;s slow).    Is keeping each version as we do in this example the best schema/approach to this problem?</p>
+
+<h3 id="answer:4d494242d33833a567dbfba012f85510">Answer:</h3>
+
+<p>Versioning can be tricky to get right if you don&rsquo;t know all of the requirements of the application and approximate expected loads for various operations.  I&rsquo;ll lay out a few possible approaches and point out their strength and weaknesses.</p>
+
+<h4 id="problem-statement:4d494242d33833a567dbfba012f85510">Problem Statement:</h4>
+
+<p>In some systems, rather than updating an existing object and overwriting its various attributes there is a business requirement to preserve the original document and to create a new version of this document, instead of updating it.  This raises the following interesting challenges:</p>
+
+<ol>
+<li>You must correctly generate the new version number in a multithreaded system</li>
+<li>You must return only the current version of each document when there is a query</li>
+<li>You must &ldquo;update&rdquo; correctly by including all current attributes in addition to newly provided attributes</li>
+<li>If the system fails at any point, you must either have a consistent state of the data, or it must be possible on re-start to infer the state of the data and clean it up, or otherwise bring it to consistent state.</li>
+</ol>
+
+<h5 id="possible-schema-approaches:4d494242d33833a567dbfba012f85510">Possible Schema Approaches:</h5>
+
+<ol>
+<li>Store full document each write with monotonically increasing version number.
+
+<ul>
+<li>1a. possibily with a field in latest version identifying it as such.</li>
+</ul></li>
+<li>Store all document versions inside a single document.</li>
+<li>Store current document in your &ldquo;primary&rdquo; collection, and keep previous versions in a second collection.</li>
+<li>Store only &ldquo;deltas&rdquo; with each increasing version.<br /></li>
+</ol>
+
+<h5 id="generating-correct-version-number:4d494242d33833a567dbfba012f85510">Generating correct version number</h5>
+
+<p>No matter which schema you choose, the issue of generating the correct &ldquo;higher&rdquo; version number will come down to one of three possible approaches:</p>
+
+<ul>
+<li>maintain a separate collection which hands out the next version for each document. This is probably the worst approach as it can be prone to contention and edge cases in multi-shard, multithreaded environment.</li>
+<li>use optimistic locking to read the current document, increment its version and save new document contingent on some constraint keeping you from succeeding simultaneously from two different threads.  This can be handled differently for different schemas, and it&rsquo;s definitely a common and feasible approach.</li>
+<li>use a fine-grain timestamp - current time to the millisecond may be good enough, depending on your ability to synchronize all the clocks, unfortunately it only works with two of our four schema options.</li>
+</ul>
+
+<p>I like optimistic locking option and it works well with all four of our schema options.  It involves a &ldquo;compare-and-swap&rdquo; technique where you read the current document,  do the appropriate calculation of new version and adding new attributes, and then try the insert or update, contingent on no one having updated the document ahead of you.  If it&rsquo;s an update, you include parts of the original document in your query condition, and if it&rsquo;s an insert you must have a unique constraint to prevent success of multiple simultaneous attempts to version the same document.   In both cases you must check the result of your write - knowing if it succeeded or failed is how the thread knows it has to try again.</p>
+
+<h4 id="how-does-each-schema:4d494242d33833a567dbfba012f85510">How does each schema:</h4>
+
+<ul>
+<li>return only the current document</li>
+<li>generate new version number to &ldquo;update&rdquo; existing and add new attributes
+
+<ul>
+<li>this includes recovering from failure in the middle of a set of operations (if there is more than one)</li>
+</ul></li>
+</ul>
+
+<hr />
+
+<h5 id="choice-1:4d494242d33833a567dbfba012f85510">Choice 1</h5>
+
+<p>Store full document each time there is a write with monotonically increasing version number inside.</p>
+
+<pre><code>    {  &quot;docId&quot; : 174, &quot;v&quot; : 1,  &quot;attr1&quot;: 165 }   /*version 1 */
+    {  &quot;docId&quot; : 174, &quot;v&quot; : 2,  &quot;attr1&quot;: 165, &quot;attr2&quot;: &quot;A-1&quot; } 
+    {  &quot;docId&quot; : 174, &quot;v&quot; : 3,  &quot;attr1&quot;: 184, &quot;attr2&quot; : &quot;A-1&quot; }
+</code></pre>
+
+<p>For each docId value the document with the highest &ldquo;v&rdquo; represents the full current object state.  In this example, docId 174 v:3 represents the total current state.   There is a unique index on <code>{&quot;docId&quot;:1,&quot;v&quot;:1}</code></p>
+
+<h6 id="to-return-only-current-document:4d494242d33833a567dbfba012f85510">To return only current document</h6>
+
+<p>If the query is for a single docId, the query would be:</p>
+
+<pre><code>db.docs.find({&quot;docId&quot;:174}).sort({&quot;v&quot;:-1}).limit(-1);
+</code></pre>
+
+<p>This will find the documents with &ldquo;docId&rdquo; 174 and return the one that has the highest &ldquo;v&rdquo; only.  This will efficiently use our index on docId and v to only scan a single document.  The <code>-1</code> for <code>limit</code> just tells the server to close the cursor when the document is returned as we are done with it (it&rsquo;s what <code>findOne</code> functionally does under the covers).</p>
+
+<p>But what if you want to query for all documents that match a particular condition, but what you expect is that only the latest version of each document would be returned?   Now you have to use the aggregation framework to &ldquo;merge&rdquo; your document set to only keep those with the highest version and apply your filter then:</p>
+
+<p>Careful that you don&rsquo;t do it the <strong>wrong</strong> way:</p>
+
+<pre><code>db.docs.aggregate( [  
+    {&quot;$match&quot;:{&lt;your-match-condition&gt;}}, /* WRONG */
+    {&quot;$sort&quot;:{&quot;docId&quot;:-1,&quot;v&quot;:-1}},
+    {&quot;$group&quot;:{&quot;_id&quot;:&quot;$docId&quot;,&quot;doc&quot;:{&quot;$first&quot;:&quot;$$ROOT&quot;}}}
+] )
+</code></pre>
+
+<p>Note that applying your filter <em>before</em> you filter out all but the latest version of each document may not return the current version of some of the documents!   So <strong>don&rsquo;t</strong> do this!</p>
+
+<p>Instead we have to do this:</p>
+
+<pre><code>sort={&quot;$sort&quot;: { &quot;documentId&quot; : 1, &quot;version&quot; : -1 } };
+group={&quot;$group&quot; : { &quot;_id&quot; : &quot;$documentId&quot;,
+                    &quot;doc&quot;: { &quot;$first&quot; : &quot;$$ROOT&quot; }
+                   } };
+match={&quot;$match&quot;:{&quot;doc.attrN&quot;:&lt;value&gt;}}; /* RIGHT */
+db.collection.aggregate( sort, group, match )
+</code></pre>
+
+<p>This is not efficient, sadly, as the indexes on our collection can only be effectively used <strong>before</strong> the first group operation.</p>
+
+<h6 id="to-generate-new-version-and-update:4d494242d33833a567dbfba012f85510">To generate new version and update</h6>
+
+<p>Optimistic locking: each thread reads in the most current document (in this case <code>docId:174, v:3</code>) makes attribute changes, increments <code>v</code> by one and then tries the insert of this document:</p>
+
+<pre><code>db.docs.insert({&quot;docId&quot;:174,&quot;v&quot;:4, &quot;attr1&quot;:184,&quot;attr2&quot;:&quot;A-1&quot;,&quot;attr3&quot;:&quot;blue&quot;})
+</code></pre>
+
+<p>If the insert succeeds, it&rsquo;s done, but if it gets a unique constraint violation, it means another thread has already inserted a new version of this document, and this thread needs to try again (making sure to read the new <code>&quot;v&quot;:4&quot;</code> or whatever the latest version of the document is and trying its change till it succeeds.</p>
+
+<p>Failure does <em>not</em> create an inconsistent state, since there is only a single write.</p>
+
+<h5 id="choice-1a:4d494242d33833a567dbfba012f85510">Choice 1a</h5>
+
+<p>In a variant of 1. we might add a field in the &ldquo;current&rdquo; version of each documentId</p>
+
+<pre><code>     {  &quot;docId&quot; : 174, &quot;v&quot; : 1,  &quot;attr1&quot;: 165 }
+     {  &quot;docId&quot; : 174, &quot;v&quot; : 2,  &quot;attr1&quot;: 165, &quot;attr2&quot;: &quot;A-1&quot; }
+     {  &quot;docId&quot; : 174, &quot;v&quot; : 3,  &quot;attr1&quot;: 184, &quot;attr2&quot; : &quot;A-1&quot;, current: true }
+</code></pre>
+
+<p>Fetching the current document should now be easy, just query for { docId:174, current:true }, and when querying for multiple documents, add {&ldquo;current&rdquo;:true} to the query predicate, solving that problem.</p>
+
+<p>Updating becomes difficult now, since there is no method to insert one document and update another document &ldquo;as one&rdquo;.  So we would want to first insert a new version, based on currently highest version, and then  update the previously current document to $unset the &ldquo;current&rdquo; field.</p>
+
+<p>Now if our process fails between those two write operations, we will have two documents for a particular docId that have &ldquo;current&rdquo; set to true and that means all of our queries will have to guard against that possibility - that  seems unnecessarily complex, so let&rsquo;s hold off on this method for now.</p>
+
+<h5 id="choice-2:4d494242d33833a567dbfba012f85510">Choice 2</h5>
+
+<p>Store all document versions inside a single document.</p>
+
+<pre><code>    {  &quot;_id&quot; : 174, &quot;current&quot; : { &quot;v&quot; :3, &quot;attr1&quot;: 184, &quot;attr2&quot; : &quot;A-1&quot; },
+        &quot;prev&quot; : [ 
+              {  &quot;v&quot; : 1,  &quot;attr1&quot;: 165 },
+              {  &quot;v&quot; : 2,  &quot;attr1&quot;: 165, &quot;attr2&quot;: &quot;A-1&quot; }
+        ]
+    }
+</code></pre>
+
+<p>For each docId, the current state is represented by its &ldquo;current&rdquo; subdocument.   Since &ldquo;docId&rdquo; is unique it can be stored in the &ldquo;_id&rdquo; field.</p>
+
+<p>The merits of multiple possible solutions mostly depend on how many versions of each object you expect to have and how long you have to keep them.  If the lifetime of a document usually has a number of versions that are in the single digits or low double digits, you can do well embedding the versions inside of the single document that represents each object.</p>
+
+<h6 id="to-return-only-current-document-1:4d494242d33833a567dbfba012f85510">To return only current document</h6>
+
+<p>Since there is only one document, we just search by docId or other attributes of &ldquo;current&rdquo; and we use projection to exclude the previous array: <code>db.collection.find({&quot;docId&quot;:174}, {&quot;prev&quot;:0})</code> except in cases we want to see it.</p>
+
+<h6 id="to-generate-new-version-and-update-1:4d494242d33833a567dbfba012f85510">To generate new version and update</h6>
+
+<p>Even though you only have one document per docId, you really can&rsquo;t create a new version with a single update, since it depends on knowing what the current subdocument is, but what you can do is utilize the &ldquo;compare-and-swap&rdquo; technique where you read the current document, move &ldquo;current&rdquo; field to the end of the previous array, set the new &ldquo;current&rdquo; field appropriately, and then do the update <strong>contingent on no one having updated the document ahead of you</strong>:</p>
+
+<pre><code>var doc = db.collection.findOne( { &quot;_id&quot; : 174 });
+/* save the current version */
+var currVersion = doc.current.v;
+/* push the current subdocument to the end of prev array */
+doc.prev.push(doc.current);
+/* construct the new &quot;current&quot; subdocument */
+doc.current = { &quot;v&quot; : currVersion+1, &quot;attr1&quot; : &lt;value&gt;, &quot;attr2&quot; : &lt;value&gt; }
+var result = db.collection.update( { &quot;_id&quot; : 174, &quot;current.v&quot; : currVersion },  { &quot;$set&quot; : doc } )
+if (result.nModified != 1) {
+    print(&quot;Someone must have gotten there first, re-fetch the new document, try again&quot;);
+}
+</code></pre>
+
+<h6 id="atomicity-and-maintainability:4d494242d33833a567dbfba012f85510">atomicity and maintainability</h6>
+
+<p>There are many pros in this approach:
+- atomic updates of document (single operation both, sets new current and updates previous)
+- querying only needs to happen on &ldquo;current&rdquo; attributes, since you only need to access previous infrequently
+- it&rsquo;s simple to return just current attributes or to exclude previous from being returned to the application
+- the <code>_id</code> index can be used for the unique docId preventing duplicates being accidentally inserted
+- creating the next version number is simple and thread-safe</p>
+
+<p>The cons are all performance based:
+- when each document grows beyond its previously allocated size, it has to be moved which makes some updates more time consuming
+- this won&rsquo;t work at all for documents that have thousands of versions over their lifetime (the documents would get too big, unwieldy, and could potentially exceed 16MB limit)
+- there&rsquo;ll likely be more fragmentation than with the more &ldquo;naive&rdquo; approach of inserting new versions as new documents
+- if the system has a very high level of concurrency when multiple threads are trying to each make different update to a specific document, a single thread could keep getting beat and it might take multiple re-tries to persist its update</p>
+
+<p>The last &ldquo;con&rdquo; shouldn&rsquo;t really be a concern if you are genuinely talking about a system where each document is only going to have a handful of versions (or updates) in its lifecycle, and this schema isn&rsquo;t appropriate for systems where a single document will live through hundreds (or thousands) of updates.</p>
+
+<h5 id="choice-3:4d494242d33833a567dbfba012f85510">Choice 3</h5>
+
+<p>Store current document in your &ldquo;primary&rdquo; collection, and keep older versions in another collection.</p>
+
+<pre><code>    CurrentCollection:     {  &quot;docId&quot; : 174,  &quot;v&quot; :3, &quot;attr1&quot;: 184, &quot;attr2&quot; : &quot;A-1&quot; }
+    CollectionOfPrevious:
+              {  &quot;docId&quot; : 174, &quot;v&quot; : 1,  &quot;attr1&quot;: 165 }
+              {  &quot;docId&quot; : 174, &quot;v&quot; : 2,  &quot;attr1&quot;: 165, &quot;attr2&quot;: &quot;A-1&quot; }
+
+For each documentId, there is only one document which represented its current state.
+</code></pre>
+
+<h6 id="to-return-only-current-document-2:4d494242d33833a567dbfba012f85510">To return only current document</h6>
+
+<p>This one is the simplest of them all.  Since the old versions are in another collection, you just query normally when you need to find a single or multiple documents - they will all be the current version.</p>
+
+<h6 id="to-generate-new-version-and-update-2:4d494242d33833a567dbfba012f85510">To generate new version and update</h6>
+
+<p>This one may be the hardest.  Technically, you only need to do a few things: read the current document, construct out of it the new current document, save the new current document on top of previous one and if successful, then insert the old current document into the &ldquo;previous&rdquo; collection.   Of course we would use the same compare-and-swap update to make sure that no one changed the document between our read and our write, and only insert into previous collection if we successfully update current.</p>
+
+<p>The problem is that you may fail before that last write and now you&rsquo;ll be missing a version of this document from the &ldquo;previous&rdquo; collection.</p>
+
+<p>What if we  switch the order of writes to save into the previous collection first?   We read the current document, we write it to previous collection, we now change it to be &ldquo;new&rdquo; current and save it into &ldquo;current&rdquo; collection.  This has several advantages:
+- if someone else is trying to update this document, they will also be saving into &ldquo;previous&rdquo; collection, so having a unique index on docId, version will tell us if we lost the race and now have to try again.<br />
+- if the thread dies in the middle (after insert into previous and before updating current) it&rsquo;s not the end of the world, as your current collection was not affected, but you do need a way to &ldquo;clean up&rdquo; your &ldquo;previous&rdquo; collection, first because you need to remove the version of the document that never existed in &ldquo;current&rdquo; and second because it will block all other &ldquo;updates&rdquo; on this document by using an invalid &ldquo;docId&rdquo;, &ldquo;version&rdquo;.</p>
+
+<p>Luckily, clean-up may be simple, as any time we detect that there exists a docId, version in &ldquo;current&rdquo; that also exists in &ldquo;previous&rdquo; it means either there is an update &ldquo;in progress&rdquo; or it means that an update &ldquo;died&rdquo; and we should clean up.  Of course the devil is in the details - and it could cause delays in the system since you have to wait long enough to be sure that this &ldquo;in progress&rdquo; update actually died.  Or you can have another field that you update after successful writes in both places (now making it easier to recover, but needing to do three writes before you&rsquo;re done with a single document update!)  Let&rsquo;s call this Medium Hard still.</p>
+
+<h5 id="choice-4:4d494242d33833a567dbfba012f85510">Choice 4</h5>
+
+<p>Store only &ldquo;deltas&rdquo; with increasing versions</p>
+
+<pre><code>    {  &quot;documentId&quot; : 174, &quot;v&quot; : 1,  &quot;attr1&quot;: 165 }
+    {  &quot;documentId&quot; : 174, &quot;v&quot; : 2,  &quot;attr2&quot;: &quot;A-1&quot; }
+    {  &quot;documentId&quot; : 174, &quot;v&quot; : 3,  &quot;attr1&quot;: 184 }
+</code></pre>
+
+<p>For each docId, the current state must be derived by &ldquo;merging&rdquo; all the documents with matching docId, keeping the &ldquo;latest&rdquo; or &ldquo;highest&rdquo; version&rsquo;s value of each attribute if it occurs in more than one version.</p>
+
+<p>This one is quite complex, and the answer is getting quite long, so let&rsquo;s call it hard and defer the details of how we accomplish this merge till <a href="http://askasya.com/post/mergeshapes">next time</a>.</p>
+
+<h4 id="let-s-summarize:4d494242d33833a567dbfba012f85510">Let&rsquo;s Summarize</h4>
+
+<p>Here&rsquo;s a table that shows for each schema choice how well we can handle the reads, writes and if an update has to make more than one write, how easy it is to recover or to be in a relatively &ldquo;safe&rdquo; state:</p>
+
+<p>|Schema | Fetch 1 | Fetch Many || Update | Recover if fail|
+&mdash;&mdash;&mdash;&mdash; | &mdash;&mdash;&mdash;&mdash;- | &mdash;&mdash;&mdash;&mdash;|-|&mdash;&mdash;&mdash;&mdash;&mdash;|&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;|&mdash;&mdash;&mdash;&mdash;-
+|1) New doc for each | Easy,Fast  | Not easy,Slow | | Medium | N/A |
+|1a) New doc with &ldquo;current&rdquo; | Easy,Fast  | Easy,Fast | | Medium | Hard |
+|2) Embedded in single doc | Easy,Fastest  | Easy,Fastest | | Medium | N/A |
+|3) Sep Collection for prev. |  Easy,Fastest  | Easy,Fastest  | | Medium |  Medium Hard |
+|4) Deltas only in new doc | TBD/Hard | TBD/Hard | | Medium | N/A |
+|?) TBD |  Easy,Fastest  | Easy,Fastest  | | Easy,Fastest |  N/A |</p>
+
+<p>&ldquo;N/A&rdquo; for recovery means there is no inconsistent state possible - if we only have to make one write to create/add a new version, we are safe from any inconsistency.  So &ldquo;N/A&rdquo; is the &ldquo;easiest&rdquo; value there.</p>
+
+<p>I deferred describing what it would take to query the &ldquo;Store deltas only&rdquo; option till the next &ldquo;Ask Asya&rdquo; but let me foreshadow and tell you that it&rsquo;s not particularly easy - it involves a long and tricky aggregation.</p>
+
+<p>But you can see I filled in a yet undescribed way that magically somehow makes all our tasks easy, and yet seems to not have any performance issues nor consistency problems.  If you&rsquo;ve stuck with me this far, I promise that I will describe the magical &ldquo;winner&rdquo; for version keeping in the next &ldquo;Ask Asya&rdquo; after the one that shows how to aggregate deltas of document into one.</p>
+
+<p>Since I just enabled comments and discussion on these pages, if you see a possible schema approach I didn&rsquo;t mention, feel free to suggest it.  Free &ldquo;MongoDB&rdquo; t-shirt for you if you guess the &ldquo;TBD&rdquo; schema I have in mind.</p>
+
+</div>
+
+      </div>
+    </div>
+
+    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
+
+  </body>
+</html>
+
