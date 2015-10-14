@@ -419,7 +419,8 @@ while (cursor.hasNext()) {
 &lt;/pre&gt;
 Of course this code does minimal error checking and it&#39;s not set up to automatically restart if it loses connection to the primary, or the primary changes in the replica set.  This is because here we are reading from a local oplog when in real life you may be fetching data from another server or cluster entirely.  Even so, about 15 lines of code there are for error checking and information printing, so the actual &#34;work&#34; we do is quite simple.  
 
-##### Creating a full archive from tailing the oplog
+##### Creating a full archive from tailing the oplog #####
+
 Now that we know how to replay original documents to maintain an indentical &#34;copy&#34; collection, let&#39;s see what we have to do differently when we want to insert a new version of the document without losing any of the old versions.
 
 For simplicity, I put the docId in the example collection into the `_id` field, so I will need to structure the full archive collection schema differently, since it cannot have multiple documents with the same `_id`.[^2]  For simplicity, I will let MongoDB generate the `_id` and I will use the combination of docId and version with a unique index on them to prevent duplicate versions.  I could achieve something similar by using the combination of original `_id` (which is the docId) and `version` fields as a compound `_id` field but then I would need to do more complicated transformations on the oplog entry.  I always choose the method that is  simpler.
