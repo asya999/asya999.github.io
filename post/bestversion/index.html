@@ -133,16 +133,16 @@
 
 <p>Here&rsquo;s a table that shows for each schema choice that we considered how well we can handle the reads, writes and if an update has to make more than one write, how easy it is to recover or to be in a relatively &ldquo;safe&rdquo; state:</p>
 
-<pre><code>         Schema         | Fetch 1       | Fetch Many  | | Update        | Recover if fail 
+<pre><code>         Schema         | Fetch 1       | Fetch Many    | Update       | Recover if fail 
 </code></pre>
 
-<p>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;-|&mdash;&mdash;&mdash;&mdash;&mdash;|&mdash;&mdash;&mdash;&mdash;-|-|&mdash;&mdash;&mdash;&mdash;&mdash;|&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;
-1) New doc for each         | Easy,Fast     | Not easy,Slow | | Medium | N/A
-1a) New doc with &ldquo;current&rdquo;  | Easy,Fast     | Easy,Fast | | Medium | Hard
-2) Embedded in single doc   | Easy,Fastest  | Easy,Fastest | | Medium | N/A
-3) Sep Collection for prev. |  Easy,Fastest | Easy,Fastest  | | Medium |  Medium Hard
-4) Deltas only in new doc   | Hard,Slow     | Hard,Slow | | Medium | N/A
-?) TBD                      |  Easy,Fastest | Easy,Fastest  | | Easy,Fastest |  N/A</p>
+<p>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;-|&mdash;&mdash;&mdash;&mdash;&mdash;|&mdash;&mdash;&mdash;&mdash;-  |&mdash;&mdash;&mdash;&mdash;&ndash;|&mdash;&mdash;&mdash;&mdash;&mdash;-
+1) New doc for each         | Easy,Fast     | Not easy,Slow | Medium       | N/A
+1a) New doc with &ldquo;current&rdquo;  | Easy,Fast     | Easy,Fast     | Medium       | Hard
+2) Embedded in single doc   | Easy,Fastest  | Easy,Fastest  | Medium       | N/A
+3) Sep Collection for prev. |  Easy,Fastest | Easy,Fastest  | Medium       |  Medium Hard
+4) Deltas only in new doc   | Hard,Slow     | Hard,Slow     | Medium       | N/A
+?) TBD                      |  Easy,Fastest | Easy,Fastest  | Easy,Fastest |  N/A</p>
 
 <p>&ldquo;N/A&rdquo; for recovery means there is no inconsistent state possible - if we only have to make one write to create/add a new version, we are safe from any inconsistency.  So &ldquo;N/A&rdquo; is the &ldquo;easiest&rdquo; value there.</p>
 
