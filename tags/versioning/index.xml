@@ -205,7 +205,7 @@ increases over time, the update latency for adding a new version remains roughly
 &lt;pre&gt;&lt;code&gt;         Schema         | Fetch 1       | Fetch Many    | Update       | Recover if fail 
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;-|&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;|&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;-  |&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;ndash;|&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;-
+&lt;p&gt;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash; | &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;- | &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;- | &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash; | &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;
 1) New doc for each         | Easy,Fast     | Not easy,Slow | Medium       | N/A
 1a) New doc with &amp;ldquo;current&amp;rdquo;  | Easy,Fast     | Easy,Fast     | Medium       | Hard
 2) Embedded in single doc   | Easy,Fastest  | Easy,Fastest  | Medium       | N/A
