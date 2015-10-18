@@ -349,14 +349,67 @@ For each documentId, there is only one document which represented its current st
 
 <p>Here&rsquo;s a table that shows for each schema choice how well we can handle the reads, writes and if an update has to make more than one write, how easy it is to recover or to be in a relatively &ldquo;safe&rdquo; state:</p>
 
-<p>|Schema | Fetch 1 | Fetch Many || Update | Recover if fail|
-&mdash;&mdash;&mdash;&mdash; | &mdash;&mdash;&mdash;&mdash;- | &mdash;&mdash;&mdash;&mdash;|-|&mdash;&mdash;&mdash;&mdash;&mdash;|&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;|&mdash;&mdash;&mdash;&mdash;-
-|1) New doc for each | Easy,Fast  | Not easy,Slow | | Medium | N/A |
-|1a) New doc with &ldquo;current&rdquo; | Easy,Fast  | Easy,Fast | | Medium | Hard |
-|2) Embedded in single doc | Easy,Fastest  | Easy,Fastest | | Medium | N/A |
-|3) Sep Collection for prev. |  Easy,Fastest  | Easy,Fastest  | | Medium |  Medium Hard |
-|4) Deltas only in new doc | TBD/Hard | TBD/Hard | | Medium | N/A |
-|?) TBD |  Easy,Fastest  | Easy,Fastest  | | Easy,Fastest |  N/A |</p>
+<table>
+<thead>
+<tr>
+<th>Schema</th>
+<th>Fetch 1</th>
+<th>Fetch Many</th>
+<th>Update</th>
+<th>Recover if fail</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>1) New doc for each</td>
+<td>Easy,Fast</td>
+<td>Not easy,Slow</td>
+<td>Medium</td>
+<td>N/A</td>
+</tr>
+
+<tr>
+<td>1a) New doc with &ldquo;current&rdquo;</td>
+<td>Easy,Fast</td>
+<td>Easy,Fast</td>
+<td>Medium</td>
+<td>Hard</td>
+</tr>
+
+<tr>
+<td>2) Embedded in single doc</td>
+<td>Easy,Fastest</td>
+<td>Easy,Fastest</td>
+<td>Medium</td>
+<td>N/A</td>
+</tr>
+
+<tr>
+<td>3) Sep Collection for prev.</td>
+<td>Easy,Fastest</td>
+<td>Easy,Fastest</td>
+<td>Medium</td>
+<td>Medium Hard</td>
+</tr>
+
+<tr>
+<td>4) Deltas only in new doc</td>
+<td>TBD/Hard</td>
+<td>TBD/Hard</td>
+<td>Medium</td>
+<td>N/A</td>
+</tr>
+
+<tr>
+<td>?) TBD</td>
+<td>Easy,Fastest</td>
+<td>Easy,Fastest</td>
+<td>Easy,Fastest</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
 
 <p>&ldquo;N/A&rdquo; for recovery means there is no inconsistent state possible - if we only have to make one write to create/add a new version, we are safe from any inconsistency.  So &ldquo;N/A&rdquo; is the &ldquo;easiest&rdquo; value there.</p>
 

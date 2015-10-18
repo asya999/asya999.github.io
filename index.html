@@ -357,34 +357,64 @@ increases over time, the update latency for adding a new version remains roughly
 
 <p>Here&rsquo;s a table that shows for each schema choice that we considered how well we can handle the reads, writes and if an update has to make more than one write, how easy it is to recover or to be in a relatively &ldquo;safe&rdquo; state:</p>
 
-<pre><code>         Schema         | Fetch 1       | Fetch Many    | Update       | Recover if fail 
-</code></pre>
-
-<p>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash; | &mdash;&mdash;&mdash;&mdash;- | &mdash;&mdash;&mdash;&mdash;- | &mdash;&mdash;&mdash;&mdash; | &mdash;&mdash;&mdash;&mdash;&mdash;
-1  New doc for each         | Easy,Fast     | Not easy,Slow | Medium       | N/A
-1a  New doc with &ldquo;current&rdquo;  | Easy,Fast     | Easy,Fast     | Medium       | Hard
-2  Embedded in single doc   | Easy,Fastest  | Easy,Fastest  | Medium       | N/A
-3  Sep Collection for prev. |  Easy,Fastest | Easy,Fastest  | Medium       |  Medium Hard
-4  Deltas only in new doc   | Hard,Slow     | Hard,Slow     | Medium       | N/A
-?  TBD                      |  Easy,Fastest | Easy,Fastest  | Easy,Fastest |  N/A</p>
-
 <table>
 <thead>
 <tr>
-<th>First Header</th>
-<th>Second Header</th>
+<th>Schema</th>
+<th>Fetch 1</th>
+<th>Fetch Many</th>
+<th>Update</th>
+<th>Recover if fail</th>
 </tr>
 </thead>
 
 <tbody>
 <tr>
-<td><em>Content Cell</em></td>
-<td>Content Cell</td>
+<td>1  New doc for each</td>
+<td>Easy,Fast</td>
+<td>Not easy,Slow</td>
+<td>Medium</td>
+<td>N/A</td>
 </tr>
 
 <tr>
-<td>Content Cell</td>
-<td>Content Cell</td>
+<td>1a  New doc with &ldquo;current&rdquo;</td>
+<td>Easy,Fast</td>
+<td>Easy,Fast</td>
+<td>Medium</td>
+<td>Hard</td>
+</tr>
+
+<tr>
+<td>2  Embedded in single doc</td>
+<td>Easy,Fastest</td>
+<td>Easy,Fastest</td>
+<td>Medium</td>
+<td>N/A</td>
+</tr>
+
+<tr>
+<td>3  Sep Collection for prev.</td>
+<td>Easy,Fastest</td>
+<td>Easy,Fastest</td>
+<td>Medium</td>
+<td>Medium Hard</td>
+</tr>
+
+<tr>
+<td>4  Deltas only in new doc</td>
+<td>Hard,Slow</td>
+<td>Hard,Slow</td>
+<td>Medium</td>
+<td>N/A</td>
+</tr>
+
+<tr>
+<td>?  TBD</td>
+<td>Easy,Fastest</td>
+<td>Easy,Fastest</td>
+<td>Easy,Fastest</td>
+<td>N/A</td>
 </tr>
 </tbody>
 </table>

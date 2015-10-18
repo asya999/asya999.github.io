@@ -202,34 +202,64 @@ increases over time, the update latency for adding a new version remains roughly
 
 &lt;p&gt;Here&amp;rsquo;s a table that shows for each schema choice that we considered how well we can handle the reads, writes and if an update has to make more than one write, how easy it is to recover or to be in a relatively &amp;ldquo;safe&amp;rdquo; state:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;         Schema         | Fetch 1       | Fetch Many    | Update       | Recover if fail 
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash; | &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;- | &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;- | &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash; | &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;
-1  New doc for each         | Easy,Fast     | Not easy,Slow | Medium       | N/A
-1a  New doc with &amp;ldquo;current&amp;rdquo;  | Easy,Fast     | Easy,Fast     | Medium       | Hard
-2  Embedded in single doc   | Easy,Fastest  | Easy,Fastest  | Medium       | N/A
-3  Sep Collection for prev. |  Easy,Fastest | Easy,Fastest  | Medium       |  Medium Hard
-4  Deltas only in new doc   | Hard,Slow     | Hard,Slow     | Medium       | N/A
-?  TBD                      |  Easy,Fastest | Easy,Fastest  | Easy,Fastest |  N/A&lt;/p&gt;
-
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
-&lt;th&gt;First Header&lt;/th&gt;
-&lt;th&gt;Second Header&lt;/th&gt;
+&lt;th&gt;Schema&lt;/th&gt;
+&lt;th&gt;Fetch 1&lt;/th&gt;
+&lt;th&gt;Fetch Many&lt;/th&gt;
+&lt;th&gt;Update&lt;/th&gt;
+&lt;th&gt;Recover if fail&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
 
 &lt;tbody&gt;
 &lt;tr&gt;
-&lt;td&gt;&lt;em&gt;Content Cell&lt;/em&gt;&lt;/td&gt;
-&lt;td&gt;Content Cell&lt;/td&gt;
+&lt;td&gt;1  New doc for each&lt;/td&gt;
+&lt;td&gt;Easy,Fast&lt;/td&gt;
+&lt;td&gt;Not easy,Slow&lt;/td&gt;
+&lt;td&gt;Medium&lt;/td&gt;
+&lt;td&gt;N/A&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td&gt;Content Cell&lt;/td&gt;
-&lt;td&gt;Content Cell&lt;/td&gt;
+&lt;td&gt;1a  New doc with &amp;ldquo;current&amp;rdquo;&lt;/td&gt;
+&lt;td&gt;Easy,Fast&lt;/td&gt;
+&lt;td&gt;Easy,Fast&lt;/td&gt;
+&lt;td&gt;Medium&lt;/td&gt;
+&lt;td&gt;Hard&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;2  Embedded in single doc&lt;/td&gt;
+&lt;td&gt;Easy,Fastest&lt;/td&gt;
+&lt;td&gt;Easy,Fastest&lt;/td&gt;
+&lt;td&gt;Medium&lt;/td&gt;
+&lt;td&gt;N/A&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;3  Sep Collection for prev.&lt;/td&gt;
+&lt;td&gt;Easy,Fastest&lt;/td&gt;
+&lt;td&gt;Easy,Fastest&lt;/td&gt;
+&lt;td&gt;Medium&lt;/td&gt;
+&lt;td&gt;Medium Hard&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;4  Deltas only in new doc&lt;/td&gt;
+&lt;td&gt;Hard,Slow&lt;/td&gt;
+&lt;td&gt;Hard,Slow&lt;/td&gt;
+&lt;td&gt;Medium&lt;/td&gt;
+&lt;td&gt;N/A&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;?  TBD&lt;/td&gt;
+&lt;td&gt;Easy,Fastest&lt;/td&gt;
+&lt;td&gt;Easy,Fastest&lt;/td&gt;
+&lt;td&gt;Easy,Fastest&lt;/td&gt;
+&lt;td&gt;N/A&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
@@ -1007,14 +1037,67 @@ For each documentId, there is only one document which represented its current st
 
 &lt;p&gt;Here&amp;rsquo;s a table that shows for each schema choice how well we can handle the reads, writes and if an update has to make more than one write, how easy it is to recover or to be in a relatively &amp;ldquo;safe&amp;rdquo; state:&lt;/p&gt;
 
-&lt;p&gt;|Schema | Fetch 1 | Fetch Many || Update | Recover if fail|
-&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash; | &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;- | &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;|-|&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;|&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;ndash;|&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;-
-|1) New doc for each | Easy,Fast  | Not easy,Slow | | Medium | N/A |
-|1a) New doc with &amp;ldquo;current&amp;rdquo; | Easy,Fast  | Easy,Fast | | Medium | Hard |
-|2) Embedded in single doc | Easy,Fastest  | Easy,Fastest | | Medium | N/A |
-|3) Sep Collection for prev. |  Easy,Fastest  | Easy,Fastest  | | Medium |  Medium Hard |
-|4) Deltas only in new doc | TBD/Hard | TBD/Hard | | Medium | N/A |
-|?) TBD |  Easy,Fastest  | Easy,Fastest  | | Easy,Fastest |  N/A |&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Schema&lt;/th&gt;
+&lt;th&gt;Fetch 1&lt;/th&gt;
+&lt;th&gt;Fetch Many&lt;/th&gt;
+&lt;th&gt;Update&lt;/th&gt;
+&lt;th&gt;Recover if fail&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;1) New doc for each&lt;/td&gt;
+&lt;td&gt;Easy,Fast&lt;/td&gt;
+&lt;td&gt;Not easy,Slow&lt;/td&gt;
+&lt;td&gt;Medium&lt;/td&gt;
+&lt;td&gt;N/A&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;1a) New doc with &amp;ldquo;current&amp;rdquo;&lt;/td&gt;
+&lt;td&gt;Easy,Fast&lt;/td&gt;
+&lt;td&gt;Easy,Fast&lt;/td&gt;
+&lt;td&gt;Medium&lt;/td&gt;
+&lt;td&gt;Hard&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;2) Embedded in single doc&lt;/td&gt;
+&lt;td&gt;Easy,Fastest&lt;/td&gt;
+&lt;td&gt;Easy,Fastest&lt;/td&gt;
+&lt;td&gt;Medium&lt;/td&gt;
+&lt;td&gt;N/A&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;3) Sep Collection for prev.&lt;/td&gt;
+&lt;td&gt;Easy,Fastest&lt;/td&gt;
+&lt;td&gt;Easy,Fastest&lt;/td&gt;
+&lt;td&gt;Medium&lt;/td&gt;
+&lt;td&gt;Medium Hard&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;4) Deltas only in new doc&lt;/td&gt;
+&lt;td&gt;TBD/Hard&lt;/td&gt;
+&lt;td&gt;TBD/Hard&lt;/td&gt;
+&lt;td&gt;Medium&lt;/td&gt;
+&lt;td&gt;N/A&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;?) TBD&lt;/td&gt;
+&lt;td&gt;Easy,Fastest&lt;/td&gt;
+&lt;td&gt;Easy,Fastest&lt;/td&gt;
+&lt;td&gt;Easy,Fastest&lt;/td&gt;
+&lt;td&gt;N/A&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;p&gt;&amp;ldquo;N/A&amp;rdquo; for recovery means there is no inconsistent state possible - if we only have to make one write to create/add a new version, we are safe from any inconsistency.  So &amp;ldquo;N/A&amp;rdquo; is the &amp;ldquo;easiest&amp;rdquo; value there.&lt;/p&gt;
 
