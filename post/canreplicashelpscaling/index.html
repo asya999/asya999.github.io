@@ -177,7 +177,7 @@ secondary?   <strong>You gave up HA</strong>.  Remember, if you can only service
 
 <p>To keep &ldquo;atypical&rdquo; jobs from interfering with your &ldquo;typical&rdquo; work load, configure the atypical ones to use read preference Secondary. Note that Secondary is different from SecondaryPreferred as the latter will go to the Primary if there is no available Secondary but the former will return an error if there is no Secondary to read from.  Since these jobs are usually not urgent, you’d rather have them wait and retry later than interfere with operational responsiveness of your app anyway.  You can even use <a href="http://docs.mongodb.org/manual/tutorial/configure-replica-set-tag-sets/">&ldquo;tags&rdquo;</a> to isolate different jobs to specific nodes even further.</p>
 
-<p>#####Bottom line#####</p>
+<h5 id="bottom-line:d15f8c1ea7d4b31deafbbed0f16c3829">Bottom line</h5>
 
 <p>Make your primary do the work that the application relies on every second.  Make sure that <em>at least</em> one secondary is idle and ready to take over for the primary in case of failure.  Use additional secondaries (<em>not</em> the hot standby one!) for all other needs whether it’s backups, analytical reports, ad hoc queries, ETL, etc.  This way, you know that you can handle the application requirements after a failover just as well as before.</p>
 
