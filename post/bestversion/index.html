@@ -137,12 +137,33 @@
 </code></pre>
 
 <p>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash; | &mdash;&mdash;&mdash;&mdash;- | &mdash;&mdash;&mdash;&mdash;- | &mdash;&mdash;&mdash;&mdash; | &mdash;&mdash;&mdash;&mdash;&mdash;
-1) New doc for each         | Easy,Fast     | Not easy,Slow | Medium       | N/A
-1a) New doc with &ldquo;current&rdquo;  | Easy,Fast     | Easy,Fast     | Medium       | Hard
-2) Embedded in single doc   | Easy,Fastest  | Easy,Fastest  | Medium       | N/A
-3) Sep Collection for prev. |  Easy,Fastest | Easy,Fastest  | Medium       |  Medium Hard
-4) Deltas only in new doc   | Hard,Slow     | Hard,Slow     | Medium       | N/A
-?) TBD                      |  Easy,Fastest | Easy,Fastest  | Easy,Fastest |  N/A</p>
+1  New doc for each         | Easy,Fast     | Not easy,Slow | Medium       | N/A
+1a  New doc with &ldquo;current&rdquo;  | Easy,Fast     | Easy,Fast     | Medium       | Hard
+2  Embedded in single doc   | Easy,Fastest  | Easy,Fastest  | Medium       | N/A
+3  Sep Collection for prev. |  Easy,Fastest | Easy,Fastest  | Medium       |  Medium Hard
+4  Deltas only in new doc   | Hard,Slow     | Hard,Slow     | Medium       | N/A
+?  TBD                      |  Easy,Fastest | Easy,Fastest  | Easy,Fastest |  N/A</p>
+
+<table>
+<thead>
+<tr>
+<th>First Header</th>
+<th>Second Header</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td><em>Content Cell</em></td>
+<td>Content Cell</td>
+</tr>
+
+<tr>
+<td>Content Cell</td>
+<td>Content Cell</td>
+</tr>
+</tbody>
+</table>
 
 <p>&ldquo;N/A&rdquo; for recovery means there is no inconsistent state possible - if we only have to make one write to create/add a new version, we are safe from any inconsistency.  So &ldquo;N/A&rdquo; is the &ldquo;easiest&rdquo; value there.</p>
 

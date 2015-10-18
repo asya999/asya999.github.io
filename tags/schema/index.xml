@@ -253,12 +253,33 @@ increases over time, the update latency for adding a new version remains roughly
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash; | &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;- | &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;- | &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash; | &amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;
-1) New doc for each         | Easy,Fast     | Not easy,Slow | Medium       | N/A
-1a) New doc with &amp;ldquo;current&amp;rdquo;  | Easy,Fast     | Easy,Fast     | Medium       | Hard
-2) Embedded in single doc   | Easy,Fastest  | Easy,Fastest  | Medium       | N/A
-3) Sep Collection for prev. |  Easy,Fastest | Easy,Fastest  | Medium       |  Medium Hard
-4) Deltas only in new doc   | Hard,Slow     | Hard,Slow     | Medium       | N/A
-?) TBD                      |  Easy,Fastest | Easy,Fastest  | Easy,Fastest |  N/A&lt;/p&gt;
+1  New doc for each         | Easy,Fast     | Not easy,Slow | Medium       | N/A
+1a  New doc with &amp;ldquo;current&amp;rdquo;  | Easy,Fast     | Easy,Fast     | Medium       | Hard
+2  Embedded in single doc   | Easy,Fastest  | Easy,Fastest  | Medium       | N/A
+3  Sep Collection for prev. |  Easy,Fastest | Easy,Fastest  | Medium       |  Medium Hard
+4  Deltas only in new doc   | Hard,Slow     | Hard,Slow     | Medium       | N/A
+?  TBD                      |  Easy,Fastest | Easy,Fastest  | Easy,Fastest |  N/A&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;First Header&lt;/th&gt;
+&lt;th&gt;Second Header&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;em&gt;Content Cell&lt;/em&gt;&lt;/td&gt;
+&lt;td&gt;Content Cell&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Content Cell&lt;/td&gt;
+&lt;td&gt;Content Cell&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;p&gt;&amp;ldquo;N/A&amp;rdquo; for recovery means there is no inconsistent state possible - if we only have to make one write to create/add a new version, we are safe from any inconsistency.  So &amp;ldquo;N/A&amp;rdquo; is the &amp;ldquo;easiest&amp;rdquo; value there.&lt;/p&gt;
 
