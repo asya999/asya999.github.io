@@ -28,7 +28,7 @@ Asya outlined various approaches for preserving historical versions of records f
 &lt;p&gt;The presented ‘compare-and-swap&amp;rsquo; example code, to generate a new version and update version history, is very effective at ensuring consistency of versions in a thread-safe manner. However, I felt that there was scope
 to reduce the update latency which will be particularly high when a document has grown, with many previous versions embedded.&lt;/p&gt;
 
-&lt;p&gt;For example, if a current document has tens of embedded previous versions, then projecting the whole document back to the client application, updating part of the document copy and then sending the whole document as an update to the database, will be slower than necessary. I prototyped a refactored version of the example code (shown below) which exhibits the same functional behaviour, but avoids projecting the entire document and uses an in-place update to push changes to the database.&lt;/p&gt;
+&lt;p&gt;eor example, if a current document has tens of embedded previous versions, then projecting the whole document back to the client application, updating part of the document copy and then sending the whole document as an update to the database, will be slower than necessary. I prototyped a refactored version of the example code (shown below) which exhibits the same functional behaviour, but avoids projecting the entire document and uses an in-place update to push changes to the database.&lt;/p&gt;
 
 &lt;p&gt;Don&amp;rsquo;t return all the old versions:&lt;/p&gt;
 

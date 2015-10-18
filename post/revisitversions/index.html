@@ -10,7 +10,7 @@
 
   <title>
     
-      Further Thoughts on How to Track Versions with MongoDB &middot; 
+      Further Thoughts on How to Track Versions with MongoDB &middot; Ask Asya
     
   </title>
 
@@ -37,7 +37,8 @@
 
 <div class="sidebar" id="sidebar">
   <div class="sidebar-item">
-    <p>A reserved <a href="http://jekyllrb.com" target="_blank">Jekyll</a> theme that places the utmost gravity on content with a hidden drawer. Made by <a href="https://twitter.com/mdo" target="_blank">@mdo</a>.</p>
+    <p>Ask Asya &middot; </p>
+    <p>Based on <a href="http://jekyllrb.com" target="_blank">Jekyll</a> theme by <a href="https://twitter.com/mdo" target="_blank">@mdo</a>.</p>
   </div>
 
   <nav class="sidebar-nav">
@@ -79,6 +80,10 @@
 
   <div class="sidebar-item">
     <p>&copy; 2014. All rights reserved.</p>
+       <p>Contact: asya@mongodb.com, <a href="https://twitter.com/asya999">Twitter</a>,
+	  <a href="https://linkedin.com/in/asya999">LinkedIn</a>.
+	      <br>Powered by <a href="http://hugo.spf13.com">Hugo</a>. <a
+				href="/index.xml">RSS Feed</a>.</p>
   </div>
 </div>
 
@@ -87,10 +92,10 @@
     <div class="wrap">
       <div class="masthead">
         <div class="container">
-          <h3 class="masthead-title">
-            <a href="http://asya999.github.io/" title="Home"></a>
+          <h1 class="masthead-title">
+            <a href="http://asya999.github.io/" title="Home"> <img src=/assets/askLeafAsya.png height="128" width="415" alt=Ask&#32;Asya ></a>
             <small></small>
-          </h3>
+          </h1>
         </div>
       </div>
 
@@ -100,7 +105,15 @@
 <div class="post">
   <h1 class="post-title">Further Thoughts on How to Track Versions with MongoDB</h1>
   
-  <span class="post-date">Sun, Sep  7, 2014</span>
+  <span class="post-date">Sun, Sep  7, 2014
+  <span class="share-buttons">
+	<a href="https://www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fasya999.github.io%2fpost%2frevisitversions%2f&t=Further%20Thoughts%20on%20How%20to%20Track%20Versions%20with%20MongoDB" target="_blank" title="Share on Facebook"><i class="fa fa-facebook-square fa-lg"></i></a>
+	<a href="https://twitter.com/intent/tweet?source=http%3a%2f%2fasya999.github.io%2fpost%2frevisitversions%2f&text=Further%20Thoughts%20on%20How%20to%20Track%20Versions%20with%20MongoDB:http%3a%2f%2fasya999.github.io%2fpost%2frevisitversions%2f" target="_blank" title="Tweet"><i class="fa fa-twitter-square fa-lg"></i></a>
+	<a href="https://plus.google.com/share?url=http%3a%2f%2fasya999.github.io%2fpost%2frevisitversions%2f" target="_blank" title="Share on Google+"><i class="fa fa-google-plus-square fa-lg"></i></a>
+	<a href="http://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2fasya999.github.io%2fpost%2frevisitversions%2f&title=Further%20Thoughts%20on%20How%20to%20Track%20Versions%20with%20MongoDB&summary=Further%20Thoughts%20on%20How%20to%20Track%20Versions%20with%20MongoDB&source=http%3a%2f%2fasya999.github.io%2fpost%2frevisitversions%2f" target="_blank" title="Share on LinkedIn"><i class="fa fa-linkedin-square fa-lg"></i></a>
+</span>
+
+  </span>
   
   
 
@@ -114,7 +127,7 @@ Asya outlined various approaches for preserving historical versions of records f
 <p>The presented ‘compare-and-swap&rsquo; example code, to generate a new version and update version history, is very effective at ensuring consistency of versions in a thread-safe manner. However, I felt that there was scope
 to reduce the update latency which will be particularly high when a document has grown, with many previous versions embedded.</p>
 
-<p>For example, if a current document has tens of embedded previous versions, then projecting the whole document back to the client application, updating part of the document copy and then sending the whole document as an update to the database, will be slower than necessary. I prototyped a refactored version of the example code (shown below) which exhibits the same functional behaviour, but avoids projecting the entire document and uses an in-place update to push changes to the database.</p>
+<p>eor example, if a current document has tens of embedded previous versions, then projecting the whole document back to the client application, updating part of the document copy and then sending the whole document as an update to the database, will be slower than necessary. I prototyped a refactored version of the example code (shown below) which exhibits the same functional behaviour, but avoids projecting the entire document and uses an in-place update to push changes to the database.</p>
 
 <p>Don&rsquo;t return all the old versions:</p>
 
@@ -247,8 +260,22 @@ increases over time, the update latency for adding a new version remains roughly
 
 <p><img src="https://dl.dropboxusercontent.com/u/35111849/table.png" alt="Updated Table of Tradeoffs" />.</p>
 
-</div>
+  
+  
+                    <hr>
+                  <h2>Comments</h2>
+                  <div id="disqus_thread"></div>
+                  <script type="text/javascript">
+                       (function() {
+                           var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					  dsq.src = '//askasya.disqus.com/embed.js';
+                           (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                       })();
+                   </script>
 
+  
+  
+</div>
       </div>
     </div>
 
