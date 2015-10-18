@@ -29,9 +29,11 @@
 &lt;h5 id=&#34;tag-aware-sharding-feature:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;Tag aware sharding feature&lt;/h5&gt;
 
 &lt;p&gt;Tags associate specific ranges of shard key values with specific shards for use in managing deployment patterns.
-What this means is that in your sharded cluster you can assign zero, one or more tags (or labels) to each shard.  Then you can assign ranges of shard key values in various sharded collections to these tags.  The balancer then moves the appropriate chunks to appropriate shards to keep things the way you &amp;ldquo;assigned&amp;rdquo; them.
-#####The Balancer: Diversion into migration details
-The whole balancing and migrations process is worthy of its own separate write-up but for now, I will simplify most of it and point out at the high level that the balancer is a thread that runs on mongos that wakes up periodically and checks (1) if it should be running (2) if there is anything for it to do.†  For the balancer &amp;ldquo;something to do&amp;rdquo; is always about moving chunks between shards.  The priorities that it considers when deciding which chunks need to be moved are as follows:&lt;/p&gt;
+What this means is that in your sharded cluster you can assign zero, one or more tags (or labels) to each shard.  Then you can assign ranges of shard key values in various sharded collections to these tags.  The balancer then moves the appropriate chunks to appropriate shards to keep things the way you &amp;ldquo;assigned&amp;rdquo; them.&lt;/p&gt;
+
+&lt;h5 id=&#34;the-balancer-diversion-into-migration-details:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;The Balancer: Diversion into migration details&lt;/h5&gt;
+
+&lt;p&gt;The whole balancing and migrations process is worthy of its own separate write-up but for now, I will simplify most of it and point out at the high level that the balancer is a thread that runs on mongos that wakes up periodically and checks (1) if it should be running (2) if there is anything for it to do.†  For the balancer &amp;ldquo;something to do&amp;rdquo; is always about moving chunks between shards.  The priorities that it considers when deciding which chunks need to be moved are as follows:&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;p&gt;draining shards: if one of the shards is &amp;ldquo;draining&amp;rdquo; - i.e. you plan to decommission it - then this will always be the first priority for all migrations unless it has no data left.&lt;/p&gt;&lt;/li&gt;
@@ -49,8 +51,9 @@ The whole balancing and migrations process is worthy of its own separate write-u
 
 &lt;p&gt;That&amp;rsquo;s all fine and good, but I&amp;rsquo;ll show you that it doesn&amp;rsquo;t have to be nearly that complex.&lt;/p&gt;
 
-&lt;p&gt;#####How you can use tags to designate which shards a sharded collection can use.
-Let&amp;rsquo;s walk through an example.   I have three shards in my test cluster:&lt;/p&gt;
+&lt;h5 id=&#34;how-you-can-use-tags-to-designate-which-shards-a-sharded-collection-can-use:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;How you can use tags to designate which shards a sharded collection can use.&lt;/h5&gt;
+
+&lt;p&gt;Let&amp;rsquo;s walk through an example.   I have three shards in my test cluster:&lt;/p&gt;
 
 &lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; db.getSiblingDB(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;config&amp;quot;&lt;/span&gt;).shards.find()
     { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0000&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30000&amp;quot;&lt;/span&gt; }

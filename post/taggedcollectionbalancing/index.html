@@ -115,9 +115,11 @@
 <h5 id="tag-aware-sharding-feature:1bc8c2f688d199692ef36348e0b0b4a8">Tag aware sharding feature</h5>
 
 <p>Tags associate specific ranges of shard key values with specific shards for use in managing deployment patterns.
-What this means is that in your sharded cluster you can assign zero, one or more tags (or labels) to each shard.  Then you can assign ranges of shard key values in various sharded collections to these tags.  The balancer then moves the appropriate chunks to appropriate shards to keep things the way you &ldquo;assigned&rdquo; them.
-#####The Balancer: Diversion into migration details
-The whole balancing and migrations process is worthy of its own separate write-up but for now, I will simplify most of it and point out at the high level that the balancer is a thread that runs on mongos that wakes up periodically and checks (1) if it should be running (2) if there is anything for it to do.†  For the balancer &ldquo;something to do&rdquo; is always about moving chunks between shards.  The priorities that it considers when deciding which chunks need to be moved are as follows:</p>
+What this means is that in your sharded cluster you can assign zero, one or more tags (or labels) to each shard.  Then you can assign ranges of shard key values in various sharded collections to these tags.  The balancer then moves the appropriate chunks to appropriate shards to keep things the way you &ldquo;assigned&rdquo; them.</p>
+
+<h5 id="the-balancer-diversion-into-migration-details:1bc8c2f688d199692ef36348e0b0b4a8">The Balancer: Diversion into migration details</h5>
+
+<p>The whole balancing and migrations process is worthy of its own separate write-up but for now, I will simplify most of it and point out at the high level that the balancer is a thread that runs on mongos that wakes up periodically and checks (1) if it should be running (2) if there is anything for it to do.†  For the balancer &ldquo;something to do&rdquo; is always about moving chunks between shards.  The priorities that it considers when deciding which chunks need to be moved are as follows:</p>
 
 <ul>
 <li><p>draining shards: if one of the shards is &ldquo;draining&rdquo; - i.e. you plan to decommission it - then this will always be the first priority for all migrations unless it has no data left.</p></li>
@@ -135,8 +137,9 @@ The whole balancing and migrations process is worthy of its own separate write-u
 
 <p>That&rsquo;s all fine and good, but I&rsquo;ll show you that it doesn&rsquo;t have to be nearly that complex.</p>
 
-<p>#####How you can use tags to designate which shards a sharded collection can use.
-Let&rsquo;s walk through an example.   I have three shards in my test cluster:</p>
+<h5 id="how-you-can-use-tags-to-designate-which-shards-a-sharded-collection-can-use:1bc8c2f688d199692ef36348e0b0b4a8">How you can use tags to designate which shards a sharded collection can use.</h5>
+
+<p>Let&rsquo;s walk through an example.   I have three shards in my test cluster:</p>
 
 <p><div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%">    tagdb<span style="border: 1px solid #FF0000">@</span>mongos(<span style="color: #40a070">2.6</span>.<span style="color: #40a070">0</span>) <span style="color: #666666">&gt;</span> db.getSiblingDB(<span style="color: #4070a0">&quot;config&quot;</span>).shards.find()
     { <span style="color: #4070a0">&quot;_id&quot;</span> <span style="color: #666666">:</span> <span style="color: #4070a0">&quot;shard0000&quot;</span>, <span style="color: #4070a0">&quot;host&quot;</span> <span style="color: #666666">:</span> <span style="color: #4070a0">&quot;localhost:30000&quot;</span> }
