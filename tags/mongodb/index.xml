@@ -161,6 +161,54 @@ tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(
         </item>
       
     
+      
+        <item>
+          <title>Why shouldn&#39;t I embed large arrays in my documents?</title>
+          <link>http://asya999.github.io/post/largeembeddedarrays/</link>
+          <pubDate>Thu, 13 Feb 2014 00:00:00 UTC</pubDate>
+          <author></author>
+          <guid>http://asya999.github.io/post/largeembeddedarrays/</guid>
+          <description>
+
+&lt;h3 id=&#34;question:b03b8c475184befd19c41be5b8f8950d&#34;&gt;Question:&lt;/h3&gt;
+
+&lt;p&gt;Why shouldn&amp;rsquo;t I embed large arrays in my documents?  It seems incredibly convenient and intuitive but I&amp;rsquo;ve heard there are performance penalties.  What causes them and how do I know if I should avoid using arrays?&lt;/p&gt;
+
+&lt;h3 id=&#34;answer:b03b8c475184befd19c41be5b8f8950d&#34;&gt;Answer:&lt;/h3&gt;
+
+&lt;p&gt;Arrays are wonderful when used properly.  When talking about performance, the main reason to be wary of arrays is when they grow without bounds.&lt;/p&gt;
+
+&lt;p&gt;Imagine you create a document:
+&lt;pre class=&#34;prettyprint&#34;&gt;
+{ user: &amp;ldquo;Asya&amp;rdquo;,
+  email: &amp;ldquo;asya@mongodb.com&amp;rdquo;,
+  twitter: [&amp;ldquo;@asya999&amp;rdquo;, &amp;ldquo;@ask-asya&amp;rdquo;]
+}
+&lt;/pre&gt;&lt;/p&gt;
+
+&lt;p&gt;Notice that twitter field is an array.  That&amp;rsquo;s perfectly fine and excellent - we don&amp;rsquo;t want to create a separate collection like we&amp;rsquo;d have to do in relational model, just because a person might have multiple twitter accounts/handles.&lt;/p&gt;
+
+&lt;p&gt;Now that the document has been created, a certain amount of space has been allocated for it.  If we continue growing the document by adding new fields to it, it will have to be moved and a larger allocation will be made for it because MongoDB dynamically tracks how often documents outgrow their allocation and tries to allocate more space for newly written or moved documents to account for the future growth.&lt;/p&gt;
+
+&lt;p&gt;Compare the cost of an update to a document when you can make an in-place change, versus rewriting the entire document somewhere else.  First, instead of just rewriting part of a document &amp;ldquo;in place&amp;rdquo; we have to allocate new space for it.  We have to rewrite the entire document, put the space that it used to occupy on the free list so that it can get re-used, and then repoint all the index entries that used to point to the old document location to the new location.  All of this must be done atomically, so your single write suddenly took a bit longer than a few microseconds that it used to take when the document didn&amp;rsquo;t have to move.&lt;/p&gt;
+
+&lt;p&gt;Now imagine what happens if you add a new array field to the document representing something that&amp;rsquo;s not naturally bound the way someone&amp;rsquo;s twitter handles or shipping addresses would be bound.  What if we want to embed into this document every time I perform some activity, let&amp;rsquo;s say click on a like button, or make a comment on someone&amp;rsquo;s blog?&lt;/p&gt;
+
+&lt;p&gt;First of all, we have to consider why we would want to do such a thing.  Normally, I would advise people to embed things that they always want to get back when they are fetching this document.  The flip side of this is that you don&amp;rsquo;t want to embed things in the document that you don&amp;rsquo;t want to get back with it.&lt;/p&gt;
+
+&lt;p&gt;If you embed activity I perform into the document, it&amp;rsquo;ll work great at first because all of my activity is right there and with a single read you can get back everything you might want to show me: &amp;ldquo;you recently clicked on this and here are your last two comments&amp;rdquo; but what happens after six months go by and I don&amp;rsquo;t care about things I did a long time ago and you don&amp;rsquo;t want to show them to me unless I specifically go to look for some old activity?&lt;/p&gt;
+
+&lt;p&gt;First, you&amp;rsquo;ll end up returning bigger and bigger document and caring about smaller and smaller portion of it.  But you can use projection to only return some of the array, the real pain is that the document on disk will get bigger and it will still all be read even if you&amp;rsquo;re only going to return part of it to the end user, but since my activity is not going to stop as long as I&amp;rsquo;m active, the document will continue growing and growing.&lt;/p&gt;
+
+&lt;p&gt;The most obvious problem with this is eventually you&amp;rsquo;ll hit the 16MB document limit, but that&amp;rsquo;s not at all what you should be concerned about.  A document that continuously grows will incur higher and higher cost every time it has to get relocated on disk, and even if you take steps to mitigate the effects of fragmentation, your writes will overall be unnecessarily long, impacting overall performance of your entire application.&lt;/p&gt;
+
+&lt;p&gt;There is one more thing that you can do that will completely kill your application&amp;rsquo;s performance and that&amp;rsquo;s to index this ever-increasing array.  What that means is that every single time the document with this array is relocated, the number of index entries that need to be updated is directly proportional to the number of indexed values in that document, and the bigger the array, the larger that number will be.&lt;/p&gt;
+
+&lt;p&gt;I don&amp;rsquo;t want this to scare you from using arrays when they are a good fit for the data model - they are a powerful feature of the document database data model, but like all powerful tools, it needs to be used in the right circumstances and it should be used with care.&lt;/p&gt;
+</description>
+        </item>
+      
+    
 
   </channel>
 </rss>

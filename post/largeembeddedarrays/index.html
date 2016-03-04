@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      Why shouldn&#39;t I embed large arrays in my documents? &middot; Ask Asya
+    
+  </title>
+
+  
+  <link rel="stylesheet" href="http://asya999.github.io/css/poole.css">
+  <link rel="stylesheet" href="http://asya999.github.io/css/syntax.css">
+  <link rel="stylesheet" href="http://asya999.github.io/css/lanyon.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700|PT+Sans:400">
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://asya999.github.io/assets/apple-touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" href="http://asya999.github.io/assets/favicon.ico">
+
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http://asya999.github.io/atom.xml">
+</head>
+
+
+  <body class="theme-base-0b">
+
+    
+<input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
+
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-item">
+    <p>Ask Asya &middot; </p>
+    <p>Based on <a href="http://jekyllrb.com" target="_blank">Jekyll</a> theme by <a href="https://twitter.com/mdo" target="_blank">@mdo</a>.</p>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="sidebar-nav-item " href="http://asya999.github.io/">Home</a>
+    <a class="sidebar-nav-item " href="http://asya999.github.io/post">Posts</a>
+
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a class="sidebar-nav-item " href="http://asya999.github.io/about/">About</a>
+      
+    
+      
+    
+      
+    
+      
+    
+
+    <a class="sidebar-nav-item" href="http://github.com/asya999/bits-n-pieces">GitHub project</a>
+    <span class="sidebar-nav-item">Currently on master</span>
+  </nav>
+
+  <div class="sidebar-item">
+    <p>&copy; 2014. All rights reserved.</p>
+       <p>Contact: asya@mongodb.com, <a href="https://twitter.com/asya999">Twitter</a>,
+	  <a href="https://linkedin.com/in/asya999">LinkedIn</a>.
+	      <br>Powered by <a href="http://hugo.spf13.com">Hugo</a>. <a
+				href="/index.xml">RSS Feed</a>.</p>
+  </div>
+</div>
+
+
+    
+    <div class="wrap">
+      <div class="masthead">
+        <div class="container">
+          <h1 class="masthead-title">
+            <a href="http://asya999.github.io/" title="Home"> <img src=/assets/askLeafAsya.png height="128" width="415" alt=Ask&#32;Asya ></a>
+            <small></small>
+          </h1>
+        </div>
+      </div>
+
+      <div class="container content">
+
+
+<div class="post">
+  <h1 class="post-title">Why shouldn&#39;t I embed large arrays in my documents?</h1>
+  
+  <span class="post-date">Thu, Feb  13, 2014
+  <span class="share-buttons">
+	<a href="https://www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fasya999.github.io%2fpost%2flargeembeddedarrays%2f&t=Why%20shouldn%27t%20I%20embed%20large%20arrays%20in%20my%20documents%3f" target="_blank" title="Share on Facebook"><i class="fa fa-facebook-square fa-lg"></i></a>
+	<a href="https://twitter.com/intent/tweet?source=http%3a%2f%2fasya999.github.io%2fpost%2flargeembeddedarrays%2f&text=Why%20shouldn%27t%20I%20embed%20large%20arrays%20in%20my%20documents%3f:http%3a%2f%2fasya999.github.io%2fpost%2flargeembeddedarrays%2f" target="_blank" title="Tweet"><i class="fa fa-twitter-square fa-lg"></i></a>
+	<a href="https://plus.google.com/share?url=http%3a%2f%2fasya999.github.io%2fpost%2flargeembeddedarrays%2f" target="_blank" title="Share on Google+"><i class="fa fa-google-plus-square fa-lg"></i></a>
+	<a href="http://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2fasya999.github.io%2fpost%2flargeembeddedarrays%2f&title=Why%20shouldn%27t%20I%20embed%20large%20arrays%20in%20my%20documents%3f&summary=Why%20shouldn%27t%20I%20embed%20large%20arrays%20in%20my%20documents%3f&source=http%3a%2f%2fasya999.github.io%2fpost%2flargeembeddedarrays%2f" target="_blank" title="Share on LinkedIn"><i class="fa fa-linkedin-square fa-lg"></i></a>
+</span>
+
+  </span>
+  
+  
+
+<h3 id="question:b03b8c475184befd19c41be5b8f8950d">Question:</h3>
+
+<p>Why shouldn&rsquo;t I embed large arrays in my documents?  It seems incredibly convenient and intuitive but I&rsquo;ve heard there are performance penalties.  What causes them and how do I know if I should avoid using arrays?</p>
+
+<h3 id="answer:b03b8c475184befd19c41be5b8f8950d">Answer:</h3>
+
+<p>Arrays are wonderful when used properly.  When talking about performance, the main reason to be wary of arrays is when they grow without bounds.</p>
+
+<p>Imagine you create a document:
+<pre class="prettyprint">
+{ user: &ldquo;Asya&rdquo;,
+  email: &ldquo;asya@mongodb.com&rdquo;,
+  twitter: [&ldquo;@asya999&rdquo;, &ldquo;@ask-asya&rdquo;]
+}
+</pre></p>
+
+<p>Notice that twitter field is an array.  That&rsquo;s perfectly fine and excellent - we don&rsquo;t want to create a separate collection like we&rsquo;d have to do in relational model, just because a person might have multiple twitter accounts/handles.</p>
+
+<p>Now that the document has been created, a certain amount of space has been allocated for it.  If we continue growing the document by adding new fields to it, it will have to be moved and a larger allocation will be made for it because MongoDB dynamically tracks how often documents outgrow their allocation and tries to allocate more space for newly written or moved documents to account for the future growth.</p>
+
+<p>Compare the cost of an update to a document when you can make an in-place change, versus rewriting the entire document somewhere else.  First, instead of just rewriting part of a document &ldquo;in place&rdquo; we have to allocate new space for it.  We have to rewrite the entire document, put the space that it used to occupy on the free list so that it can get re-used, and then repoint all the index entries that used to point to the old document location to the new location.  All of this must be done atomically, so your single write suddenly took a bit longer than a few microseconds that it used to take when the document didn&rsquo;t have to move.</p>
+
+<p>Now imagine what happens if you add a new array field to the document representing something that&rsquo;s not naturally bound the way someone&rsquo;s twitter handles or shipping addresses would be bound.  What if we want to embed into this document every time I perform some activity, let&rsquo;s say click on a like button, or make a comment on someone&rsquo;s blog?</p>
+
+<p>First of all, we have to consider why we would want to do such a thing.  Normally, I would advise people to embed things that they always want to get back when they are fetching this document.  The flip side of this is that you don&rsquo;t want to embed things in the document that you don&rsquo;t want to get back with it.</p>
+
+<p>If you embed activity I perform into the document, it&rsquo;ll work great at first because all of my activity is right there and with a single read you can get back everything you might want to show me: &ldquo;you recently clicked on this and here are your last two comments&rdquo; but what happens after six months go by and I don&rsquo;t care about things I did a long time ago and you don&rsquo;t want to show them to me unless I specifically go to look for some old activity?</p>
+
+<p>First, you&rsquo;ll end up returning bigger and bigger document and caring about smaller and smaller portion of it.  But you can use projection to only return some of the array, the real pain is that the document on disk will get bigger and it will still all be read even if you&rsquo;re only going to return part of it to the end user, but since my activity is not going to stop as long as I&rsquo;m active, the document will continue growing and growing.</p>
+
+<p>The most obvious problem with this is eventually you&rsquo;ll hit the 16MB document limit, but that&rsquo;s not at all what you should be concerned about.  A document that continuously grows will incur higher and higher cost every time it has to get relocated on disk, and even if you take steps to mitigate the effects of fragmentation, your writes will overall be unnecessarily long, impacting overall performance of your entire application.</p>
+
+<p>There is one more thing that you can do that will completely kill your application&rsquo;s performance and that&rsquo;s to index this ever-increasing array.  What that means is that every single time the document with this array is relocated, the number of index entries that need to be updated is directly proportional to the number of indexed values in that document, and the bigger the array, the larger that number will be.</p>
+
+<p>I don&rsquo;t want this to scare you from using arrays when they are a good fit for the data model - they are a powerful feature of the document database data model, but like all powerful tools, it needs to be used in the right circumstances and it should be used with care.</p>
+
+  
+  
+                    <hr>
+                  <h2>Comments</h2>
+                  <div id="disqus_thread"></div>
+                  <script type="text/javascript">
+                       (function() {
+                           var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					  dsq.src = '//askasya.disqus.com/embed.js';
+                           (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                       })();
+                   </script>
+
+  
+  
+</div>
+      </div>
+    </div>
+
+    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
+
+  </body>
+</html>
+
