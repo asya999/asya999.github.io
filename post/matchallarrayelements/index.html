@@ -182,22 +182,30 @@ db.coll.find({"$nor":[{"a":{"$elemMatch":{$not:/^str/}}}]})
 
 <p>Now, let&rsquo;s try it on a more complex document structure with a more complex predicate.</p>
 
-<pre><code>{ &quot;b&quot; : [ { &quot;x&quot; : 1, &quot;y&quot; : ISODate(&quot;2016-04-09T00:00:00Z&quot;) }, { &quot;x&quot; : 2, &quot;y&quot; : ISODate(&quot;2016-04-19T00:00:00Z&quot;) }, { &quot;x&quot; : 3, &quot;y&quot; : ISODate(&quot;2015-12-12T00:00:00Z&quot;) } ] }
-{ &quot;b&quot; : [ { &quot;x&quot; : 1, &quot;y&quot; : ISODate(&quot;2016-02-05T12:00:00Z&quot;) }, { &quot;x&quot; : 9, &quot;y&quot; : ISODate(&quot;2016-03-01T00:00:00Z&quot;) }, { &quot;x&quot; : 5, &quot;y&quot; : ISODate(&quot;2015-11-01T00:00:00Z&quot;) } ] }
-{ &quot;b&quot; : [ { &quot;x&quot; : 3, &quot;y&quot; : ISODate(&quot;2016-01-31T12:00:00Z&quot;) }, { &quot;x&quot; : 6, &quot;y&quot; : ISODate(&quot;2016-03-01T00:00:00Z&quot;) }, { &quot;x&quot; : 1, &quot;y&quot; : ISODate(&quot;2016-10-01T00:00:00Z&quot;) } ] }
-{ &quot;b&quot; : [ { &quot;x&quot; : 1, &quot;y&quot; : ISODate(&quot;2016-04-09T00:00:00Z&quot;) }, { &quot;x&quot; : 2, &quot;y&quot; : ISODate(&quot;2016-04-19T00:00:00Z&quot;) }, { &quot;x&quot; : 3, &quot;y&quot; : ISODate(&quot;2016-09-21T00:00:00Z&quot;) } ] }
-{ &quot;b&quot; : [ { &quot;x&quot; : 1, &quot;y&quot; : ISODate(&quot;2016-04-09T00:00:00Z&quot;) }, { &quot;x&quot; : 2, &quot;y&quot; : ISODate(&quot;2016-04-19T00:00:00Z&quot;) }, { &quot;x&quot; : 3, &quot;y&quot; : ISODate(&quot;2016-01-01T00:00:00Z&quot;) }, { &quot;x&quot; : 4, &quot;y&quot; : ISODate(&quot;2016-01-01T00:00:00Z&quot;) } ] }
+<pre><code>{ &quot;b&quot; : [ { &quot;x&quot; : 1, &quot;y&quot; : ISODate(&quot;2016-04-09T00:00:00Z&quot;) }, 
+          { &quot;x&quot; : 2, &quot;y&quot; : ISODate(&quot;2016-04-19T00:00:00Z&quot;) }, 
+          { &quot;x&quot; : 3, &quot;y&quot; : ISODate(&quot;2015-12-12T00:00:00Z&quot;) } ] }
+{ &quot;b&quot; : [ { &quot;x&quot; : 1, &quot;y&quot; : ISODate(&quot;2016-02-05T12:00:00Z&quot;) }, 
+          { &quot;x&quot; : 9, &quot;y&quot; : ISODate(&quot;2016-03-01T00:00:00Z&quot;) }, 
+          { &quot;x&quot; : 5, &quot;y&quot; : ISODate(&quot;2015-11-01T00:00:00Z&quot;) } ] }
+{ &quot;b&quot; : [ { &quot;x&quot; : 3, &quot;y&quot; : ISODate(&quot;2016-01-31T12:00:00Z&quot;) }, 
+          { &quot;x&quot; : 6, &quot;y&quot; : ISODate(&quot;2016-03-01T00:00:00Z&quot;) }, 
+          { &quot;x&quot; : 1, &quot;y&quot; : ISODate(&quot;2016-10-01T00:00:00Z&quot;) } ] }
+{ &quot;b&quot; : [ { &quot;x&quot; : 1, &quot;y&quot; : ISODate(&quot;2016-04-09T00:00:00Z&quot;) }, 
+          { &quot;x&quot; : 2, &quot;y&quot; : ISODate(&quot;2016-04-19T00:00:00Z&quot;) }, 
+          { &quot;x&quot; : 3, &quot;y&quot; : ISODate(&quot;2016-09-21T00:00:00Z&quot;) } ] }
+{ &quot;b&quot; : [ { &quot;x&quot; : 1, &quot;y&quot; : ISODate(&quot;2016-04-09T00:00:00Z&quot;) }, 
+          { &quot;x&quot; : 2, &quot;y&quot; : ISODate(&quot;2016-04-19T00:00:00Z&quot;) }, 
+          { &quot;x&quot; : 3, &quot;y&quot; : ISODate(&quot;2016-01-01T00:00:00Z&quot;) }, 
+          { &quot;x&quot; : 4, &quot;y&quot; : ISODate(&quot;2016-01-01T00:00:00Z&quot;) } ] }
 </code></pre>
 
 <p>If our predicate was just about &ldquo;b.x&rdquo; or just about &ldquo;b.y&rdquo; we would use &ldquo;$elemMatch&rdquo; rather than dotted notation to run a query just like our first example.  To find all documents where &ldquo;b.x&rdquo; is either 1, 2 or 3, we can go through these steps (assume all queries ask in projection just for the field I&rsquo;m querying by):</p>
 
 <pre><code>// find all documents where &quot;b.x&quot; is one of 1,2,3
-db.coll.find({&quot;b.x&quot;:{$in:[1,2,3]}})
+db.coll.find({$nor:[{&quot;b&quot;:{$elemMatch:{&quot;x&quot;:{$nin:[1,2,3]}}}}]},{_id:0,&quot;b.x&quot;:1})
 { &quot;b&quot; : [ { &quot;x&quot; : 1 }, { &quot;x&quot; : 2 }, { &quot;x&quot; : 3 } ] }
-{ &quot;b&quot; : [ { &quot;x&quot; : 1 }, { &quot;x&quot; : 9 }, { &quot;x&quot; : 5 } ] }
-{ &quot;b&quot; : [ { &quot;x&quot; : 3 }, { &quot;x&quot; : 6 }, { &quot;x&quot; : 1 } ] }
 { &quot;b&quot; : [ { &quot;x&quot; : 1 }, { &quot;x&quot; : 2 }, { &quot;x&quot; : 3 } ] }
-{ &quot;b&quot; : [ { &quot;x&quot; : 1 }, { &quot;x&quot; : 2 }, { &quot;x&quot; : 3 }, { &quot;x&quot; : 4 } ] }
 </code></pre>
 
                                <hr>
@@ -218,7 +226,7 @@ db.coll.find({&quot;b.x&quot;:{$in:[1,2,3]}})
         <div class="col-md-3">
             <div class="well well-sm"> 
                 <h4>October 9, 2016<br>
-                <small>1525 words</small></h4>
+                <small>1457 words</small></h4>
                 <hr>
                 <strong>Categories</strong>
                 <ul class="list-unstyled">

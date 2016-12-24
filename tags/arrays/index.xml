@@ -149,22 +149,30 @@ db.coll.find({&#34;$nor&#34;:[{&#34;a&#34;:{&#34;$elemMatch&#34;:{$not:/^str/}}}
 
 &lt;p&gt;Now, let&amp;rsquo;s try it on a more complex document structure with a more complex predicate.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-09T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 2, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-19T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 3, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2015-12-12T00:00:00Z&amp;quot;) } ] }
-{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-02-05T12:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 9, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-03-01T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 5, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2015-11-01T00:00:00Z&amp;quot;) } ] }
-{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 3, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-01-31T12:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 6, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-03-01T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-10-01T00:00:00Z&amp;quot;) } ] }
-{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-09T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 2, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-19T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 3, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-09-21T00:00:00Z&amp;quot;) } ] }
-{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-09T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 2, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-19T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 3, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-01-01T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 4, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-01-01T00:00:00Z&amp;quot;) } ] }
+&lt;pre&gt;&lt;code&gt;{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-09T00:00:00Z&amp;quot;) }, 
+          { &amp;quot;x&amp;quot; : 2, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-19T00:00:00Z&amp;quot;) }, 
+          { &amp;quot;x&amp;quot; : 3, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2015-12-12T00:00:00Z&amp;quot;) } ] }
+{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-02-05T12:00:00Z&amp;quot;) }, 
+          { &amp;quot;x&amp;quot; : 9, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-03-01T00:00:00Z&amp;quot;) }, 
+          { &amp;quot;x&amp;quot; : 5, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2015-11-01T00:00:00Z&amp;quot;) } ] }
+{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 3, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-01-31T12:00:00Z&amp;quot;) }, 
+          { &amp;quot;x&amp;quot; : 6, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-03-01T00:00:00Z&amp;quot;) }, 
+          { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-10-01T00:00:00Z&amp;quot;) } ] }
+{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-09T00:00:00Z&amp;quot;) }, 
+          { &amp;quot;x&amp;quot; : 2, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-19T00:00:00Z&amp;quot;) }, 
+          { &amp;quot;x&amp;quot; : 3, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-09-21T00:00:00Z&amp;quot;) } ] }
+{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-09T00:00:00Z&amp;quot;) }, 
+          { &amp;quot;x&amp;quot; : 2, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-19T00:00:00Z&amp;quot;) }, 
+          { &amp;quot;x&amp;quot; : 3, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-01-01T00:00:00Z&amp;quot;) }, 
+          { &amp;quot;x&amp;quot; : 4, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-01-01T00:00:00Z&amp;quot;) } ] }
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;If our predicate was just about &amp;ldquo;b.x&amp;rdquo; or just about &amp;ldquo;b.y&amp;rdquo; we would use &amp;ldquo;$elemMatch&amp;rdquo; rather than dotted notation to run a query just like our first example.  To find all documents where &amp;ldquo;b.x&amp;rdquo; is either 1, 2 or 3, we can go through these steps (assume all queries ask in projection just for the field I&amp;rsquo;m querying by):&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;// find all documents where &amp;quot;b.x&amp;quot; is one of 1,2,3
-db.coll.find({&amp;quot;b.x&amp;quot;:{$in:[1,2,3]}})
+db.coll.find({$nor:[{&amp;quot;b&amp;quot;:{$elemMatch:{&amp;quot;x&amp;quot;:{$nin:[1,2,3]}}}}]},{_id:0,&amp;quot;b.x&amp;quot;:1})
 { &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1 }, { &amp;quot;x&amp;quot; : 2 }, { &amp;quot;x&amp;quot; : 3 } ] }
-{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1 }, { &amp;quot;x&amp;quot; : 9 }, { &amp;quot;x&amp;quot; : 5 } ] }
-{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 3 }, { &amp;quot;x&amp;quot; : 6 }, { &amp;quot;x&amp;quot; : 1 } ] }
 { &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1 }, { &amp;quot;x&amp;quot; : 2 }, { &amp;quot;x&amp;quot; : 3 } ] }
-{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1 }, { &amp;quot;x&amp;quot; : 2 }, { &amp;quot;x&amp;quot; : 3 }, { &amp;quot;x&amp;quot; : 4 } ] }
 &lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
