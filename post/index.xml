@@ -351,110 +351,6 @@ increases over time, the update latency for adding a new version remains roughly
     </item>
     
     <item>
-      <title>Another Hugo Post</title>
-      <link>http://asya999.github.io/post/another-post/</link>
-      <pubDate>Tue, 02 Sep 2014 00:00:00 UTC</pubDate>
-      <author>Asya Kamsky</author>
-      <guid>http://asya999.github.io/post/another-post/</guid>
-      <description>
-
-&lt;h2 id=&#34;toml-yaml-json-oh-my:fa77c077e3fbd48e440da594382c44fa&#34;&gt;TOML, YAML, JSON &amp;mdash; Oh my!&lt;/h2&gt;
-
-&lt;p&gt;One of the nifty Hugo features we should cover: flexible configuration and front matter formats! This entry has front
-matter in &lt;code&gt;toml&lt;/code&gt;, unlike the last one which used &lt;code&gt;yaml&lt;/code&gt;, and &lt;code&gt;json&lt;/code&gt; is also available if that&amp;rsquo;s your preference.&lt;/p&gt;
-
-&lt;p&gt;The &lt;code&gt;toml&lt;/code&gt; front matter used on this entry:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;+++
-title = &amp;quot;Another Hugo Post&amp;quot;
-description = &amp;quot;Nothing special, but one post is boring.&amp;quot;
-date = &amp;quot;2014-09-02&amp;quot;
-categories = [ &amp;quot;example&amp;quot;, &amp;quot;configuration&amp;quot; ]
-tags = [
-    &amp;quot;example&amp;quot;,
-    &amp;quot;hugo&amp;quot;,
-    &amp;quot;toml&amp;quot;
-]
-+++
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This flexibility also extends to your site&amp;rsquo;s global configuration file. You&amp;rsquo;re free to use any format you prefer::simply
-name the file &lt;code&gt;config.yaml&lt;/code&gt;, &lt;code&gt;config.toml&lt;/code&gt; or &lt;code&gt;config.json&lt;/code&gt;, and go on your merry way.&lt;/p&gt;
-
-&lt;h2 id=&#34;json-example:fa77c077e3fbd48e440da594382c44fa&#34;&gt;JSON Example&lt;/h2&gt;
-
-&lt;p&gt;How would this entry&amp;rsquo;s front matter look in &lt;code&gt;json&lt;/code&gt;? That&amp;rsquo;s easy enough to demonstrate:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;{
-    &amp;quot;title&amp;quot;: &amp;quot;Another Hugo Post&amp;quot;,
-    &amp;quot;description&amp;quot;: &amp;quot;Nothing special, but one post is boring.&amp;quot;,
-    &amp;quot;date&amp;quot;: &amp;quot;2014-09-02&amp;quot;,
-    &amp;quot;categories&amp;quot;: [ &amp;quot;example&amp;quot;, &amp;quot;configuration&amp;quot; ],
-    &amp;quot;tags&amp;quot;: [
-        &amp;quot;example&amp;quot;,
-        &amp;quot;hugo&amp;quot;,
-        &amp;quot;toml&amp;quot;
-    ],
-}
-&lt;/code&gt;&lt;/pre&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Hello Hugo!</title>
-      <link>http://asya999.github.io/post/hello-hugo/</link>
-      <pubDate>Mon, 01 Sep 2014 00:00:00 UTC</pubDate>
-      <author>Asya Kamsky</author>
-      <guid>http://asya999.github.io/post/hello-hugo/</guid>
-      <description>
-
-&lt;p&gt;Hello from Hugo! If you&amp;rsquo;re reading this in your browser, good job! The file &lt;code&gt;content/post/hello-hugo.md&lt;/code&gt; has been
-converted into a complete HTML document by Hugo. Isn&amp;rsquo;t that pretty nifty?&lt;/p&gt;
-
-&lt;h2 id=&#34;a-section:559804b0a39dd16d2d1d1238c597145a&#34;&gt;A Section&lt;/h2&gt;
-
-&lt;p&gt;Here&amp;rsquo;s a simple titled section where you can place whatever information you want.&lt;/p&gt;
-
-&lt;p&gt;You can use inline HTML if you want, but really there&amp;rsquo;s not much that Markdown can&amp;rsquo;t do.&lt;/p&gt;
-
-&lt;h2 id=&#34;showing-off-with-markdown:559804b0a39dd16d2d1d1238c597145a&#34;&gt;Showing off with Markdown&lt;/h2&gt;
-
-&lt;p&gt;A full cheat sheet can be found &lt;a href=&#34;https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet&#34;&gt;here&lt;/a&gt;
-or through &lt;a href=&#34;https://google.com/&#34;&gt;Google&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;There are some &lt;em&gt;easy&lt;/em&gt; examples for styling, though. I can&amp;rsquo;t &lt;strong&gt;emphasize&lt;/strong&gt; that enough.
-Creating &lt;a href=&#34;https://google.com/&#34;&gt;links&lt;/a&gt; or &lt;code&gt;inline code&lt;/code&gt; blocks are very straightforward.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;There are some *easy* examples for styling, though. I can&#39;t **emphasize** that enough.
-Creating [links](https://google.com/) or `inline code` blocks are very straightforward.
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;front-matter-for-fun:559804b0a39dd16d2d1d1238c597145a&#34;&gt;Front Matter for Fun&lt;/h2&gt;
-
-&lt;p&gt;This is the meta data for this post. It is located at the top of the &lt;code&gt;content/post/hello-hugo.md&lt;/code&gt; markdown file.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;---
-title: &amp;quot;Hello Hugo!&amp;quot;
-description: &amp;quot;Saying &#39;Hello&#39; from Hugo&amp;quot;
-date: &amp;quot;2014-09-01&amp;quot;
-categories:
-  - &amp;quot;example&amp;quot;
-  - &amp;quot;hello&amp;quot;
-tags:
-  - &amp;quot;example&amp;quot;
-  - &amp;quot;hugo&amp;quot;
-  - &amp;quot;blog&amp;quot;
----
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This section, called &amp;lsquo;Front Matter&amp;rsquo;, is what tells Hugo about the content in this file: the &lt;code&gt;title&lt;/code&gt; of the item, the
-&lt;code&gt;description&lt;/code&gt;, and the &lt;code&gt;date&lt;/code&gt; it was posted. In our example, we&amp;rsquo;ve added two custom bits of data too. The &lt;code&gt;categories&lt;/code&gt; and
-&lt;code&gt;tags&lt;/code&gt; sections are used in this example for indexing/grouping content. You will learn more about what that means by
-examining the code in this example and through reading the Hugo &lt;a href=&#34;http://gohugo.io/overview/introduction&#34;&gt;documentation&lt;/a&gt;.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
       <title>Social Status Feed in MongoDB</title>
       <link>http://asya999.github.io/post/socialstatusfeed/</link>
       <pubDate>Wed, 27 Aug 2014 00:00:00 UTC</pubDate>
@@ -1513,6 +1409,507 @@ For each documentId, there is only one document which represented its current st
  &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:8efa43574f94dcc0d1d4b4a79faa202f:2&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>How to Balance Collections Across Your Sharded Cluster</title>
+      <link>http://asya999.github.io/post/taggedcollectionbalancing/</link>
+      <pubDate>Tue, 29 Apr 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/taggedcollectionbalancing/</guid>
+      <description>
+
+&lt;h3 id=&#34;question:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;Question:&lt;/h3&gt;
+
+&lt;p&gt;Is it possible to use &lt;a href=&#34;http://docs.mongodb.org/manual/core/tag-aware-sharding/&#34;&gt;&amp;ldquo;Tag aware sharding&amp;rdquo;&lt;/a&gt;  feature without having to use a special shard key?  The example in the tutorial makes it look like we would have to change our shard key to have a prefix value that we can define tag ranges on but we&amp;rsquo;re already sharded.  We have many collections in this database and we want to limit each collection to a subset of the shards so we can isolate the busy ones from each other.&lt;/p&gt;
+
+&lt;h3 id=&#34;answer:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;Answer:&lt;/h3&gt;
+
+&lt;p&gt;Yes, that is absolutely possible, and it&amp;rsquo;s one of the cool capabilities of tag aware sharding.   A quick review of the feature.&lt;/p&gt;
+
+&lt;h5 id=&#34;tag-aware-sharding-feature:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;Tag aware sharding feature&lt;/h5&gt;
+
+&lt;p&gt;Tags associate specific ranges of shard key values with specific shards for use in managing deployment patterns.
+What this means is that in your sharded cluster you can assign zero, one or more tags (or labels) to each shard.  Then you can assign ranges of shard key values in various sharded collections to these tags.  The balancer then moves the appropriate chunks to appropriate shards to keep things the way you &amp;ldquo;assigned&amp;rdquo; them.&lt;/p&gt;
+
+&lt;h5 id=&#34;the-balancer-diversion-into-migration-details:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;The Balancer: Diversion into migration details&lt;/h5&gt;
+
+&lt;p&gt;The whole balancing and migrations process is worthy of its own separate write-up but for now, I will simplify most of it and point out at the high level that the balancer is a thread that runs on mongos that wakes up periodically and checks (1) if it should be running (2) if there is anything for it to do.†  For the balancer &amp;ldquo;something to do&amp;rdquo; is always about moving chunks between shards.  The priorities that it considers when deciding which chunks need to be moved are as follows:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;draining shards: if one of the shards is &amp;ldquo;draining&amp;rdquo; - i.e. you plan to decommission it - then this will always be the first priority for all migrations unless it has no data left.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;tagged shards: if any chunks are on the &amp;ldquo;wrong&amp;rdquo; tagged shard for  its range, then it has to be moved to a &amp;ldquo;correct&amp;rdquo; shard.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;balance the remaining chunks: if the shard with the most chunks has nine+ more chunks than the shard with the fewest chunks, then the balancer will move chunks to try to keep things in balance.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h5 id=&#34;how-do-you-tag-shards-and-ranges:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;How do you tag shards and ranges?&lt;/h5&gt;
+
+&lt;p&gt;All you have to do for tagging to work is mark some shards with &amp;ldquo;tags&amp;rdquo; and specify which ranges of shard key values will be associated with that tag.   The relevant commands are &lt;code&gt;sh.addTag(&amp;quot;shardName&amp;quot;,&amp;quot;tagName&amp;quot;)&lt;/code&gt; and &lt;code&gt;sh.addTagRange(&amp;quot;namespace&amp;quot;, { shardKey: minValue }, { shardKey: maxValue }, &amp;quot;tagName&amp;quot;)&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;The MongoDB docs have a great tutorial that you always see used as an example for tag aware sharding - your shard key has to include a prefix field that can be used to figure out which geographical region the user is in, and the range of shard key values that starts with certain regions will be associated with shards in that data center.&lt;/p&gt;
+
+&lt;p&gt;That&amp;rsquo;s all fine and good, but I&amp;rsquo;ll show you that it doesn&amp;rsquo;t have to be nearly that complex.&lt;/p&gt;
+
+&lt;h5 id=&#34;how-you-can-use-tags-to-designate-which-shards-a-sharded-collection-can-use:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;How you can use tags to designate which shards a sharded collection can use.&lt;/h5&gt;
+
+&lt;p&gt;Let&amp;rsquo;s walk through an example.   I have three shards in my test cluster:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; db.getSiblingDB(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;config&amp;quot;&lt;/span&gt;).shards.find()
+    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0000&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30000&amp;quot;&lt;/span&gt; }
+    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30001&amp;quot;&lt;/span&gt; }
+    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0002&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30002&amp;quot;&lt;/span&gt; }
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;I will add two tags, each to two shards.  Let&amp;rsquo;s say that shards 0000 and 0001 have a lot of RAM, and shards 0001 and 0002 have very fast flash storage and I plan to distribute my data to take advantage of the different physical resources:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0000&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt;)
+    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0002&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt;)
+    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt;)
+    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt;)
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Now that I tagged my shards, I will add tag ranges to two different collections.  Note, I don&amp;rsquo;t have these collections yet, and I haven&amp;rsquo;t even sharded them yet, but I want to have the tags ready for them when they get created:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addTagRange(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigidx&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MinKey},{_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MaxKey},&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt;);
+    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addTagRange(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigdata&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MinKey},{_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MaxKey},&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt;);
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;I have a collection with big indexes (called bigidx) that I want to constrain only to shards tagged &amp;ldquo;HI_MEM&amp;rdquo; and I have another collection with a lot of data (called bigdata) that I want to keep on shards that have flash storage because I know the data will be read from disk a lot.  Note that I only needed to know what I will be using as my shard key, and I specified MinKey to MaxKey as my range - that means &lt;em&gt;all&lt;/em&gt; of the chunks!&lt;/p&gt;
+
+&lt;p&gt;I will now shard the collections and take a look at how things are shaping up:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.enableSharding(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb&amp;quot;&lt;/span&gt;)
+{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ok&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
+tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.shardCollection(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigdata&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;hashed&amp;quot;&lt;/span&gt;})
+{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;collectionsharded&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigdata&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ok&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
+tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.shardCollection(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigidx&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;hashed&amp;quot;&lt;/span&gt;})
+{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;collectionsharded&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigidx&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ok&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
+tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.status()
+&lt;span style=&#34;color: #666666&#34;&gt;---&lt;/span&gt; Sharding Status &lt;span style=&#34;color: #666666&#34;&gt;---&lt;/span&gt;
+  sharding version&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
+     &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
+     &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;version&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;4&lt;/span&gt;,
+     &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;minCompatibleVersion&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;4&lt;/span&gt;,
+     &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;currentVersion&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;5&lt;/span&gt;,
+     &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;clusterId&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; ObjectId(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;535be5d7d5274545e9d01426&amp;quot;&lt;/span&gt;)
+  }
+  shards&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
+     {  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0000&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30000&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tags&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt; ] }
+     {  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30001&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tags&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt; ] }
+     {  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0002&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30002&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tags&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt; ] }
+  databases&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
+     {  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;admin&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;partitioned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;primary&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;config&amp;quot;&lt;/span&gt; }
+     {  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;partitioned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;primary&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt; }
+         tagdb.bigdata
+             shard key&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;hashed&amp;quot;&lt;/span&gt; }
+             chunks&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
+                 shard0001    &lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;
+                 shard0002    &lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;
+             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
+             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0002
+             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
+             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
+             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0002
+             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0002
+              tag&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; FLASH  { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } }
+         tagdb.bigidx
+             shard key&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;hashed&amp;quot;&lt;/span&gt; }
+             chunks&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
+                 shard0000    &lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;
+                 shard0001    &lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;
+             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0000
+             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0000
+             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
+             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
+             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0000
+             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
+              tag&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; HI_MEM  { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } }
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;h5 id=&#34;how-you-can-use-tags-to-make-collection-migrate-from-one-shard-to-another:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;How you can use tags to make collection migrate from one shard to another&lt;/h5&gt;
+
+&lt;p&gt;What if you have a number of unsharded collections in your sharded database and you don&amp;rsquo;t want for all of them to hang out on the primary shard for this DB?   Well, you might need unique tags for each shard, but then you can do this to move collection one to &lt;code&gt;shard0001&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0002&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard2&amp;quot;&lt;/span&gt;)
+tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addTagRange(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.one&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MinKey},{_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MaxKey},&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard2&amp;quot;&lt;/span&gt;)
+tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.shardCollection(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.one&amp;quot;&lt;/span&gt;,{_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;})
+{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;collectionsharded&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.one&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ok&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
+tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.status()
+   ...
+      tagdb.one
+         shard key&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
+         chunks&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
+             shard0002    &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;
+         { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0002
+          tag&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard2  { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } }
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;If we peek inside the config database, we should see our tags in the &lt;code&gt;config.tags&lt;/code&gt; collection, our shard ranges attached to chunks in &lt;code&gt;config.chunks&lt;/code&gt; and we can find evidence of the chunk moves due to tag policy in the &lt;code&gt;config.changelog&lt;/code&gt; collection, as well as the &lt;code&gt;mongos&lt;/code&gt; and &lt;code&gt;mongod&lt;/code&gt; log files.&lt;/p&gt;
+
+&lt;p&gt;To summarize: tag aware sharding can be easily used to distribute a single collection a particular way across all shards,  to isolate whole collections on a subset of shards, and even to move an entire collection from one shard to another.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;† This is definitely a gross simplification of all the steps the balancer goes through - look for a more detailed write-up demystifying the inner workings of migrations some time soon.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>How to Model Dynamic Attributes</title>
+      <link>http://asya999.github.io/post/dynamicattributes/</link>
+      <pubDate>Tue, 15 Apr 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/dynamicattributes/</guid>
+      <description>
+
+&lt;h3 id=&#34;question:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Question:&lt;/h3&gt;
+
+&lt;p&gt;I&amp;rsquo;ve heard that MongoDB can be effectively used to model &amp;ldquo;dynamic attributes&amp;rdquo; - where you don&amp;rsquo;t know up front all the different attributes and not all attributes apply to all items.  Can you describe how that can be done, and in particular how it can be effectively indexed?&lt;/p&gt;
+
+&lt;h3 id=&#34;answer:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Answer:&lt;/h3&gt;
+
+&lt;h5 id=&#34;the-problem:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;The problem:&lt;/h5&gt;
+
+&lt;p&gt;Imagine you are building an e-commerce site and you aspire to be as big as amazon.com some day, which means you will be selling many different types of products.  It&amp;rsquo;s easy to see that there will be sets of attributes that will only apply to some of the products you sell.&lt;/p&gt;
+
+&lt;p&gt;Product document may look like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  SKU: &amp;quot;XRD12349&amp;quot;,
+  type: &amp;quot;book&amp;quot;,
+  title: &amp;quot;MongoDB, The Definitive Guide&amp;quot;,
+  ISBN: &amp;quot;xxx&amp;quot;,
+  author: [ &amp;quot;Kristina Chodorow&amp;quot;, &amp;quot;Mike Dieroff&amp;quot;],
+  genre: [&amp;quot;computing&amp;quot;, &amp;quot;databases&amp;quot;]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;or this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  SKU: &amp;quot;Y32944EW&amp;quot;,
+  type: &amp;quot;shoes&amp;quot;,
+  manufacturer: &amp;quot;ShoesForAll&amp;quot;,
+  color: &amp;quot;blue&amp;quot;,
+  style: &amp;quot;comfort&amp;quot;,
+  size: &amp;quot;7B&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can see how it would be extremely challenging to manage a collection that has an incredibly wide variety of document &amp;ldquo;shapes&amp;rdquo;.  Now, while some people call MongoDB &amp;ldquo;schemaless&amp;rdquo; I am not a fan of this designation.  The schema of each document is defined by the document itself.  To be able to build a robust applications you need to decide what the schema of the documents will be, otherwise your application will spend as much time examining the documents to learn their schema as providing actual functionality.&lt;/p&gt;
+
+&lt;h5 id=&#34;possible-solutions:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Possible solutions:&lt;/h5&gt;
+
+&lt;p&gt;One way to index the attributes you want to be able to search by is by creating an index on each such attribute in a schema like the one above.  This is not practical, even if you use &lt;a href=&#34;http://docs.mongodb.org/manual/core/index-sparse/&#34;&gt;&amp;ldquo;sparse&amp;rdquo; indexes&lt;/a&gt; (since many attributes will be set only on a small subset of the products), because you may end up with dozens, if not hundreds of indexes.  In addition, every time a new attribute is introduced, a new index has to be added on the collection.  Not very practical.&lt;/p&gt;
+
+&lt;p&gt;The other solution, which is a nice generalization of storing attributes which are numerous and not known up-front, is to use an array of key-value pairs.&lt;/p&gt;
+
+&lt;p&gt;Our two sample documents might then become:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  SKU: &amp;quot;XRD12349&amp;quot;,
+  type: &amp;quot;book&amp;quot;,
+  attr: [
+      { &amp;quot;k&amp;quot;: &amp;quot;title&amp;quot;, 
+        &amp;quot;v&amp;quot;: &amp;quot;MongoDB, The Definitive Guide, 1st Edition&amp;quot;
+      },
+      { &amp;quot;k&amp;quot;: &amp;quot;ISBN&amp;quot;,
+        &amp;quot;v&amp;quot;: &amp;quot;xxx&amp;quot;
+      },
+      { &amp;quot;k&amp;quot;: &amp;quot;author&amp;quot;,
+        &amp;quot;v&amp;quot;: &amp;quot;Kristina Chodorow&amp;quot;
+      },
+      { &amp;quot;k&amp;quot;: &amp;quot;author&amp;quot;,
+        &amp;quot;v&amp;quot;: &amp;quot;Mike Dieroff&amp;quot;
+      },
+      { &amp;quot;k&amp;quot;: &amp;quot;genre&amp;quot;,
+        &amp;quot;v&amp;quot;: [&amp;quot;computing&amp;quot;, &amp;quot;databases&amp;quot;] 
+      }
+  ]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;and&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  SKU: &amp;quot;Y32944EW&amp;quot;,
+  type: &amp;quot;shoes&amp;quot;,
+  attr: [
+      { &amp;quot;k&amp;quot;: &amp;quot;manufacturer&amp;quot;, 
+        &amp;quot;v&amp;quot;: &amp;quot;ShoesForAll&amp;quot;,
+      },
+      { &amp;quot;k&amp;quot;: &amp;quot;color&amp;quot;, 
+        &amp;quot;v&amp;quot;: &amp;quot;blue&amp;quot;,
+      },
+      { &amp;quot;k&amp;quot;: &amp;quot;style&amp;quot;, 
+        &amp;quot;v&amp;quot;: &amp;quot;comfort&amp;quot;,
+      },
+      { &amp;quot;k&amp;quot;: &amp;quot;size&amp;quot;, 
+        &amp;quot;v&amp;quot;: &amp;quot;7B&amp;quot;
+      }
+  ]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that for an attribute that can have multiple values you have a choice of storing it as an array in a single &amp;ldquo;key&amp;rdquo; or you can repeat keys that can have more than one value.&lt;/p&gt;
+
+&lt;p&gt;Now we can index all of these attribute values with the following:&lt;/p&gt;
+
+&lt;pre class=&#34;prettyprint lang-js&#34;&gt;
+PRIMARY(2.6.0) &gt; db.products.ensureIndex( { &#34;attr.k&#34;:1, &#34;attr.v&#34;:1 } )
+&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s take a look at how the queries will execute and use the index by using the &amp;ldquo;explain()&amp;rdquo; helper in MongoDB shell.  When filtering based on attribute key-value pair, remember to use the &lt;code&gt;$elemMatch&lt;/code&gt; operator to indicate that both conditions must be satisfied by the same element of the array.&lt;/p&gt;
+
+&lt;pre class=&#34;prettyprint lang-js&#34;&gt;
+PRIMARY(2.6.0) &gt; db.products.find( 
+                                { &#34;attr&#34;: { &#34;$elemMatch&#34; : { &#34;k&#34;:&#34;size&#34;, &#34;v&#34;:&#34;8B&#34; } }
+                     } ).explain()
+{
+    &#34;cursor&#34; : &#34;BtreeCursor attr.k_1_attr.v_1&#34;,
+    &#34;isMultiKey&#34; : true,
+    &#34;n&#34; : 104,
+    &#34;nscannedObjects&#34; : 104,
+    &#34;nscanned&#34; : 104,
+    &#34;nscannedObjectsAllPlans&#34; : 104,
+    &#34;nscannedAllPlans&#34; : 104,
+    &#34;scanAndOrder&#34; : false,
+    &#34;indexOnly&#34; : false,
+    &#34;nYields&#34; : 0,
+    &#34;nChunkSkips&#34; : 0,
+    &#34;millis&#34; : 2,
+    &#34;indexBounds&#34; : {
+        &#34;attr.k&#34; : [
+            [
+                &#34;size&#34;,
+                &#34;size&#34;
+            ]
+        ],
+        &#34;attr.v&#34; : [
+            [
+                &#34;8B&#34;,
+                &#34;8B&#34;
+            ]
+        ]
+    },
+    &#34;server&#34; : &#34;asyasmacbook.local:27017&#34;,
+    &#34;filterSet&#34; : false
+}
+&lt;/pre&gt;
+
+&lt;pre class=&#34;prettyprint lang-js&#34;&gt;
+PRIMARY(2.6.0) &gt; db.products.find(
+                  { &#34;attr&#34; :  { &#34;$elemMatch&#34; : { &#34;k&#34;:&#34;color&#34;, &#34;v&#34;:&#34;blue&#34;}}
+              } ).explain()
+{
+    &#34;cursor&#34; : &#34;BtreeCursor attr.k_1_attr.v_1&#34;,
+    &#34;isMultiKey&#34; : true,
+    &#34;n&#34; : 98,
+    &#34;nscannedObjects&#34; : 98,
+    &#34;nscanned&#34; : 98,
+    &#34;nscannedObjectsAllPlans&#34; : 98,
+    &#34;nscannedAllPlans&#34; : 98,
+    &#34;scanAndOrder&#34; : false,
+    &#34;indexOnly&#34; : false,
+    &#34;nYields&#34; : 0,
+    &#34;nChunkSkips&#34; : 0,
+    &#34;millis&#34; : 0,
+    &#34;indexBounds&#34; : {
+        &#34;attr.k&#34; : [
+            [
+                &#34;color&#34;,
+                &#34;color&#34;
+            ]
+        ],
+        &#34;attr.v&#34; : [
+            [
+                &#34;blue&#34;,
+                &#34;blue&#34;
+            ]
+        ]
+    },
+    &#34;server&#34; : &#34;asyasmacbook.local:27017&#34;,
+    &#34;filterSet&#34; : false
+}
+&lt;/pre&gt;
+
+&lt;p&gt;Now I&amp;rsquo;ll use both criteria, and I&amp;rsquo;ll add another one for attribute &amp;ldquo;style&amp;rdquo; - since I want to match only when &lt;em&gt;all&lt;/em&gt; are true (rather than when any is true) I will use the &lt;code&gt;$all&lt;/code&gt; operator.  Passing &amp;ldquo;true&amp;rdquo; as an argument to explain will show all considered plans and not just the winning plan.&lt;/p&gt;
+
+&lt;pre class=&#34;prettyprint lang-js&#34;&gt;
+PRIMARY(2.6.0) &gt; db.products.find( { &#34;attr&#34; : { &#34;$all&#34; : [ 
+                    { &#34;$elemMatch&#34; : { &#34;k&#34;:&#34;style&#34;, &#34;v&#34;:&#34;comfort&#34; } }, 
+                    { &#34;$elemMatch&#34; : { &#34;k&#34;:&#34;color&#34;, &#34;v&#34;:&#34;blue&#34; } },
+                    { &#34;$elemMatch&#34; : { &#34;k&#34;:&#34;size&#34;, &#34;v&#34;:&#34;8B&#34; } } 
+                  ] } } ).explain(true)
+{
+    &#34;cursor&#34; : &#34;BtreeCursor attr.k_1_attr.v_1&#34;,
+    &#34;isMultiKey&#34; : true,
+    &#34;n&#34; : 1,
+    &#34;nscannedObjects&#34; : 98,
+    &#34;nscanned&#34; : 98,
+    &#34;nscannedObjectsAllPlans&#34; : 296,
+    &#34;nscannedAllPlans&#34; : 298,
+    &#34;scanAndOrder&#34; : false,
+    &#34;indexOnly&#34; : false,
+    &#34;nYields&#34; : 2,
+    &#34;nChunkSkips&#34; : 0,
+    &#34;millis&#34; : 1,
+    &#34;indexBounds&#34; : {
+        &#34;attr.k&#34; : [
+            [
+                &#34;color&#34;,
+                &#34;color&#34;
+            ]
+        ],
+        &#34;attr.v&#34; : [
+            [
+                &#34;blue&#34;,
+                &#34;blue&#34;
+            ]
+        ]
+    },
+    &#34;allPlans&#34; : [
+        {
+            &#34;cursor&#34; : &#34;BtreeCursor attr.k_1_attr.v_1&#34;,
+            &#34;isMultiKey&#34; : true,
+            &#34;n&#34; : 1,
+            &#34;nscannedObjects&#34; : 98,
+            &#34;nscanned&#34; : 98,
+            &#34;scanAndOrder&#34; : false,
+            &#34;indexOnly&#34; : false,
+            &#34;nChunkSkips&#34; : 0,
+            &#34;indexBounds&#34; : {
+                &#34;attributes.name&#34; : [
+                    [
+                        &#34;color&#34;,
+                        &#34;color&#34;
+                    ]
+                ],
+                &#34;attributes.value&#34; : [
+                    [
+                        &#34;blue&#34;,
+                        &#34;blue&#34;
+                    ]
+                ]
+            }
+        },
+        {
+            &#34;cursor&#34; : &#34;BtreeCursor attr.k_1_attr.v_1&#34;,
+            &#34;isMultiKey&#34; : true,
+            &#34;n&#34; : 1,
+            &#34;nscannedObjects&#34; : 99,
+            &#34;nscanned&#34; : 100,
+            &#34;scanAndOrder&#34; : false,
+            &#34;indexOnly&#34; : false,
+            &#34;nChunkSkips&#34; : 0,
+            &#34;indexBounds&#34; : {
+                &#34;attributes.name&#34; : [
+                    [
+                        &#34;style&#34;,
+                        &#34;style&#34;
+                    ]
+                ],
+                &#34;attributes.value&#34; : [
+                    [
+                        &#34;comfort&#34;,
+                        &#34;comfort&#34;
+                    ]
+                ]
+            }
+        },
+        {
+            &#34;cursor&#34; : &#34;BtreeCursor attr.k_1_attr.v_1&#34;,
+            &#34;isMultiKey&#34; : true,
+            &#34;n&#34; : 1,
+            &#34;nscannedObjects&#34; : 99,
+            &#34;nscanned&#34; : 100,
+            &#34;scanAndOrder&#34; : false,
+            &#34;indexOnly&#34; : false,
+            &#34;nChunkSkips&#34; : 0,
+            &#34;indexBounds&#34; : {
+                &#34;attributes.name&#34; : [
+                    [
+                        &#34;size&#34;,
+                        &#34;size&#34;
+                    ]
+                ],
+                &#34;attributes.value&#34; : [
+                    [
+                        &#34;8B&#34;,
+                        &#34;8B&#34;
+                    ]
+                ]
+            }
+        }
+    ],
+    &#34;server&#34; : &#34;asyasmacbook.local:27017&#34;,
+    &#34;filterSet&#34; : false,
+    &#34;stats&#34; : {
+        &#34;type&#34; : &#34;KEEP_MUTATIONS&#34;,
+        &#34;works&#34; : 100,
+        &#34;yields&#34; : 2,
+        &#34;unyields&#34; : 2,
+        &#34;invalidates&#34; : 0,
+        &#34;advanced&#34; : 1,
+        &#34;needTime&#34; : 97,
+        &#34;needFetch&#34; : 0,
+        &#34;isEOF&#34; : 1,
+        &#34;children&#34; : [
+            {
+                &#34;type&#34; : &#34;FETCH&#34;,
+                &#34;works&#34; : 99,
+                &#34;yields&#34; : 2,
+                &#34;unyields&#34; : 2,
+                &#34;invalidates&#34; : 0,
+                &#34;advanced&#34; : 1,
+                &#34;needTime&#34; : 97,
+                &#34;needFetch&#34; : 0,
+                &#34;isEOF&#34; : 1,
+                &#34;alreadyHasObj&#34; : 0,
+                &#34;forcedFetches&#34; : 0,
+                &#34;matchTested&#34; : 1,
+                &#34;children&#34; : [
+                    {
+                        &#34;type&#34; : &#34;IXSCAN&#34;,
+                        &#34;works&#34; : 98,
+                        &#34;yields&#34; : 2,
+                        &#34;unyields&#34; : 2,
+                        &#34;invalidates&#34; : 0,
+                        &#34;advanced&#34; : 98,
+                        &#34;needTime&#34; : 0,
+                        &#34;needFetch&#34; : 0,
+                        &#34;isEOF&#34; : 1,
+                        &#34;keyPattern&#34; : &#34;{ attr.k: 1.0, attr.v: 1.0 }&#34;,
+                        &#34;boundsVerbose&#34; : &#34;field #0[&#39;attr.k&#39;]: [\&#34;color\&#34;, \&#34;color\&#34;], field #1[&#39;attr.v&#39;]: [\&#34;blue\&#34;, \&#34;blue\&#34;]&#34;,
+                        &#34;isMultiKey&#34; : 1,
+                        &#34;yieldMovedCursor&#34; : 0,
+                        &#34;dupsTested&#34; : 98,
+                        &#34;dupsDropped&#34; : 0,
+                        &#34;seenInvalidated&#34; : 0,
+                        &#34;matchTested&#34; : 0,
+                        &#34;keysExamined&#34; : 98,
+                        &#34;children&#34; : [ ]
+                    }
+                ]
+            }
+        ]
+    }
+}
+&lt;/pre&gt;
+
+&lt;p&gt;What does this mean?   If we look at &lt;code&gt;allPlans&lt;/code&gt; we see that the optimizer tried our attribute index separately (but in parallel) with each of the clauses inside the $all array.  The winning plan was for &amp;ldquo;color&amp;rdquo; attribute because it turned out to be the most selective.&lt;/p&gt;
+
+&lt;p&gt;In MongoDB 2.4 this was not possible and unfortunately the optimizer would use the index for the first clause of the &lt;code&gt;$all&lt;/code&gt; expression.  If it happened to have low selectivity, then you didn&amp;rsquo;t get as good performance as you might have, had you ordered your conditions differently.  In 2.6 the order of expressions inside &lt;code&gt;$all&lt;/code&gt; does not make a difference as the one that&amp;rsquo;s most selective will be the one used by the query optimizer.&lt;/p&gt;
+
+&lt;p&gt;Depending on how you need to query your attributes, there are different ways of structuring the attribute array.  You can use key-value pairs as I showed, you can use the attribute name as the key value, or you can even store a single string value &amp;ldquo;attrname::attrvalue&amp;rdquo; - best thing is to take a look at the types of queries and updates you will be running and try it different ways, benchmark which one works best and use that one.&lt;/p&gt;
 </description>
     </item>
     
