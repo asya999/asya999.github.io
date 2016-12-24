@@ -1,22 +1,183 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Ask Asya </title>
+      <title>Mongodb on Ask Asya </title>
     <link>http://asya999.github.io/tags/mongodb/</link>
-    <language>en-us</language>
-    <author></author>
-    <rights>(C) 2014</rights>
-    <updated>2014-04-29 00:00:00 &#43;0000 UTC</updated>
-
+    <language>en-US</language>
+    <author>Asya Kamsky</author>
+    <rights>Copyright (c) 2016, Asya Kamsky; all rights reserved.</rights>
+    <updated>Sun, 09 Oct 2016 00:00:00 UTC</updated>
     
-      
-        <item>
-          <title>How to Balance Collections Across Your Sharded Cluster</title>
-          <link>http://asya999.github.io/post/taggedcollectionbalancing/</link>
-          <pubDate>Tue, 29 Apr 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/taggedcollectionbalancing/</guid>
-          <description>
+    <item>
+      <title>How do I match documents where all array elements match some predicate?</title>
+      <link>http://asya999.github.io/post/matchallarrayelements/</link>
+      <pubDate>Sun, 09 Oct 2016 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/matchallarrayelements/</guid>
+      <description>
+
+&lt;h3 id=&#34;question:292757d8f30706addf536c1c5ac8ae1a&#34;&gt;Question:&lt;/h3&gt;
+
+&lt;p&gt;I need to match all documents where every element of an array matches some predicate.  Can that be done?&lt;/p&gt;
+
+&lt;h3 id=&#34;answer:292757d8f30706addf536c1c5ac8ae1a&#34;&gt;Answer:&lt;/h3&gt;
+
+&lt;p&gt;Yes, the query to do this is actually quite simple to construct.&lt;/p&gt;
+
+&lt;p&gt;Remember that when you match an array, MongoDB will &amp;ldquo;reach inside&amp;rdquo; the array to compare the predicate to every single
+array element and return the document if the predicate matches at least one of them.  I like to tell MongoDB newbies
+to think of arrays as a field that can hold many different values at the same time.  Once you start thinking of
+arrays that way, it becomes a lot easier to understand that query like &amp;ldquo;where A is greater than 50 AND A is less than 10&amp;rdquo;
+is not meaningless if &amp;ldquo;A&amp;rdquo; happens to be an array, because different array elements can satisfy the separate parts of
+this query.&lt;/p&gt;
+
+&lt;p&gt;What that means is that in order to make sure every array element matches some construct, you should negate that construct and then negate the query again.&lt;/p&gt;
+
+&lt;p&gt;A simple example can probably help:&lt;/p&gt;
+
+&lt;p&gt;Imagine you have this set of documents:
+&lt;pre class=&#34;prettyprint&#34;&gt;
+{ &amp;ldquo;a&amp;rdquo;: [ 1, 2, 3, 4 ] }
+{ &amp;ldquo;a&amp;rdquo;: [ 3, 4, 5, 6 ] }
+{ &amp;ldquo;a&amp;rdquo;: [ 5, 6, 7, 8 ] }
+{ &amp;ldquo;a&amp;rdquo;: [ 1, 2, 3, 4, 5 ] }
+&lt;/pre&gt;&lt;/p&gt;
+
+&lt;p&gt;How do you find all documents where &amp;ldquo;a&amp;rdquo; is less than 5?  That&amp;rsquo;s simple, just &lt;code&gt;db.coll.find({&amp;quot;a&amp;quot;:{&amp;quot;$lt&amp;quot;:5}})&lt;/code&gt; and we get back (unsurprisingly):
+&lt;pre class=&#34;prettyprint&#34;&gt;
+{ &amp;ldquo;a&amp;rdquo;: [ 1, 2, 3, 4 ] }
+{ &amp;ldquo;a&amp;rdquo;: [ 3, 4, 5, 6 ] }
+{ &amp;ldquo;a&amp;rdquo;: [ 1, 2, 3, 4, 5 ] }
+&lt;/pre&gt;&lt;/p&gt;
+
+&lt;p&gt;This is because at least one element in each of these arrays matches our query predicate.  The third document has no elements that are less than 5.&lt;/p&gt;
+
+&lt;p&gt;Now we want to get back only the documents which have &lt;em&gt;every&lt;/em&gt; element match the same predicate.  Another way of saying &amp;ldquo;I want every document where each element of array is less than 5&amp;rdquo; would be &amp;ldquo;I want every document where none of the elements are greater than or equal to 5&amp;rdquo;.  So we first negate our original query:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.coll.find({&amp;quot;a&amp;quot;:{&amp;quot;$gte&amp;quot;:5}})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;and then we negate the entire result:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.coll.find({&amp;quot;$nor&amp;quot;:[{&amp;quot;a&amp;quot;:{&amp;quot;$gte&amp;quot;:5}}]})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;and as you would expect, the result is:
+&lt;pre class=&#34;prettyprint&#34;&gt;
+{ &amp;ldquo;a&amp;rdquo;: [ 1, 2, 3, 4 ] }
+&lt;/pre&gt;&lt;/p&gt;
+
+&lt;p&gt;When we deal with numbers, it&amp;rsquo;s easy to &amp;ldquo;negate&amp;rdquo; a condition, but with arrays, reasoning about &amp;ldquo;$not&amp;rdquo; and &amp;ldquo;$nor&amp;rdquo; can be tricky so let&amp;rsquo;s try again with strings where we can&amp;rsquo;t use &amp;ldquo;$gt&amp;rdquo; and &amp;ldquo;$lt&amp;rdquo; so easily.
+&lt;pre class=&#34;prettyprint&#34;&gt;
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;1&amp;rdquo;, &amp;ldquo;2&amp;rdquo;, &amp;ldquo;3&amp;rdquo;, &amp;ldquo;4&amp;rdquo; ] }
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;3&amp;rdquo;, &amp;ldquo;4&amp;rdquo;, &amp;ldquo;5&amp;rdquo;, &amp;ldquo;6&amp;rdquo; ] }
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;5&amp;rdquo;, &amp;ldquo;6&amp;rdquo;, &amp;ldquo;7&amp;rdquo;, &amp;ldquo;8&amp;rdquo; ] }
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;1&amp;rdquo;, &amp;ldquo;2&amp;rdquo;, &amp;ldquo;3&amp;rdquo;, &amp;ldquo;4&amp;rdquo;, &amp;ldquo;5&amp;rdquo; ] }
+&lt;/pre&gt;&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s try the same thing we tried above where first we will look for a being one of the set &amp;ldquo;1&amp;rdquo;,&amp;ldquo;2&amp;rdquo;,&amp;ldquo;3&amp;rdquo;,&amp;ldquo;4&amp;rdquo; and go from there.
+&lt;pre class=&#34;prettyprint&#34;&gt;
+db.coll.find({&amp;ldquo;a&amp;rdquo;:{&amp;ldquo;$in&amp;rdquo;:[&amp;ldquo;1&amp;rdquo;,&amp;ldquo;2&amp;rdquo;,&amp;ldquo;3&amp;rdquo;,&amp;ldquo;4&amp;rdquo;]}})
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;1&amp;rdquo;, &amp;ldquo;2&amp;rdquo;, &amp;ldquo;3&amp;rdquo;, &amp;ldquo;4&amp;rdquo; ] }
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;3&amp;rdquo;, &amp;ldquo;4&amp;rdquo;, &amp;ldquo;5&amp;rdquo;, &amp;ldquo;6&amp;rdquo; ] }
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;1&amp;rdquo;, &amp;ldquo;2&amp;rdquo;, &amp;ldquo;3&amp;rdquo;, &amp;ldquo;4&amp;rdquo;, &amp;ldquo;5&amp;rdquo; ] }
+db.coll.find({&amp;ldquo;a&amp;rdquo;:{&amp;ldquo;$nin&amp;rdquo;:[&amp;ldquo;1&amp;rdquo;,&amp;ldquo;2&amp;rdquo;,&amp;ldquo;3&amp;rdquo;,&amp;ldquo;4&amp;rdquo;]}})
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;5&amp;rdquo;, &amp;ldquo;6&amp;rdquo;, &amp;ldquo;7&amp;rdquo;, &amp;ldquo;8&amp;rdquo; ] }
+&lt;/pre&gt;
+What happened?  Did you expect to get back every document which had an element that isn&amp;rsquo;t one of the four in the &amp;ldquo;$nin&amp;rdquo; list?  Recall that [&amp;ldquo;$nin&amp;rdquo;][2] is the same as saying [&amp;ldquo;$not&amp;rdquo;][3] &amp;ldquo;$in&amp;rdquo; which is the same as saying &amp;ldquo;take the set of documents which satisfy the query &lt;code&gt;{&amp;quot;$in&amp;quot;:[&amp;lt;list&amp;gt;]}&lt;/code&gt; and give me the rest of the documents.   So how do we express the query that we want all documents which have an &lt;em&gt;element&lt;/em&gt; that isn&amp;rsquo;t one of our list?&lt;/p&gt;
+
+&lt;p&gt;Whenever the question (or query) involves an element of an array, there&amp;rsquo;s a good chance that you should be using [&amp;ldquo;$elemMatch&amp;rdquo;][1] to express it.   Commonly, we use &amp;ldquo;$elemMatch&amp;rdquo; to express that we want the same array element to match multiple conditions in the query predicates, but it&amp;rsquo;s also correct to use it when you are trying to negate the meaning of a query by applying the negation to the element of an array, rather than to the document selection as a whole.&lt;/p&gt;
+
+&lt;pre class=&#34;prettyprint&#34;&gt;
+// find me all documents where at least one array element is *not* on our list
+db.coll.find({&#34;a&#34;:{&#34;$elemMatch&#34;:{&#34;$nin&#34;:[&#34;1&#34;,&#34;2&#34;,&#34;3&#34;,&#34;4&#34;]}}})
+{ &#34;a&#34; : [ &#34;1&#34;, &#34;2&#34;, &#34;3&#34;, &#34;4&#34;, &#34;5&#34; ] }
+{ &#34;a&#34; : [ &#34;3&#34;, &#34;4&#34;, &#34;5&#34;, &#34;6&#34; ] }
+{ &#34;a&#34; : [ &#34;5&#34;, &#34;6&#34;, &#34;7&#34;, &#34;8&#34; ] }
+// now we negate the entire query
+db.coll.find({&#34;$nor&#34;:[{&#34;a&#34;:{&#34;$elemMatch&#34;:{&#34;$nin&#34;:[&#34;1&#34;,&#34;2&#34;,&#34;3&#34;,&#34;4&#34;]}}}]})
+{ &#34;a&#34; : [ &#34;1&#34;, &#34;2&#34;, &#34;3&#34;, &#34;4&#34; ] }
+&lt;/pre&gt;
+
+&lt;p&gt;Here&amp;rsquo;s another tricky example involving a regular expression - while you can negate a regular expression, you may inadvertantly limit matching to string types only, and when you have mixed type arrays (not recommended, but it happens) that&amp;rsquo;s won&amp;rsquo;t give you desired results.&lt;/p&gt;
+
+&lt;pre class=&#34;prettyprint&#34;&gt;
+{ &#34;a&#34; : [ &#34;str1&#34;, &#34;str2&#34;, &#34;str3&#34;, &#34;notstr&#34; ] }
+{ &#34;a&#34; : [ &#34;str1&#34;, &#34;str2&#34;, &#34;str3&#34;, &#34;str4&#34; ] }
+{ &#34;a&#34; : [ 1, 2, 3, 4, 5 ] }
+{ &#34;a&#34; : [ 5, 6, 7, 8, 9 ] }
+{ &#34;a&#34; : [ &#34;str1&#34;, 0, 10 ] }
+&lt;/pre&gt;
+
+&lt;p&gt;Say I want to get back just documents that have &lt;em&gt;all&lt;/em&gt; its &amp;ldquo;a&amp;rdquo; elements start with characters &amp;ldquo;str&amp;rdquo;. Let&amp;rsquo;s look at some queries and their results:
+&lt;pre class=&#34;prettyprint&#34;&gt;
+db.coll.find({&amp;ldquo;a&amp;rdquo;:/^str/})
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;str1&amp;rdquo;, &amp;ldquo;str2&amp;rdquo;, &amp;ldquo;str3&amp;rdquo;, &amp;ldquo;notstr&amp;rdquo; ] }
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;str1&amp;rdquo;, &amp;ldquo;str2&amp;rdquo;, &amp;ldquo;str3&amp;rdquo;, &amp;ldquo;str4&amp;rdquo; ] }
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;str1&amp;rdquo;, 0, 10 ] }
+db.coll.find({&amp;ldquo;a&amp;rdquo;:{$not:/^str/}})
+{ &amp;ldquo;a&amp;rdquo; : [ 1, 2, 3, 4, 5 ] }
+{ &amp;ldquo;a&amp;rdquo; : [ 5, 6, 7, 8, 9 ] }
+// negate regular expression:
+db.coll.find({&amp;ldquo;a&amp;rdquo;:/^(?!str)/})
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;str1&amp;rdquo;, &amp;ldquo;str2&amp;rdquo;, &amp;ldquo;str3&amp;rdquo;, &amp;ldquo;notstr&amp;rdquo; ] }
+db.coll.find({&amp;ldquo;a&amp;rdquo;:{$not:/^(?!str)/}})
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;str1&amp;rdquo;, &amp;ldquo;str2&amp;rdquo;, &amp;ldquo;str3&amp;rdquo;, &amp;ldquo;str4&amp;rdquo; ] }
+{ &amp;ldquo;a&amp;rdquo; : [ 1, 2, 3, 4, 5 ] }
+{ &amp;ldquo;a&amp;rdquo; : [ 5, 6, 7, 8, 9 ] }
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;str1&amp;rdquo;, 0, 10 ] }
+&lt;/pre&gt;&lt;/p&gt;
+
+&lt;p&gt;Any surprises here?   First, we see that negated regular expression query only matches elements of type string.  We also see that &amp;ldquo;$not&amp;rdquo; added to any regex query returns the complement of documents that were returned without &amp;ldquo;$not&amp;rdquo; present.  That&amp;rsquo;s not what we need when trying to get all documents with every element that satisfies the predicate.   Let&amp;rsquo;s see if &amp;ldquo;$elemMatch&amp;rdquo; gives us what we want:&lt;/p&gt;
+
+&lt;pre class=&#34;prettyprint&#34;&gt;
+// note that $elemMatch requires a subdocument so we use [&#34;$regex&#34;][4] rather than / / syntax
+db.coll.find({&#34;a&#34;:{&#34;$elemMatch&#34;:{&#34;$regex&#34;:&#34;^str&#34;}}})
+{ &#34;a&#34; : [ &#34;str1&#34;, &#34;str2&#34;, &#34;str3&#34;, &#34;notstr&#34; ] }
+{ &#34;a&#34; : [ &#34;str1&#34;, &#34;str2&#34;, &#34;str3&#34;, &#34;str4&#34; ] }
+{ &#34;a&#34; : [ &#34;str1&#34;, 0, 10 ] }
+db.coll.find({&#34;a&#34;:{&#34;$elemMatch&#34;:{$not:/^str/}}})
+{ &#34;a&#34; : [ &#34;str1&#34;, &#34;str2&#34;, &#34;str3&#34;, &#34;notstr&#34; ] }
+{ &#34;a&#34; : [ 1, 2, 3, 4, 5 ] }
+{ &#34;a&#34; : [ 5, 6, 7, 8, 9 ] }
+{ &#34;a&#34; : [ &#34;str1&#34;, 0, 10 ] }
+// bingo!  we got back every document that had something that would NOT match &#34;^str&#34;
+// now we just negate that whole query
+db.coll.find({&#34;$nor&#34;:[{&#34;a&#34;:{&#34;$elemMatch&#34;:{$not:/^str/}}}]})
+{ &#34;a&#34; : [ &#34;str1&#34;, &#34;str2&#34;, &#34;str3&#34;, &#34;str4&#34; ] }
+&lt;/pre&gt;
+
+&lt;p&gt;Now, let&amp;rsquo;s try it on a more complex document structure with a more complex predicate.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-09T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 2, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-19T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 3, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2015-12-12T00:00:00Z&amp;quot;) } ] }
+{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-02-05T12:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 9, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-03-01T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 5, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2015-11-01T00:00:00Z&amp;quot;) } ] }
+{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 3, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-01-31T12:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 6, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-03-01T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-10-01T00:00:00Z&amp;quot;) } ] }
+{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-09T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 2, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-19T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 3, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-09-21T00:00:00Z&amp;quot;) } ] }
+{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-09T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 2, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-19T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 3, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-01-01T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 4, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-01-01T00:00:00Z&amp;quot;) } ] }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If our predicate was just about &amp;ldquo;b.x&amp;rdquo; or just about &amp;ldquo;b.y&amp;rdquo; we would use &amp;ldquo;$elemMatch&amp;rdquo; rather than dotted notation to run a query just like our first example.  To find all documents where &amp;ldquo;b.x&amp;rdquo; is either 1, 2 or 3, we can go through these steps (assume all queries ask in projection just for the field I&amp;rsquo;m querying by):
+````
+// find all documents where &amp;ldquo;b.x&amp;rdquo; is one of 1,2,3
+db.coll.find({&amp;ldquo;b.x&amp;rdquo;:{$in:[1,2,3]}})
+{ &amp;ldquo;b&amp;rdquo; : [ { &amp;ldquo;x&amp;rdquo; : 1 }, { &amp;ldquo;x&amp;rdquo; : 2 }, { &amp;ldquo;x&amp;rdquo; : 3 } ] }
+{ &amp;ldquo;b&amp;rdquo; : [ { &amp;ldquo;x&amp;rdquo; : 1 }, { &amp;ldquo;x&amp;rdquo; : 9 }, { &amp;ldquo;x&amp;rdquo; : 5 } ] }
+{ &amp;ldquo;b&amp;rdquo; : [ { &amp;ldquo;x&amp;rdquo; : 3 }, { &amp;ldquo;x&amp;rdquo; : 6 }, { &amp;ldquo;x&amp;rdquo; : 1 } ] }
+{ &amp;ldquo;b&amp;rdquo; : [ { &amp;ldquo;x&amp;rdquo; : 1 }, { &amp;ldquo;x&amp;rdquo; : 2 }, { &amp;ldquo;x&amp;rdquo; : 3 } ] }
+{ &amp;ldquo;b&amp;rdquo; : [ { &amp;ldquo;x&amp;rdquo; : 1 }, { &amp;ldquo;x&amp;rdquo; : 2 }, { &amp;ldquo;x&amp;rdquo; : 3 }, { &amp;ldquo;x&amp;rdquo; : 4 } ] }
+// another way of structuring this query is with $or
+db.coll.find({$or:[{&amp;ldquo;b.x&amp;rdquo;:1},{&amp;ldquo;b.x&amp;rdquo;:2},{&amp;ldquo;b.x&amp;rdquo;:3}]})
+db.coll.find({$and:[{&amp;ldquo;b.x&amp;rdquo;:1},{&amp;ldquo;b.x&amp;rdquo;:2},{&amp;ldquo;b.x&amp;rdquo;:3}]})&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>How to Balance Collections Across Your Sharded Cluster</title>
+      <link>http://asya999.github.io/post/taggedcollectionbalancing/</link>
+      <pubDate>Tue, 29 Apr 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/taggedcollectionbalancing/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;Question:&lt;/h3&gt;
 
@@ -158,57 +319,7 @@ tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(
 
 &lt;p&gt;† This is definitely a gross simplification of all the steps the balancer goes through - look for a more detailed write-up demystifying the inner workings of migrations some time soon.&lt;/p&gt;
 </description>
-        </item>
-      
+    </item>
     
-      
-        <item>
-          <title>Why shouldn&#39;t I embed large arrays in my documents?</title>
-          <link>http://asya999.github.io/post/largeembeddedarrays/</link>
-          <pubDate>Thu, 13 Feb 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/largeembeddedarrays/</guid>
-          <description>
-
-&lt;h3 id=&#34;question:b03b8c475184befd19c41be5b8f8950d&#34;&gt;Question:&lt;/h3&gt;
-
-&lt;p&gt;Why shouldn&amp;rsquo;t I embed large arrays in my documents?  It seems incredibly convenient and intuitive but I&amp;rsquo;ve heard there are performance penalties.  What causes them and how do I know if I should avoid using arrays?&lt;/p&gt;
-
-&lt;h3 id=&#34;answer:b03b8c475184befd19c41be5b8f8950d&#34;&gt;Answer:&lt;/h3&gt;
-
-&lt;p&gt;Arrays are wonderful when used properly.  When talking about performance, the main reason to be wary of arrays is when they grow without bounds.&lt;/p&gt;
-
-&lt;p&gt;Imagine you create a document:
-&lt;pre class=&#34;prettyprint&#34;&gt;
-{ user: &amp;ldquo;Asya&amp;rdquo;,
-  email: &amp;ldquo;asya@mongodb.com&amp;rdquo;,
-  twitter: [&amp;ldquo;@asya999&amp;rdquo;, &amp;ldquo;@ask-asya&amp;rdquo;]
-}
-&lt;/pre&gt;&lt;/p&gt;
-
-&lt;p&gt;Notice that twitter field is an array.  That&amp;rsquo;s perfectly fine and excellent - we don&amp;rsquo;t want to create a separate collection like we&amp;rsquo;d have to do in relational model, just because a person might have multiple twitter accounts/handles.&lt;/p&gt;
-
-&lt;p&gt;Now that the document has been created, a certain amount of space has been allocated for it.  If we continue growing the document by adding new fields to it, it will have to be moved and a larger allocation will be made for it because MongoDB dynamically tracks how often documents outgrow their allocation and tries to allocate more space for newly written or moved documents to account for the future growth.&lt;/p&gt;
-
-&lt;p&gt;Compare the cost of an update to a document when you can make an in-place change, versus rewriting the entire document somewhere else.  First, instead of just rewriting part of a document &amp;ldquo;in place&amp;rdquo; we have to allocate new space for it.  We have to rewrite the entire document, put the space that it used to occupy on the free list so that it can get re-used, and then repoint all the index entries that used to point to the old document location to the new location.  All of this must be done atomically, so your single write suddenly took a bit longer than a few microseconds that it used to take when the document didn&amp;rsquo;t have to move.&lt;/p&gt;
-
-&lt;p&gt;Now imagine what happens if you add a new array field to the document representing something that&amp;rsquo;s not naturally bound the way someone&amp;rsquo;s twitter handles or shipping addresses would be bound.  What if we want to embed into this document every time I perform some activity, let&amp;rsquo;s say click on a like button, or make a comment on someone&amp;rsquo;s blog?&lt;/p&gt;
-
-&lt;p&gt;First of all, we have to consider why we would want to do such a thing.  Normally, I would advise people to embed things that they always want to get back when they are fetching this document.  The flip side of this is that you don&amp;rsquo;t want to embed things in the document that you don&amp;rsquo;t want to get back with it.&lt;/p&gt;
-
-&lt;p&gt;If you embed activity I perform into the document, it&amp;rsquo;ll work great at first because all of my activity is right there and with a single read you can get back everything you might want to show me: &amp;ldquo;you recently clicked on this and here are your last two comments&amp;rdquo; but what happens after six months go by and I don&amp;rsquo;t care about things I did a long time ago and you don&amp;rsquo;t want to show them to me unless I specifically go to look for some old activity?&lt;/p&gt;
-
-&lt;p&gt;First, you&amp;rsquo;ll end up returning bigger and bigger document and caring about smaller and smaller portion of it.  But you can use projection to only return some of the array, the real pain is that the document on disk will get bigger and it will still all be read even if you&amp;rsquo;re only going to return part of it to the end user, but since my activity is not going to stop as long as I&amp;rsquo;m active, the document will continue growing and growing.&lt;/p&gt;
-
-&lt;p&gt;The most obvious problem with this is eventually you&amp;rsquo;ll hit the 16MB document limit, but that&amp;rsquo;s not at all what you should be concerned about.  A document that continuously grows will incur higher and higher cost every time it has to get relocated on disk, and even if you take steps to mitigate the effects of fragmentation, your writes will overall be unnecessarily long, impacting overall performance of your entire application.&lt;/p&gt;
-
-&lt;p&gt;There is one more thing that you can do that will completely kill your application&amp;rsquo;s performance and that&amp;rsquo;s to index this ever-increasing array.  What that means is that every single time the document with this array is relocated, the number of index entries that need to be updated is directly proportional to the number of indexed values in that document, and the bigger the array, the larger that number will be.&lt;/p&gt;
-
-&lt;p&gt;I don&amp;rsquo;t want this to scare you from using arrays when they are a good fit for the data model - they are a powerful feature of the document database data model, but like all powerful tools, it needs to be used in the right circumstances and it should be used with care.&lt;/p&gt;
-</description>
-        </item>
-      
-    
-
   </channel>
 </rss>

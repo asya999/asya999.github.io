@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Asya Kamky"> 
+
+
+    <title>How do I match documents where all array elements match some predicate? - http://asya999.github.io/</title>
+    <link rel="canonical" href="http://asya999.github.io/post/matchallarrayelements/">
+    
+    <link href="http://asya999.github.io/css/bootstrap.min.css" rel="stylesheet">
+    <link href="http://asya999.github.io/css/font-awesome.css" rel="stylesheet">
+    <link href="http://asya999.github.io/css/custom.css" rel="stylesheet">
+
+    
+</head>
+
+<body>
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                    <span class="sr-only">Toggle Navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="http://asya999.github.io/">Ask Asya</a>
+            </div>
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="http://asya999.github.io/post/">Post Index</a></li>
+                    <li><a href="http://asya999.github.io/about/">About Me</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-9">
+            <div class="well well-sm">
+                    <h3>How do I match documents where all array elements match some predicate?<br> <small></small></h3>
+                    <hr>
+                    
+
+<h3 id="question:292757d8f30706addf536c1c5ac8ae1a">Question:</h3>
+
+<p>I need to match all documents where every element of an array matches some predicate.  Can that be done?</p>
+
+<h3 id="answer:292757d8f30706addf536c1c5ac8ae1a">Answer:</h3>
+
+<p>Yes, the query to do this is actually quite simple to construct.</p>
+
+<p>Remember that when you match an array, MongoDB will &ldquo;reach inside&rdquo; the array to compare the predicate to every single
+array element and return the document if the predicate matches at least one of them.  I like to tell MongoDB newbies
+to think of arrays as a field that can hold many different values at the same time.  Once you start thinking of
+arrays that way, it becomes a lot easier to understand that query like &ldquo;where A is greater than 50 AND A is less than 10&rdquo;
+is not meaningless if &ldquo;A&rdquo; happens to be an array, because different array elements can satisfy the separate parts of
+this query.</p>
+
+<p>What that means is that in order to make sure every array element matches some construct, you should negate that construct and then negate the query again.</p>
+
+<p>A simple example can probably help:</p>
+
+<p>Imagine you have this set of documents:
+<pre class="prettyprint">
+{ &ldquo;a&rdquo;: [ 1, 2, 3, 4 ] }
+{ &ldquo;a&rdquo;: [ 3, 4, 5, 6 ] }
+{ &ldquo;a&rdquo;: [ 5, 6, 7, 8 ] }
+{ &ldquo;a&rdquo;: [ 1, 2, 3, 4, 5 ] }
+</pre></p>
+
+<p>How do you find all documents where &ldquo;a&rdquo; is less than 5?  That&rsquo;s simple, just <code>db.coll.find({&quot;a&quot;:{&quot;$lt&quot;:5}})</code> and we get back (unsurprisingly):
+<pre class="prettyprint">
+{ &ldquo;a&rdquo;: [ 1, 2, 3, 4 ] }
+{ &ldquo;a&rdquo;: [ 3, 4, 5, 6 ] }
+{ &ldquo;a&rdquo;: [ 1, 2, 3, 4, 5 ] }
+</pre></p>
+
+<p>This is because at least one element in each of these arrays matches our query predicate.  The third document has no elements that are less than 5.</p>
+
+<p>Now we want to get back only the documents which have <em>every</em> element match the same predicate.  Another way of saying &ldquo;I want every document where each element of array is less than 5&rdquo; would be &ldquo;I want every document where none of the elements are greater than or equal to 5&rdquo;.  So we first negate our original query:</p>
+
+<pre><code>db.coll.find({&quot;a&quot;:{&quot;$gte&quot;:5}})
+</code></pre>
+
+<p>and then we negate the entire result:</p>
+
+<pre><code>db.coll.find({&quot;$nor&quot;:[{&quot;a&quot;:{&quot;$gte&quot;:5}}]})
+</code></pre>
+
+<p>and as you would expect, the result is:
+<pre class="prettyprint">
+{ &ldquo;a&rdquo;: [ 1, 2, 3, 4 ] }
+</pre></p>
+
+<p>When we deal with numbers, it&rsquo;s easy to &ldquo;negate&rdquo; a condition, but with arrays, reasoning about &ldquo;$not&rdquo; and &ldquo;$nor&rdquo; can be tricky so let&rsquo;s try again with strings where we can&rsquo;t use &ldquo;$gt&rdquo; and &ldquo;$lt&rdquo; so easily.
+<pre class="prettyprint">
+{ &ldquo;a&rdquo; : [ &ldquo;1&rdquo;, &ldquo;2&rdquo;, &ldquo;3&rdquo;, &ldquo;4&rdquo; ] }
+{ &ldquo;a&rdquo; : [ &ldquo;3&rdquo;, &ldquo;4&rdquo;, &ldquo;5&rdquo;, &ldquo;6&rdquo; ] }
+{ &ldquo;a&rdquo; : [ &ldquo;5&rdquo;, &ldquo;6&rdquo;, &ldquo;7&rdquo;, &ldquo;8&rdquo; ] }
+{ &ldquo;a&rdquo; : [ &ldquo;1&rdquo;, &ldquo;2&rdquo;, &ldquo;3&rdquo;, &ldquo;4&rdquo;, &ldquo;5&rdquo; ] }
+</pre></p>
+
+<p>Let&rsquo;s try the same thing we tried above where first we will look for a being one of the set &ldquo;1&rdquo;,&ldquo;2&rdquo;,&ldquo;3&rdquo;,&ldquo;4&rdquo; and go from there.
+<pre class="prettyprint">
+db.coll.find({&ldquo;a&rdquo;:{&ldquo;$in&rdquo;:[&ldquo;1&rdquo;,&ldquo;2&rdquo;,&ldquo;3&rdquo;,&ldquo;4&rdquo;]}})
+{ &ldquo;a&rdquo; : [ &ldquo;1&rdquo;, &ldquo;2&rdquo;, &ldquo;3&rdquo;, &ldquo;4&rdquo; ] }
+{ &ldquo;a&rdquo; : [ &ldquo;3&rdquo;, &ldquo;4&rdquo;, &ldquo;5&rdquo;, &ldquo;6&rdquo; ] }
+{ &ldquo;a&rdquo; : [ &ldquo;1&rdquo;, &ldquo;2&rdquo;, &ldquo;3&rdquo;, &ldquo;4&rdquo;, &ldquo;5&rdquo; ] }
+db.coll.find({&ldquo;a&rdquo;:{&ldquo;$nin&rdquo;:[&ldquo;1&rdquo;,&ldquo;2&rdquo;,&ldquo;3&rdquo;,&ldquo;4&rdquo;]}})
+{ &ldquo;a&rdquo; : [ &ldquo;5&rdquo;, &ldquo;6&rdquo;, &ldquo;7&rdquo;, &ldquo;8&rdquo; ] }
+</pre>
+What happened?  Did you expect to get back every document which had an element that isn&rsquo;t one of the four in the &ldquo;$nin&rdquo; list?  Recall that [&ldquo;$nin&rdquo;][2] is the same as saying [&ldquo;$not&rdquo;][3] &ldquo;$in&rdquo; which is the same as saying &ldquo;take the set of documents which satisfy the query <code>{&quot;$in&quot;:[&lt;list&gt;]}</code> and give me the rest of the documents.   So how do we express the query that we want all documents which have an <em>element</em> that isn&rsquo;t one of our list?</p>
+
+<p>Whenever the question (or query) involves an element of an array, there&rsquo;s a good chance that you should be using [&ldquo;$elemMatch&rdquo;][1] to express it.   Commonly, we use &ldquo;$elemMatch&rdquo; to express that we want the same array element to match multiple conditions in the query predicates, but it&rsquo;s also correct to use it when you are trying to negate the meaning of a query by applying the negation to the element of an array, rather than to the document selection as a whole.</p>
+
+<pre class="prettyprint">
+// find me all documents where at least one array element is *not* on our list
+db.coll.find({"a":{"$elemMatch":{"$nin":["1","2","3","4"]}}})
+{ "a" : [ "1", "2", "3", "4", "5" ] }
+{ "a" : [ "3", "4", "5", "6" ] }
+{ "a" : [ "5", "6", "7", "8" ] }
+// now we negate the entire query
+db.coll.find({"$nor":[{"a":{"$elemMatch":{"$nin":["1","2","3","4"]}}}]})
+{ "a" : [ "1", "2", "3", "4" ] }
+</pre>
+
+<p>Here&rsquo;s another tricky example involving a regular expression - while you can negate a regular expression, you may inadvertantly limit matching to string types only, and when you have mixed type arrays (not recommended, but it happens) that&rsquo;s won&rsquo;t give you desired results.</p>
+
+<pre class="prettyprint">
+{ "a" : [ "str1", "str2", "str3", "notstr" ] }
+{ "a" : [ "str1", "str2", "str3", "str4" ] }
+{ "a" : [ 1, 2, 3, 4, 5 ] }
+{ "a" : [ 5, 6, 7, 8, 9 ] }
+{ "a" : [ "str1", 0, 10 ] }
+</pre>
+
+<p>Say I want to get back just documents that have <em>all</em> its &ldquo;a&rdquo; elements start with characters &ldquo;str&rdquo;. Let&rsquo;s look at some queries and their results:
+<pre class="prettyprint">
+db.coll.find({&ldquo;a&rdquo;:/^str/})
+{ &ldquo;a&rdquo; : [ &ldquo;str1&rdquo;, &ldquo;str2&rdquo;, &ldquo;str3&rdquo;, &ldquo;notstr&rdquo; ] }
+{ &ldquo;a&rdquo; : [ &ldquo;str1&rdquo;, &ldquo;str2&rdquo;, &ldquo;str3&rdquo;, &ldquo;str4&rdquo; ] }
+{ &ldquo;a&rdquo; : [ &ldquo;str1&rdquo;, 0, 10 ] }
+db.coll.find({&ldquo;a&rdquo;:{$not:/^str/}})
+{ &ldquo;a&rdquo; : [ 1, 2, 3, 4, 5 ] }
+{ &ldquo;a&rdquo; : [ 5, 6, 7, 8, 9 ] }
+// negate regular expression:
+db.coll.find({&ldquo;a&rdquo;:/^(?!str)/})
+{ &ldquo;a&rdquo; : [ &ldquo;str1&rdquo;, &ldquo;str2&rdquo;, &ldquo;str3&rdquo;, &ldquo;notstr&rdquo; ] }
+db.coll.find({&ldquo;a&rdquo;:{$not:/^(?!str)/}})
+{ &ldquo;a&rdquo; : [ &ldquo;str1&rdquo;, &ldquo;str2&rdquo;, &ldquo;str3&rdquo;, &ldquo;str4&rdquo; ] }
+{ &ldquo;a&rdquo; : [ 1, 2, 3, 4, 5 ] }
+{ &ldquo;a&rdquo; : [ 5, 6, 7, 8, 9 ] }
+{ &ldquo;a&rdquo; : [ &ldquo;str1&rdquo;, 0, 10 ] }
+</pre></p>
+
+<p>Any surprises here?   First, we see that negated regular expression query only matches elements of type string.  We also see that &ldquo;$not&rdquo; added to any regex query returns the complement of documents that were returned without &ldquo;$not&rdquo; present.  That&rsquo;s not what we need when trying to get all documents with every element that satisfies the predicate.   Let&rsquo;s see if &ldquo;$elemMatch&rdquo; gives us what we want:</p>
+
+<pre class="prettyprint">
+// note that $elemMatch requires a subdocument so we use ["$regex"][4] rather than / / syntax
+db.coll.find({"a":{"$elemMatch":{"$regex":"^str"}}})
+{ "a" : [ "str1", "str2", "str3", "notstr" ] }
+{ "a" : [ "str1", "str2", "str3", "str4" ] }
+{ "a" : [ "str1", 0, 10 ] }
+db.coll.find({"a":{"$elemMatch":{$not:/^str/}}})
+{ "a" : [ "str1", "str2", "str3", "notstr" ] }
+{ "a" : [ 1, 2, 3, 4, 5 ] }
+{ "a" : [ 5, 6, 7, 8, 9 ] }
+{ "a" : [ "str1", 0, 10 ] }
+// bingo!  we got back every document that had something that would NOT match "^str"
+// now we just negate that whole query
+db.coll.find({"$nor":[{"a":{"$elemMatch":{$not:/^str/}}}]})
+{ "a" : [ "str1", "str2", "str3", "str4" ] }
+</pre>
+
+<p>Now, let&rsquo;s try it on a more complex document structure with a more complex predicate.</p>
+
+<pre><code>{ &quot;b&quot; : [ { &quot;x&quot; : 1, &quot;y&quot; : ISODate(&quot;2016-04-09T00:00:00Z&quot;) }, { &quot;x&quot; : 2, &quot;y&quot; : ISODate(&quot;2016-04-19T00:00:00Z&quot;) }, { &quot;x&quot; : 3, &quot;y&quot; : ISODate(&quot;2015-12-12T00:00:00Z&quot;) } ] }
+{ &quot;b&quot; : [ { &quot;x&quot; : 1, &quot;y&quot; : ISODate(&quot;2016-02-05T12:00:00Z&quot;) }, { &quot;x&quot; : 9, &quot;y&quot; : ISODate(&quot;2016-03-01T00:00:00Z&quot;) }, { &quot;x&quot; : 5, &quot;y&quot; : ISODate(&quot;2015-11-01T00:00:00Z&quot;) } ] }
+{ &quot;b&quot; : [ { &quot;x&quot; : 3, &quot;y&quot; : ISODate(&quot;2016-01-31T12:00:00Z&quot;) }, { &quot;x&quot; : 6, &quot;y&quot; : ISODate(&quot;2016-03-01T00:00:00Z&quot;) }, { &quot;x&quot; : 1, &quot;y&quot; : ISODate(&quot;2016-10-01T00:00:00Z&quot;) } ] }
+{ &quot;b&quot; : [ { &quot;x&quot; : 1, &quot;y&quot; : ISODate(&quot;2016-04-09T00:00:00Z&quot;) }, { &quot;x&quot; : 2, &quot;y&quot; : ISODate(&quot;2016-04-19T00:00:00Z&quot;) }, { &quot;x&quot; : 3, &quot;y&quot; : ISODate(&quot;2016-09-21T00:00:00Z&quot;) } ] }
+{ &quot;b&quot; : [ { &quot;x&quot; : 1, &quot;y&quot; : ISODate(&quot;2016-04-09T00:00:00Z&quot;) }, { &quot;x&quot; : 2, &quot;y&quot; : ISODate(&quot;2016-04-19T00:00:00Z&quot;) }, { &quot;x&quot; : 3, &quot;y&quot; : ISODate(&quot;2016-01-01T00:00:00Z&quot;) }, { &quot;x&quot; : 4, &quot;y&quot; : ISODate(&quot;2016-01-01T00:00:00Z&quot;) } ] }
+</code></pre>
+
+<p>If our predicate was just about &ldquo;b.x&rdquo; or just about &ldquo;b.y&rdquo; we would use &ldquo;$elemMatch&rdquo; rather than dotted notation to run a query just like our first example.  To find all documents where &ldquo;b.x&rdquo; is either 1, 2 or 3, we can go through these steps (assume all queries ask in projection just for the field I&rsquo;m querying by):
+````
+// find all documents where &ldquo;b.x&rdquo; is one of 1,2,3
+db.coll.find({&ldquo;b.x&rdquo;:{$in:[1,2,3]}})
+{ &ldquo;b&rdquo; : [ { &ldquo;x&rdquo; : 1 }, { &ldquo;x&rdquo; : 2 }, { &ldquo;x&rdquo; : 3 } ] }
+{ &ldquo;b&rdquo; : [ { &ldquo;x&rdquo; : 1 }, { &ldquo;x&rdquo; : 9 }, { &ldquo;x&rdquo; : 5 } ] }
+{ &ldquo;b&rdquo; : [ { &ldquo;x&rdquo; : 3 }, { &ldquo;x&rdquo; : 6 }, { &ldquo;x&rdquo; : 1 } ] }
+{ &ldquo;b&rdquo; : [ { &ldquo;x&rdquo; : 1 }, { &ldquo;x&rdquo; : 2 }, { &ldquo;x&rdquo; : 3 } ] }
+{ &ldquo;b&rdquo; : [ { &ldquo;x&rdquo; : 1 }, { &ldquo;x&rdquo; : 2 }, { &ldquo;x&rdquo; : 3 }, { &ldquo;x&rdquo; : 4 } ] }
+// another way of structuring this query is with $or
+db.coll.find({$or:[{&ldquo;b.x&rdquo;:1},{&ldquo;b.x&rdquo;:2},{&ldquo;b.x&rdquo;:3}]})
+db.coll.find({$and:[{&ldquo;b.x&rdquo;:1},{&ldquo;b.x&rdquo;:2},{&ldquo;b.x&rdquo;:3}]})</p>
+
+                               <hr>
+           <h2>Comments</h2>
+           <div id="disqus_thread"></div>
+           <script type="text/javascript">
+               (function() {
+                   var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+			  dsq.src = '//askasya.disqus.com/embed.js';
+                          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+           </script>
+
+            </div>
+        </div>
+
+        
+        <div class="col-md-3">
+            <div class="well well-sm"> 
+                <h4>October 9, 2016<br>
+                <small>1538 words</small></h4>
+                <hr>
+                <strong>Categories</strong>
+                <ul class="list-unstyled">
+                
+                    <li><a href="http://asya999.github.io/categories/mongodb">MongoDB</a></li>
+                
+                </ul>
+                <hr>
+                <strong>Tags</strong><br>
+                <a class="label label-default" href="http://asya999.github.io/tags/schema">schema</a> <a class="label label-default" href="http://asya999.github.io/tags/query">query</a> <a class="label label-default" href="http://asya999.github.io/tags/arrays">arrays</a> <a class="label label-default" href="http://asya999.github.io/tags/mongodb">mongodb</a> 
+            </div>
+                <div class="panel panel-default">
+        <div class="panel-heading" style="padding: 2px 15px;">
+            <h4>Connect. Socialize.</h4>
+        </div>
+        <div class="panel-body">
+            <a href="https://github.com/asya999/" class="btn btn-primary btn-xs"><i class="fa fa-github-square fa-2x"></i></a>
+            <a href="https://www.facebook.com/mongodb" class="btn btn-info btn-xs"><i class="fa fa-facebook-square fa-2x"></i></a>
+            <a href="https://www.twitter.com/asya999" class="btn btn-info btn-xs"><i class="fa fa-twitter-square fa-2x"></i></a>
+
+            <div class="alert alert-info alert-dismissable" style="margin-top:25px;margin-bottom:5px;">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <strong>Hey, listen!</strong><br>
+                AK: You should modify the <code>layouts/partials/menu.html</code> template and include the rest of my own links.
+            </div>
+        </div>
+    </div>
+
+        </div>
+    </div>
+        <footer>
+            <div class="row">
+                <hr>
+                <div class="col-sm-12">
+                    <p>&copy; Asya Kamsky 2016 &middot;
+                    Built with <a href="https://github.com/spf13/hugo">Hugo</a></p>
+                </div>
+            </div>
+        </footer>
+
+</div>
+
+    <script src="http://asya999.github.io/js/jquery-1.11.3.min.js"></script>
+    <script src="http://asya999.github.io/js/bootstrap.js"></script>
+</body>
+</html>
+

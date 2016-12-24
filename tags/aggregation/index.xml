@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Ask Asya </title>
+      <title>Aggregation on Ask Asya </title>
     <link>http://asya999.github.io/tags/aggregation/</link>
-    <language>en-us</language>
-    <author></author>
-    <rights>(C) 2014</rights>
-    <updated>2014-05-24 00:00:00 &#43;0000 UTC</updated>
-
+    <language>en-US</language>
+    <author>Asya Kamsky</author>
+    <rights>Copyright (c) 2016, Asya Kamsky; all rights reserved.</rights>
+    <updated>Sat, 24 May 2014 00:00:00 UTC</updated>
     
-      
-        <item>
-          <title>How to Merge Shapes with Aggregation Framework</title>
-          <link>http://asya999.github.io/post/mergeshapes/</link>
-          <pubDate>Sat, 24 May 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/mergeshapes/</guid>
-          <description>
+    <item>
+      <title>How to Merge Shapes with Aggregation Framework</title>
+      <link>http://asya999.github.io/post/mergeshapes/</link>
+      <pubDate>Sat, 24 May 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/mergeshapes/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:03d96d95380719f8d4c3b2ad2c7c545e&#34;&gt;Question:&lt;/h3&gt;
 
@@ -169,9 +167,7 @@ reduce = function (key,values) {
 }
 &lt;/code&gt;&lt;/pre&gt;
 </description>
-        </item>
-      
+    </item>
     
-
   </channel>
 </rss>

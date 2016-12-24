@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Ask Asya </title>
+      <title>Versioning on Ask Asya </title>
     <link>http://asya999.github.io/tags/versioning/</link>
-    <language>en-us</language>
-    <author></author>
-    <rights>(C) 2014</rights>
-    <updated>2014-09-07 00:00:00 &#43;0000 UTC</updated>
-
+    <language>en-US</language>
+    <author>Asya Kamsky</author>
+    <rights>Copyright (c) 2016, Asya Kamsky; all rights reserved.</rights>
+    <updated>Sun, 07 Sep 2014 00:00:00 UTC</updated>
     
-      
-        <item>
-          <title>Further Thoughts on How to Track Versions with MongoDB</title>
-          <link>http://asya999.github.io/post/revisitversions/</link>
-          <pubDate>Sun, 07 Sep 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/revisitversions/</guid>
-          <description>
+    <item>
+      <title>Further Thoughts on How to Track Versions with MongoDB</title>
+      <link>http://asya999.github.io/post/revisitversions/</link>
+      <pubDate>Sun, 07 Sep 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/revisitversions/</guid>
+      <description>
 
 &lt;h3 id=&#34;guest-post-by-paul-done-http-pauldone-blogspot-co-uk:a2980dc88478af7ab881c721f66e9b4d&#34;&gt;GUEST POST by &lt;a href=&#34;http://pauldone.blogspot.co.uk/&#34;&gt;Paul Done&lt;/a&gt; &lt;/h3&gt;
 
@@ -161,17 +159,15 @@ increases over time, the update latency for adding a new version remains roughly
 
 &lt;p&gt;&lt;img src=&#34;https://dl.dropboxusercontent.com/u/35111849/table.png&#34; alt=&#34;Updated Table of Tradeoffs&#34; /&gt;.&lt;/p&gt;
 </description>
-        </item>
-      
+    </item>
     
-      
-        <item>
-          <title>Best Versions with MongoDB</title>
-          <link>http://asya999.github.io/post/bestversion/</link>
-          <pubDate>Fri, 30 May 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/bestversion/</guid>
-          <description>
+    <item>
+      <title>Best Versions with MongoDB</title>
+      <link>http://asya999.github.io/post/bestversion/</link>
+      <pubDate>Fri, 30 May 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/bestversion/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:897d8a06bfdbaecbf747ed08c519e7de&#34;&gt;Question:&lt;/h3&gt;
 
@@ -617,17 +613,15 @@ db.docs_full_archive.find( {&amp;ldquo;docId&amp;rdquo;:279}, {&amp;rdquo;_id&am
 &lt;/ol&gt;
 &lt;/div&gt;
 </description>
-        </item>
-      
+    </item>
     
-      
-        <item>
-          <title>How to Merge Shapes with Aggregation Framework</title>
-          <link>http://asya999.github.io/post/mergeshapes/</link>
-          <pubDate>Sat, 24 May 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/mergeshapes/</guid>
-          <description>
+    <item>
+      <title>How to Merge Shapes with Aggregation Framework</title>
+      <link>http://asya999.github.io/post/mergeshapes/</link>
+      <pubDate>Sat, 24 May 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/mergeshapes/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:03d96d95380719f8d4c3b2ad2c7c545e&#34;&gt;Question:&lt;/h3&gt;
 
@@ -780,17 +774,15 @@ reduce = function (key,values) {
 }
 &lt;/code&gt;&lt;/pre&gt;
 </description>
-        </item>
-      
+    </item>
     
-      
-        <item>
-          <title>How to Track Versions with MongoDB</title>
-          <link>http://asya999.github.io/post/trackversions/</link>
-          <pubDate>Wed, 21 May 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/trackversions/</guid>
-          <description>
+    <item>
+      <title>How to Track Versions with MongoDB</title>
+      <link>http://asya999.github.io/post/trackversions/</link>
+      <pubDate>Wed, 21 May 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/trackversions/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:4d494242d33833a567dbfba012f85510&#34;&gt;Question:&lt;/h3&gt;
 
@@ -1107,9 +1099,7 @@ For each documentId, there is only one document which represented its current st
 
 &lt;p&gt;Since I just enabled comments and discussion on these pages, if you see a possible schema approach I didn&amp;rsquo;t mention, feel free to suggest it.  Free &amp;ldquo;MongoDB&amp;rdquo; t-shirt for you if you guess the &amp;ldquo;TBD&amp;rdquo; schema I have in mind.&lt;/p&gt;
 </description>
-        </item>
-      
+    </item>
     
-
   </channel>
 </rss>

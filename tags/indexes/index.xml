@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Ask Asya </title>
+      <title>Indexes on Ask Asya </title>
     <link>http://asya999.github.io/tags/indexes/</link>
-    <language>en-us</language>
-    <author></author>
-    <rights>(C) 2014</rights>
-    <updated>2014-08-27 00:00:00 &#43;0000 UTC</updated>
-
+    <language>en-US</language>
+    <author>Asya Kamsky</author>
+    <rights>Copyright (c) 2016, Asya Kamsky; all rights reserved.</rights>
+    <updated>Wed, 27 Aug 2014 00:00:00 UTC</updated>
     
-      
-        <item>
-          <title>Social Status Feed in MongoDB</title>
-          <link>http://asya999.github.io/post/socialstatusfeed/</link>
-          <pubDate>Wed, 27 Aug 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/socialstatusfeed/</guid>
-          <description>
+    <item>
+      <title>Social Status Feed in MongoDB</title>
+      <link>http://asya999.github.io/post/socialstatusfeed/</link>
+      <pubDate>Wed, 27 Aug 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/socialstatusfeed/</guid>
+      <description>
 
 &lt;h3 id=&#34;socialite:36d9d7ac96775ede158c079032b00e59&#34;&gt;Socialite&lt;/h3&gt;
 
@@ -53,17 +51,15 @@
 
 &lt;p&gt;Over the next few months as I write up different parts of the system, and consider the schema, indexes and possible shard data distribution, you will see me return to these two litmus tests again and again.   In order to have highest chance of success at large scale any option that hinders one of these goals should be out of the running.&lt;/p&gt;
 </description>
-        </item>
-      
+    </item>
     
-      
-        <item>
-          <title>Best Versions with MongoDB</title>
-          <link>http://asya999.github.io/post/bestversion/</link>
-          <pubDate>Fri, 30 May 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/bestversion/</guid>
-          <description>
+    <item>
+      <title>Best Versions with MongoDB</title>
+      <link>http://asya999.github.io/post/bestversion/</link>
+      <pubDate>Fri, 30 May 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/bestversion/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:897d8a06bfdbaecbf747ed08c519e7de&#34;&gt;Question:&lt;/h3&gt;
 
@@ -509,17 +505,15 @@ db.docs_full_archive.find( {&amp;ldquo;docId&amp;rdquo;:279}, {&amp;rdquo;_id&am
 &lt;/ol&gt;
 &lt;/div&gt;
 </description>
-        </item>
-      
+    </item>
     
-      
-        <item>
-          <title>How to Track Versions with MongoDB</title>
-          <link>http://asya999.github.io/post/trackversions/</link>
-          <pubDate>Wed, 21 May 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/trackversions/</guid>
-          <description>
+    <item>
+      <title>How to Track Versions with MongoDB</title>
+      <link>http://asya999.github.io/post/trackversions/</link>
+      <pubDate>Wed, 21 May 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/trackversions/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:4d494242d33833a567dbfba012f85510&#34;&gt;Question:&lt;/h3&gt;
 
@@ -836,17 +830,15 @@ For each documentId, there is only one document which represented its current st
 
 &lt;p&gt;Since I just enabled comments and discussion on these pages, if you see a possible schema approach I didn&amp;rsquo;t mention, feel free to suggest it.  Free &amp;ldquo;MongoDB&amp;rdquo; t-shirt for you if you guess the &amp;ldquo;TBD&amp;rdquo; schema I have in mind.&lt;/p&gt;
 </description>
-        </item>
-      
+    </item>
     
-      
-        <item>
-          <title>How to Model Dynamic Attributes</title>
-          <link>http://asya999.github.io/post/dynamicattributes/</link>
-          <pubDate>Tue, 15 Apr 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/dynamicattributes/</guid>
-          <description>
+    <item>
+      <title>How to Model Dynamic Attributes</title>
+      <link>http://asya999.github.io/post/dynamicattributes/</link>
+      <pubDate>Tue, 15 Apr 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/dynamicattributes/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Question:&lt;/h3&gt;
 
@@ -1189,9 +1181,7 @@ PRIMARY(2.6.0) &gt; db.products.find( { &#34;attr&#34; : { &#34;$all&#34; : [
 
 &lt;p&gt;Depending on how you need to query your attributes, there are different ways of structuring the attribute array.  You can use key-value pairs as I showed, you can use the attribute name as the key value, or you can even store a single string value &amp;ldquo;attrname::attrvalue&amp;rdquo; - best thing is to take a look at the types of queries and updates you will be running and try it different ways, benchmark which one works best and use that one.&lt;/p&gt;
 </description>
-        </item>
-      
+    </item>
     
-
   </channel>
 </rss>

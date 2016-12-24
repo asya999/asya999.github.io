@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Ask Asya </title>
+      <title>Slow on Ask Asya </title>
     <link>http://asya999.github.io/tags/slow/</link>
-    <language>en-us</language>
-    <author></author>
-    <rights>(C) 2014</rights>
-    <updated>2014-10-29 00:00:00 &#43;0000 UTC</updated>
-
+    <language>en-US</language>
+    <author>Asya Kamsky</author>
+    <rights>Copyright (c) 2016, Asya Kamsky; all rights reserved.</rights>
+    <updated>Wed, 29 Oct 2014 00:00:00 UTC</updated>
     
-      
-        <item>
-          <title>How to Find and Kill Slow Running Queries</title>
-          <link>http://asya999.github.io/post/findkillslowqueries/</link>
-          <pubDate>Wed, 29 Oct 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/findkillslowqueries/</guid>
-          <description>
+    <item>
+      <title>How to Find and Kill Slow Running Queries</title>
+      <link>http://asya999.github.io/post/findkillslowqueries/</link>
+      <pubDate>Wed, 29 Oct 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/findkillslowqueries/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:18aaff1e2e315456fa60158351f7ffe2&#34;&gt;Question:&lt;/h3&gt;
 
@@ -34,9 +32,7 @@
 
 &lt;p&gt;Be careful not to kill any long running operations that are not initiated by your application/client - it may be a necessary system operation, like chunk migration in a sharded cluster as just one example, replication threads would be another.&lt;/p&gt;
 </description>
-        </item>
-      
+    </item>
     
-
   </channel>
 </rss>

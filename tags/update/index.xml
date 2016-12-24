@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Ask Asya </title>
+      <title>Update on Ask Asya </title>
     <link>http://asya999.github.io/tags/update/</link>
-    <language>en-us</language>
-    <author></author>
-    <rights>(C) 2014</rights>
-    <updated>2014-05-19 00:00:00 &#43;0000 UTC</updated>
-
+    <language>en-US</language>
+    <author>Asya Kamsky</author>
+    <rights>Copyright (c) 2016, Asya Kamsky; all rights reserved.</rights>
+    <updated>Mon, 19 May 2014 00:00:00 UTC</updated>
     
-      
-        <item>
-          <title>What Does FindAndModify Do</title>
-          <link>http://asya999.github.io/post/findandmodify/</link>
-          <pubDate>Mon, 19 May 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/findandmodify/</guid>
-          <description>
+    <item>
+      <title>What Does FindAndModify Do</title>
+      <link>http://asya999.github.io/post/findandmodify/</link>
+      <pubDate>Mon, 19 May 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/findandmodify/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;Question:&lt;/h3&gt;
 
@@ -85,9 +83,7 @@
 &lt;/ol&gt;
 &lt;/div&gt;
 </description>
-        </item>
-      
+    </item>
     
-
   </channel>
 </rss>

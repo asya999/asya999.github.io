@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Ask Asya </title>
+      <title>Replication on Ask Asya </title>
     <link>http://asya999.github.io/tags/replication/</link>
-    <language>en-us</language>
-    <author></author>
-    <rights>(C) 2014</rights>
-    <updated>2014-02-20 00:00:00 &#43;0000 UTC</updated>
-
+    <language>en-US</language>
+    <author>Asya Kamsky</author>
+    <rights>Copyright (c) 2016, Asya Kamsky; all rights reserved.</rights>
+    <updated>Thu, 20 Feb 2014 00:00:00 UTC</updated>
     
-      
-        <item>
-          <title>Can I use more replica nodes to scale?</title>
-          <link>http://asya999.github.io/post/canreplicashelpscaling/</link>
-          <pubDate>Thu, 20 Feb 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/canreplicashelpscaling/</guid>
-          <description>
+    <item>
+      <title>Can I use more replica nodes to scale?</title>
+      <link>http://asya999.github.io/post/canreplicashelpscaling/</link>
+      <pubDate>Thu, 20 Feb 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/canreplicashelpscaling/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Question:&lt;/h3&gt;
 
@@ -99,9 +97,7 @@ secondary?   &lt;strong&gt;You gave up HA&lt;/strong&gt;.  Remember, if you can 
 
 &lt;p&gt;†  By the way, this is exactly what happens when you have a query that doesn&amp;rsquo;t have a good index to use - it does a full collection scan - more on that in a future &amp;ldquo;answer&amp;rdquo;.&lt;/p&gt;
 </description>
-        </item>
-      
+    </item>
     
-
   </channel>
 </rss>

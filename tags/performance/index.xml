@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Ask Asya </title>
+      <title>Performance on Ask Asya </title>
     <link>http://asya999.github.io/tags/performance/</link>
-    <language>en-us</language>
-    <author></author>
-    <rights>(C) 2014</rights>
-    <updated>2014-10-29 00:00:00 &#43;0000 UTC</updated>
-
+    <language>en-US</language>
+    <author>Asya Kamsky</author>
+    <rights>Copyright (c) 2016, Asya Kamsky; all rights reserved.</rights>
+    <updated>Wed, 29 Oct 2014 00:00:00 UTC</updated>
     
-      
-        <item>
-          <title>How to Find and Kill Slow Running Queries</title>
-          <link>http://asya999.github.io/post/findkillslowqueries/</link>
-          <pubDate>Wed, 29 Oct 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/findkillslowqueries/</guid>
-          <description>
+    <item>
+      <title>How to Find and Kill Slow Running Queries</title>
+      <link>http://asya999.github.io/post/findkillslowqueries/</link>
+      <pubDate>Wed, 29 Oct 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/findkillslowqueries/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:18aaff1e2e315456fa60158351f7ffe2&#34;&gt;Question:&lt;/h3&gt;
 
@@ -34,17 +32,15 @@
 
 &lt;p&gt;Be careful not to kill any long running operations that are not initiated by your application/client - it may be a necessary system operation, like chunk migration in a sharded cluster as just one example, replication threads would be another.&lt;/p&gt;
 </description>
-        </item>
-      
+    </item>
     
-      
-        <item>
-          <title>What Does FindAndModify Do</title>
-          <link>http://asya999.github.io/post/findandmodify/</link>
-          <pubDate>Mon, 19 May 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/findandmodify/</guid>
-          <description>
+    <item>
+      <title>What Does FindAndModify Do</title>
+      <link>http://asya999.github.io/post/findandmodify/</link>
+      <pubDate>Mon, 19 May 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/findandmodify/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;Question:&lt;/h3&gt;
 
@@ -113,17 +109,15 @@
 &lt;/ol&gt;
 &lt;/div&gt;
 </description>
-        </item>
-      
+    </item>
     
-      
-        <item>
-          <title>Can I use more replica nodes to scale?</title>
-          <link>http://asya999.github.io/post/canreplicashelpscaling/</link>
-          <pubDate>Thu, 20 Feb 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/canreplicashelpscaling/</guid>
-          <description>
+    <item>
+      <title>Can I use more replica nodes to scale?</title>
+      <link>http://asya999.github.io/post/canreplicashelpscaling/</link>
+      <pubDate>Thu, 20 Feb 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/canreplicashelpscaling/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Question:&lt;/h3&gt;
 
@@ -206,17 +200,23 @@ secondary?   &lt;strong&gt;You gave up HA&lt;/strong&gt;.  Remember, if you can 
 
 &lt;p&gt;†  By the way, this is exactly what happens when you have a query that doesn&amp;rsquo;t have a good index to use - it does a full collection scan - more on that in a future &amp;ldquo;answer&amp;rdquo;.&lt;/p&gt;
 </description>
-        </item>
-      
+    </item>
     
-      
-        <item>
-          <title>Why shouldn&#39;t I embed large arrays in my documents?</title>
-          <link>http://asya999.github.io/post/largeembeddedarrays/</link>
-          <pubDate>Thu, 13 Feb 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/largeembeddedarrays/</guid>
-          <description>
+    <item>
+      <title>Why shouldn&#39;t I embed large arrays in my documents?</title>
+      <link>http://asya999.github.io/post/largeembeddedarrays/</link>
+      <pubDate>Thu, 13 Feb 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/largeembeddedarrays/</guid>
+      <description>
+
+&lt;p&gt;+++
+Categories = [&amp;ldquo;MongoDB&amp;rdquo;]
+Title= &amp;ldquo;Why shouldn&amp;rsquo;t I embed large arrays in my documents?&amp;rdquo;
+Date= &amp;ldquo;2014-02-13&amp;rdquo;
+Slug= &amp;ldquo;largeembeddedarrays&amp;rdquo;
+Tags= [&amp;ldquo;schema&amp;rdquo;,&amp;ldquo;performance&amp;rdquo;,&amp;ldquo;arrays&amp;rdquo;,&amp;ldquo;mongodb&amp;rdquo;]
++++&lt;/p&gt;
 
 &lt;h3 id=&#34;question:b03b8c475184befd19c41be5b8f8950d&#34;&gt;Question:&lt;/h3&gt;
 
@@ -254,9 +254,7 @@ secondary?   &lt;strong&gt;You gave up HA&lt;/strong&gt;.  Remember, if you can 
 
 &lt;p&gt;I don&amp;rsquo;t want this to scare you from using arrays when they are a good fit for the data model - they are a powerful feature of the document database data model, but like all powerful tools, it needs to be used in the right circumstances and it should be used with care.&lt;/p&gt;
 </description>
-        </item>
-      
+    </item>
     
-
   </channel>
 </rss>

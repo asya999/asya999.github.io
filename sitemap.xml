@@ -3,8 +3,13 @@
   
   <url>
     <loc>http://asya999.github.io/</loc>
-    <lastmod>2014-10-29T00:00:00+00:00</lastmod>
+    <lastmod>2016-10-09T00:00:00+00:00</lastmod>
     <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://asya999.github.io/post/matchallarrayelements/</loc>
+    <lastmod>2016-10-09T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -15,6 +20,16 @@
   <url>
     <loc>http://asya999.github.io/post/revisitversions/</loc>
     <lastmod>2014-09-07T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://asya999.github.io/post/another-post/</loc>
+    <lastmod>2014-09-02T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://asya999.github.io/post/hello-hugo/</loc>
+    <lastmod>2014-09-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -58,7 +73,7 @@
   </url>
   
   <url>
-    <loc>http://asya999.github.io/post/embedorlink/</loc>
+    <loc>http://asya999.github.io/post/blogsandcommentsrevisted/</loc>
     <lastmod>2014-03-29T00:00:00+00:00</lastmod>
   </url>
   

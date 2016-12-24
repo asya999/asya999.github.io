@@ -1,22 +1,183 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Ask Asya </title>
+      <title> on Ask Asya </title>
     <link>http://asya999.github.io/</link>
-    <language>en-us</language>
-    <author></author>
-    <rights>(C) 2014</rights>
-    <updated>2014-10-29 00:00:00 &#43;0000 UTC</updated>
-
+    <language>en-US</language>
+    <author>Asya Kamsky</author>
+    <rights>Copyright (c) 2016, Asya Kamsky; all rights reserved.</rights>
+    <updated>Sun, 09 Oct 2016 00:00:00 UTC</updated>
     
-      
-        <item>
-          <title>How to Find and Kill Slow Running Queries</title>
-          <link>http://asya999.github.io/post/findkillslowqueries/</link>
-          <pubDate>Wed, 29 Oct 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/findkillslowqueries/</guid>
-          <description>
+    <item>
+      <title>How do I match documents where all array elements match some predicate?</title>
+      <link>http://asya999.github.io/post/matchallarrayelements/</link>
+      <pubDate>Sun, 09 Oct 2016 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/matchallarrayelements/</guid>
+      <description>
+
+&lt;h3 id=&#34;question:292757d8f30706addf536c1c5ac8ae1a&#34;&gt;Question:&lt;/h3&gt;
+
+&lt;p&gt;I need to match all documents where every element of an array matches some predicate.  Can that be done?&lt;/p&gt;
+
+&lt;h3 id=&#34;answer:292757d8f30706addf536c1c5ac8ae1a&#34;&gt;Answer:&lt;/h3&gt;
+
+&lt;p&gt;Yes, the query to do this is actually quite simple to construct.&lt;/p&gt;
+
+&lt;p&gt;Remember that when you match an array, MongoDB will &amp;ldquo;reach inside&amp;rdquo; the array to compare the predicate to every single
+array element and return the document if the predicate matches at least one of them.  I like to tell MongoDB newbies
+to think of arrays as a field that can hold many different values at the same time.  Once you start thinking of
+arrays that way, it becomes a lot easier to understand that query like &amp;ldquo;where A is greater than 50 AND A is less than 10&amp;rdquo;
+is not meaningless if &amp;ldquo;A&amp;rdquo; happens to be an array, because different array elements can satisfy the separate parts of
+this query.&lt;/p&gt;
+
+&lt;p&gt;What that means is that in order to make sure every array element matches some construct, you should negate that construct and then negate the query again.&lt;/p&gt;
+
+&lt;p&gt;A simple example can probably help:&lt;/p&gt;
+
+&lt;p&gt;Imagine you have this set of documents:
+&lt;pre class=&#34;prettyprint&#34;&gt;
+{ &amp;ldquo;a&amp;rdquo;: [ 1, 2, 3, 4 ] }
+{ &amp;ldquo;a&amp;rdquo;: [ 3, 4, 5, 6 ] }
+{ &amp;ldquo;a&amp;rdquo;: [ 5, 6, 7, 8 ] }
+{ &amp;ldquo;a&amp;rdquo;: [ 1, 2, 3, 4, 5 ] }
+&lt;/pre&gt;&lt;/p&gt;
+
+&lt;p&gt;How do you find all documents where &amp;ldquo;a&amp;rdquo; is less than 5?  That&amp;rsquo;s simple, just &lt;code&gt;db.coll.find({&amp;quot;a&amp;quot;:{&amp;quot;$lt&amp;quot;:5}})&lt;/code&gt; and we get back (unsurprisingly):
+&lt;pre class=&#34;prettyprint&#34;&gt;
+{ &amp;ldquo;a&amp;rdquo;: [ 1, 2, 3, 4 ] }
+{ &amp;ldquo;a&amp;rdquo;: [ 3, 4, 5, 6 ] }
+{ &amp;ldquo;a&amp;rdquo;: [ 1, 2, 3, 4, 5 ] }
+&lt;/pre&gt;&lt;/p&gt;
+
+&lt;p&gt;This is because at least one element in each of these arrays matches our query predicate.  The third document has no elements that are less than 5.&lt;/p&gt;
+
+&lt;p&gt;Now we want to get back only the documents which have &lt;em&gt;every&lt;/em&gt; element match the same predicate.  Another way of saying &amp;ldquo;I want every document where each element of array is less than 5&amp;rdquo; would be &amp;ldquo;I want every document where none of the elements are greater than or equal to 5&amp;rdquo;.  So we first negate our original query:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.coll.find({&amp;quot;a&amp;quot;:{&amp;quot;$gte&amp;quot;:5}})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;and then we negate the entire result:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.coll.find({&amp;quot;$nor&amp;quot;:[{&amp;quot;a&amp;quot;:{&amp;quot;$gte&amp;quot;:5}}]})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;and as you would expect, the result is:
+&lt;pre class=&#34;prettyprint&#34;&gt;
+{ &amp;ldquo;a&amp;rdquo;: [ 1, 2, 3, 4 ] }
+&lt;/pre&gt;&lt;/p&gt;
+
+&lt;p&gt;When we deal with numbers, it&amp;rsquo;s easy to &amp;ldquo;negate&amp;rdquo; a condition, but with arrays, reasoning about &amp;ldquo;$not&amp;rdquo; and &amp;ldquo;$nor&amp;rdquo; can be tricky so let&amp;rsquo;s try again with strings where we can&amp;rsquo;t use &amp;ldquo;$gt&amp;rdquo; and &amp;ldquo;$lt&amp;rdquo; so easily.
+&lt;pre class=&#34;prettyprint&#34;&gt;
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;1&amp;rdquo;, &amp;ldquo;2&amp;rdquo;, &amp;ldquo;3&amp;rdquo;, &amp;ldquo;4&amp;rdquo; ] }
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;3&amp;rdquo;, &amp;ldquo;4&amp;rdquo;, &amp;ldquo;5&amp;rdquo;, &amp;ldquo;6&amp;rdquo; ] }
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;5&amp;rdquo;, &amp;ldquo;6&amp;rdquo;, &amp;ldquo;7&amp;rdquo;, &amp;ldquo;8&amp;rdquo; ] }
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;1&amp;rdquo;, &amp;ldquo;2&amp;rdquo;, &amp;ldquo;3&amp;rdquo;, &amp;ldquo;4&amp;rdquo;, &amp;ldquo;5&amp;rdquo; ] }
+&lt;/pre&gt;&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s try the same thing we tried above where first we will look for a being one of the set &amp;ldquo;1&amp;rdquo;,&amp;ldquo;2&amp;rdquo;,&amp;ldquo;3&amp;rdquo;,&amp;ldquo;4&amp;rdquo; and go from there.
+&lt;pre class=&#34;prettyprint&#34;&gt;
+db.coll.find({&amp;ldquo;a&amp;rdquo;:{&amp;ldquo;$in&amp;rdquo;:[&amp;ldquo;1&amp;rdquo;,&amp;ldquo;2&amp;rdquo;,&amp;ldquo;3&amp;rdquo;,&amp;ldquo;4&amp;rdquo;]}})
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;1&amp;rdquo;, &amp;ldquo;2&amp;rdquo;, &amp;ldquo;3&amp;rdquo;, &amp;ldquo;4&amp;rdquo; ] }
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;3&amp;rdquo;, &amp;ldquo;4&amp;rdquo;, &amp;ldquo;5&amp;rdquo;, &amp;ldquo;6&amp;rdquo; ] }
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;1&amp;rdquo;, &amp;ldquo;2&amp;rdquo;, &amp;ldquo;3&amp;rdquo;, &amp;ldquo;4&amp;rdquo;, &amp;ldquo;5&amp;rdquo; ] }
+db.coll.find({&amp;ldquo;a&amp;rdquo;:{&amp;ldquo;$nin&amp;rdquo;:[&amp;ldquo;1&amp;rdquo;,&amp;ldquo;2&amp;rdquo;,&amp;ldquo;3&amp;rdquo;,&amp;ldquo;4&amp;rdquo;]}})
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;5&amp;rdquo;, &amp;ldquo;6&amp;rdquo;, &amp;ldquo;7&amp;rdquo;, &amp;ldquo;8&amp;rdquo; ] }
+&lt;/pre&gt;
+What happened?  Did you expect to get back every document which had an element that isn&amp;rsquo;t one of the four in the &amp;ldquo;$nin&amp;rdquo; list?  Recall that [&amp;ldquo;$nin&amp;rdquo;][2] is the same as saying [&amp;ldquo;$not&amp;rdquo;][3] &amp;ldquo;$in&amp;rdquo; which is the same as saying &amp;ldquo;take the set of documents which satisfy the query &lt;code&gt;{&amp;quot;$in&amp;quot;:[&amp;lt;list&amp;gt;]}&lt;/code&gt; and give me the rest of the documents.   So how do we express the query that we want all documents which have an &lt;em&gt;element&lt;/em&gt; that isn&amp;rsquo;t one of our list?&lt;/p&gt;
+
+&lt;p&gt;Whenever the question (or query) involves an element of an array, there&amp;rsquo;s a good chance that you should be using [&amp;ldquo;$elemMatch&amp;rdquo;][1] to express it.   Commonly, we use &amp;ldquo;$elemMatch&amp;rdquo; to express that we want the same array element to match multiple conditions in the query predicates, but it&amp;rsquo;s also correct to use it when you are trying to negate the meaning of a query by applying the negation to the element of an array, rather than to the document selection as a whole.&lt;/p&gt;
+
+&lt;pre class=&#34;prettyprint&#34;&gt;
+// find me all documents where at least one array element is *not* on our list
+db.coll.find({&#34;a&#34;:{&#34;$elemMatch&#34;:{&#34;$nin&#34;:[&#34;1&#34;,&#34;2&#34;,&#34;3&#34;,&#34;4&#34;]}}})
+{ &#34;a&#34; : [ &#34;1&#34;, &#34;2&#34;, &#34;3&#34;, &#34;4&#34;, &#34;5&#34; ] }
+{ &#34;a&#34; : [ &#34;3&#34;, &#34;4&#34;, &#34;5&#34;, &#34;6&#34; ] }
+{ &#34;a&#34; : [ &#34;5&#34;, &#34;6&#34;, &#34;7&#34;, &#34;8&#34; ] }
+// now we negate the entire query
+db.coll.find({&#34;$nor&#34;:[{&#34;a&#34;:{&#34;$elemMatch&#34;:{&#34;$nin&#34;:[&#34;1&#34;,&#34;2&#34;,&#34;3&#34;,&#34;4&#34;]}}}]})
+{ &#34;a&#34; : [ &#34;1&#34;, &#34;2&#34;, &#34;3&#34;, &#34;4&#34; ] }
+&lt;/pre&gt;
+
+&lt;p&gt;Here&amp;rsquo;s another tricky example involving a regular expression - while you can negate a regular expression, you may inadvertantly limit matching to string types only, and when you have mixed type arrays (not recommended, but it happens) that&amp;rsquo;s won&amp;rsquo;t give you desired results.&lt;/p&gt;
+
+&lt;pre class=&#34;prettyprint&#34;&gt;
+{ &#34;a&#34; : [ &#34;str1&#34;, &#34;str2&#34;, &#34;str3&#34;, &#34;notstr&#34; ] }
+{ &#34;a&#34; : [ &#34;str1&#34;, &#34;str2&#34;, &#34;str3&#34;, &#34;str4&#34; ] }
+{ &#34;a&#34; : [ 1, 2, 3, 4, 5 ] }
+{ &#34;a&#34; : [ 5, 6, 7, 8, 9 ] }
+{ &#34;a&#34; : [ &#34;str1&#34;, 0, 10 ] }
+&lt;/pre&gt;
+
+&lt;p&gt;Say I want to get back just documents that have &lt;em&gt;all&lt;/em&gt; its &amp;ldquo;a&amp;rdquo; elements start with characters &amp;ldquo;str&amp;rdquo;. Let&amp;rsquo;s look at some queries and their results:
+&lt;pre class=&#34;prettyprint&#34;&gt;
+db.coll.find({&amp;ldquo;a&amp;rdquo;:/^str/})
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;str1&amp;rdquo;, &amp;ldquo;str2&amp;rdquo;, &amp;ldquo;str3&amp;rdquo;, &amp;ldquo;notstr&amp;rdquo; ] }
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;str1&amp;rdquo;, &amp;ldquo;str2&amp;rdquo;, &amp;ldquo;str3&amp;rdquo;, &amp;ldquo;str4&amp;rdquo; ] }
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;str1&amp;rdquo;, 0, 10 ] }
+db.coll.find({&amp;ldquo;a&amp;rdquo;:{$not:/^str/}})
+{ &amp;ldquo;a&amp;rdquo; : [ 1, 2, 3, 4, 5 ] }
+{ &amp;ldquo;a&amp;rdquo; : [ 5, 6, 7, 8, 9 ] }
+// negate regular expression:
+db.coll.find({&amp;ldquo;a&amp;rdquo;:/^(?!str)/})
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;str1&amp;rdquo;, &amp;ldquo;str2&amp;rdquo;, &amp;ldquo;str3&amp;rdquo;, &amp;ldquo;notstr&amp;rdquo; ] }
+db.coll.find({&amp;ldquo;a&amp;rdquo;:{$not:/^(?!str)/}})
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;str1&amp;rdquo;, &amp;ldquo;str2&amp;rdquo;, &amp;ldquo;str3&amp;rdquo;, &amp;ldquo;str4&amp;rdquo; ] }
+{ &amp;ldquo;a&amp;rdquo; : [ 1, 2, 3, 4, 5 ] }
+{ &amp;ldquo;a&amp;rdquo; : [ 5, 6, 7, 8, 9 ] }
+{ &amp;ldquo;a&amp;rdquo; : [ &amp;ldquo;str1&amp;rdquo;, 0, 10 ] }
+&lt;/pre&gt;&lt;/p&gt;
+
+&lt;p&gt;Any surprises here?   First, we see that negated regular expression query only matches elements of type string.  We also see that &amp;ldquo;$not&amp;rdquo; added to any regex query returns the complement of documents that were returned without &amp;ldquo;$not&amp;rdquo; present.  That&amp;rsquo;s not what we need when trying to get all documents with every element that satisfies the predicate.   Let&amp;rsquo;s see if &amp;ldquo;$elemMatch&amp;rdquo; gives us what we want:&lt;/p&gt;
+
+&lt;pre class=&#34;prettyprint&#34;&gt;
+// note that $elemMatch requires a subdocument so we use [&#34;$regex&#34;][4] rather than / / syntax
+db.coll.find({&#34;a&#34;:{&#34;$elemMatch&#34;:{&#34;$regex&#34;:&#34;^str&#34;}}})
+{ &#34;a&#34; : [ &#34;str1&#34;, &#34;str2&#34;, &#34;str3&#34;, &#34;notstr&#34; ] }
+{ &#34;a&#34; : [ &#34;str1&#34;, &#34;str2&#34;, &#34;str3&#34;, &#34;str4&#34; ] }
+{ &#34;a&#34; : [ &#34;str1&#34;, 0, 10 ] }
+db.coll.find({&#34;a&#34;:{&#34;$elemMatch&#34;:{$not:/^str/}}})
+{ &#34;a&#34; : [ &#34;str1&#34;, &#34;str2&#34;, &#34;str3&#34;, &#34;notstr&#34; ] }
+{ &#34;a&#34; : [ 1, 2, 3, 4, 5 ] }
+{ &#34;a&#34; : [ 5, 6, 7, 8, 9 ] }
+{ &#34;a&#34; : [ &#34;str1&#34;, 0, 10 ] }
+// bingo!  we got back every document that had something that would NOT match &#34;^str&#34;
+// now we just negate that whole query
+db.coll.find({&#34;$nor&#34;:[{&#34;a&#34;:{&#34;$elemMatch&#34;:{$not:/^str/}}}]})
+{ &#34;a&#34; : [ &#34;str1&#34;, &#34;str2&#34;, &#34;str3&#34;, &#34;str4&#34; ] }
+&lt;/pre&gt;
+
+&lt;p&gt;Now, let&amp;rsquo;s try it on a more complex document structure with a more complex predicate.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-09T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 2, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-19T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 3, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2015-12-12T00:00:00Z&amp;quot;) } ] }
+{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-02-05T12:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 9, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-03-01T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 5, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2015-11-01T00:00:00Z&amp;quot;) } ] }
+{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 3, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-01-31T12:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 6, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-03-01T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-10-01T00:00:00Z&amp;quot;) } ] }
+{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-09T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 2, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-19T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 3, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-09-21T00:00:00Z&amp;quot;) } ] }
+{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-09T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 2, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-19T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 3, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-01-01T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 4, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-01-01T00:00:00Z&amp;quot;) } ] }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If our predicate was just about &amp;ldquo;b.x&amp;rdquo; or just about &amp;ldquo;b.y&amp;rdquo; we would use &amp;ldquo;$elemMatch&amp;rdquo; rather than dotted notation to run a query just like our first example.  To find all documents where &amp;ldquo;b.x&amp;rdquo; is either 1, 2 or 3, we can go through these steps (assume all queries ask in projection just for the field I&amp;rsquo;m querying by):
+````
+// find all documents where &amp;ldquo;b.x&amp;rdquo; is one of 1,2,3
+db.coll.find({&amp;ldquo;b.x&amp;rdquo;:{$in:[1,2,3]}})
+{ &amp;ldquo;b&amp;rdquo; : [ { &amp;ldquo;x&amp;rdquo; : 1 }, { &amp;ldquo;x&amp;rdquo; : 2 }, { &amp;ldquo;x&amp;rdquo; : 3 } ] }
+{ &amp;ldquo;b&amp;rdquo; : [ { &amp;ldquo;x&amp;rdquo; : 1 }, { &amp;ldquo;x&amp;rdquo; : 9 }, { &amp;ldquo;x&amp;rdquo; : 5 } ] }
+{ &amp;ldquo;b&amp;rdquo; : [ { &amp;ldquo;x&amp;rdquo; : 3 }, { &amp;ldquo;x&amp;rdquo; : 6 }, { &amp;ldquo;x&amp;rdquo; : 1 } ] }
+{ &amp;ldquo;b&amp;rdquo; : [ { &amp;ldquo;x&amp;rdquo; : 1 }, { &amp;ldquo;x&amp;rdquo; : 2 }, { &amp;ldquo;x&amp;rdquo; : 3 } ] }
+{ &amp;ldquo;b&amp;rdquo; : [ { &amp;ldquo;x&amp;rdquo; : 1 }, { &amp;ldquo;x&amp;rdquo; : 2 }, { &amp;ldquo;x&amp;rdquo; : 3 }, { &amp;ldquo;x&amp;rdquo; : 4 } ] }
+// another way of structuring this query is with $or
+db.coll.find({$or:[{&amp;ldquo;b.x&amp;rdquo;:1},{&amp;ldquo;b.x&amp;rdquo;:2},{&amp;ldquo;b.x&amp;rdquo;:3}]})
+db.coll.find({$and:[{&amp;ldquo;b.x&amp;rdquo;:1},{&amp;ldquo;b.x&amp;rdquo;:2},{&amp;ldquo;b.x&amp;rdquo;:3}]})&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>How to Find and Kill Slow Running Queries</title>
+      <link>http://asya999.github.io/post/findkillslowqueries/</link>
+      <pubDate>Wed, 29 Oct 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/findkillslowqueries/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:18aaff1e2e315456fa60158351f7ffe2&#34;&gt;Question:&lt;/h3&gt;
 
@@ -34,17 +195,15 @@
 
 &lt;p&gt;Be careful not to kill any long running operations that are not initiated by your application/client - it may be a necessary system operation, like chunk migration in a sharded cluster as just one example, replication threads would be another.&lt;/p&gt;
 </description>
-        </item>
-      
+    </item>
     
-      
-        <item>
-          <title>Further Thoughts on How to Track Versions with MongoDB</title>
-          <link>http://asya999.github.io/post/revisitversions/</link>
-          <pubDate>Sun, 07 Sep 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/revisitversions/</guid>
-          <description>
+    <item>
+      <title>Further Thoughts on How to Track Versions with MongoDB</title>
+      <link>http://asya999.github.io/post/revisitversions/</link>
+      <pubDate>Sun, 07 Sep 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/revisitversions/</guid>
+      <description>
 
 &lt;h3 id=&#34;guest-post-by-paul-done-http-pauldone-blogspot-co-uk:a2980dc88478af7ab881c721f66e9b4d&#34;&gt;GUEST POST by &lt;a href=&#34;http://pauldone.blogspot.co.uk/&#34;&gt;Paul Done&lt;/a&gt; &lt;/h3&gt;
 
@@ -189,17 +348,119 @@ increases over time, the update latency for adding a new version remains roughly
 
 &lt;p&gt;&lt;img src=&#34;https://dl.dropboxusercontent.com/u/35111849/table.png&#34; alt=&#34;Updated Table of Tradeoffs&#34; /&gt;.&lt;/p&gt;
 </description>
-        </item>
-      
+    </item>
     
-      
-        <item>
-          <title>Social Status Feed in MongoDB</title>
-          <link>http://asya999.github.io/post/socialstatusfeed/</link>
-          <pubDate>Wed, 27 Aug 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/socialstatusfeed/</guid>
-          <description>
+    <item>
+      <title>Another Hugo Post</title>
+      <link>http://asya999.github.io/post/another-post/</link>
+      <pubDate>Tue, 02 Sep 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/another-post/</guid>
+      <description>
+
+&lt;h2 id=&#34;toml-yaml-json-oh-my:fa77c077e3fbd48e440da594382c44fa&#34;&gt;TOML, YAML, JSON &amp;mdash; Oh my!&lt;/h2&gt;
+
+&lt;p&gt;One of the nifty Hugo features we should cover: flexible configuration and front matter formats! This entry has front
+matter in &lt;code&gt;toml&lt;/code&gt;, unlike the last one which used &lt;code&gt;yaml&lt;/code&gt;, and &lt;code&gt;json&lt;/code&gt; is also available if that&amp;rsquo;s your preference.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;toml&lt;/code&gt; front matter used on this entry:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;+++
+title = &amp;quot;Another Hugo Post&amp;quot;
+description = &amp;quot;Nothing special, but one post is boring.&amp;quot;
+date = &amp;quot;2014-09-02&amp;quot;
+categories = [ &amp;quot;example&amp;quot;, &amp;quot;configuration&amp;quot; ]
+tags = [
+    &amp;quot;example&amp;quot;,
+    &amp;quot;hugo&amp;quot;,
+    &amp;quot;toml&amp;quot;
+]
++++
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This flexibility also extends to your site&amp;rsquo;s global configuration file. You&amp;rsquo;re free to use any format you prefer::simply
+name the file &lt;code&gt;config.yaml&lt;/code&gt;, &lt;code&gt;config.toml&lt;/code&gt; or &lt;code&gt;config.json&lt;/code&gt;, and go on your merry way.&lt;/p&gt;
+
+&lt;h2 id=&#34;json-example:fa77c077e3fbd48e440da594382c44fa&#34;&gt;JSON Example&lt;/h2&gt;
+
+&lt;p&gt;How would this entry&amp;rsquo;s front matter look in &lt;code&gt;json&lt;/code&gt;? That&amp;rsquo;s easy enough to demonstrate:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+    &amp;quot;title&amp;quot;: &amp;quot;Another Hugo Post&amp;quot;,
+    &amp;quot;description&amp;quot;: &amp;quot;Nothing special, but one post is boring.&amp;quot;,
+    &amp;quot;date&amp;quot;: &amp;quot;2014-09-02&amp;quot;,
+    &amp;quot;categories&amp;quot;: [ &amp;quot;example&amp;quot;, &amp;quot;configuration&amp;quot; ],
+    &amp;quot;tags&amp;quot;: [
+        &amp;quot;example&amp;quot;,
+        &amp;quot;hugo&amp;quot;,
+        &amp;quot;toml&amp;quot;
+    ],
+}
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Hello Hugo!</title>
+      <link>http://asya999.github.io/post/hello-hugo/</link>
+      <pubDate>Mon, 01 Sep 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/hello-hugo/</guid>
+      <description>
+
+&lt;p&gt;Hello from Hugo! If you&amp;rsquo;re reading this in your browser, good job! The file &lt;code&gt;content/post/hello-hugo.md&lt;/code&gt; has been
+converted into a complete HTML document by Hugo. Isn&amp;rsquo;t that pretty nifty?&lt;/p&gt;
+
+&lt;h2 id=&#34;a-section:559804b0a39dd16d2d1d1238c597145a&#34;&gt;A Section&lt;/h2&gt;
+
+&lt;p&gt;Here&amp;rsquo;s a simple titled section where you can place whatever information you want.&lt;/p&gt;
+
+&lt;p&gt;You can use inline HTML if you want, but really there&amp;rsquo;s not much that Markdown can&amp;rsquo;t do.&lt;/p&gt;
+
+&lt;h2 id=&#34;showing-off-with-markdown:559804b0a39dd16d2d1d1238c597145a&#34;&gt;Showing off with Markdown&lt;/h2&gt;
+
+&lt;p&gt;A full cheat sheet can be found &lt;a href=&#34;https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet&#34;&gt;here&lt;/a&gt;
+or through &lt;a href=&#34;https://google.com/&#34;&gt;Google&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;There are some &lt;em&gt;easy&lt;/em&gt; examples for styling, though. I can&amp;rsquo;t &lt;strong&gt;emphasize&lt;/strong&gt; that enough.
+Creating &lt;a href=&#34;https://google.com/&#34;&gt;links&lt;/a&gt; or &lt;code&gt;inline code&lt;/code&gt; blocks are very straightforward.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;There are some *easy* examples for styling, though. I can&#39;t **emphasize** that enough.
+Creating [links](https://google.com/) or `inline code` blocks are very straightforward.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;front-matter-for-fun:559804b0a39dd16d2d1d1238c597145a&#34;&gt;Front Matter for Fun&lt;/h2&gt;
+
+&lt;p&gt;This is the meta data for this post. It is located at the top of the &lt;code&gt;content/post/hello-hugo.md&lt;/code&gt; markdown file.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;---
+title: &amp;quot;Hello Hugo!&amp;quot;
+description: &amp;quot;Saying &#39;Hello&#39; from Hugo&amp;quot;
+date: &amp;quot;2014-09-01&amp;quot;
+categories:
+  - &amp;quot;example&amp;quot;
+  - &amp;quot;hello&amp;quot;
+tags:
+  - &amp;quot;example&amp;quot;
+  - &amp;quot;hugo&amp;quot;
+  - &amp;quot;blog&amp;quot;
+---
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This section, called &amp;lsquo;Front Matter&amp;rsquo;, is what tells Hugo about the content in this file: the &lt;code&gt;title&lt;/code&gt; of the item, the
+&lt;code&gt;description&lt;/code&gt;, and the &lt;code&gt;date&lt;/code&gt; it was posted. In our example, we&amp;rsquo;ve added two custom bits of data too. The &lt;code&gt;categories&lt;/code&gt; and
+&lt;code&gt;tags&lt;/code&gt; sections are used in this example for indexing/grouping content. You will learn more about what that means by
+examining the code in this example and through reading the Hugo &lt;a href=&#34;http://gohugo.io/overview/introduction&#34;&gt;documentation&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Social Status Feed in MongoDB</title>
+      <link>http://asya999.github.io/post/socialstatusfeed/</link>
+      <pubDate>Wed, 27 Aug 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/socialstatusfeed/</guid>
+      <description>
 
 &lt;h3 id=&#34;socialite:36d9d7ac96775ede158c079032b00e59&#34;&gt;Socialite&lt;/h3&gt;
 
@@ -236,17 +497,15 @@ increases over time, the update latency for adding a new version remains roughly
 
 &lt;p&gt;Over the next few months as I write up different parts of the system, and consider the schema, indexes and possible shard data distribution, you will see me return to these two litmus tests again and again.   In order to have highest chance of success at large scale any option that hinders one of these goals should be out of the running.&lt;/p&gt;
 </description>
-        </item>
-      
+    </item>
     
-      
-        <item>
-          <title>Best Versions with MongoDB</title>
-          <link>http://asya999.github.io/post/bestversion/</link>
-          <pubDate>Fri, 30 May 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/bestversion/</guid>
-          <description>
+    <item>
+      <title>Best Versions with MongoDB</title>
+      <link>http://asya999.github.io/post/bestversion/</link>
+      <pubDate>Fri, 30 May 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/bestversion/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:897d8a06bfdbaecbf747ed08c519e7de&#34;&gt;Question:&lt;/h3&gt;
 
@@ -692,17 +951,15 @@ db.docs_full_archive.find( {&amp;ldquo;docId&amp;rdquo;:279}, {&amp;rdquo;_id&am
 &lt;/ol&gt;
 &lt;/div&gt;
 </description>
-        </item>
-      
+    </item>
     
-      
-        <item>
-          <title>How to Merge Shapes with Aggregation Framework</title>
-          <link>http://asya999.github.io/post/mergeshapes/</link>
-          <pubDate>Sat, 24 May 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/mergeshapes/</guid>
-          <description>
+    <item>
+      <title>How to Merge Shapes with Aggregation Framework</title>
+      <link>http://asya999.github.io/post/mergeshapes/</link>
+      <pubDate>Sat, 24 May 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/mergeshapes/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:03d96d95380719f8d4c3b2ad2c7c545e&#34;&gt;Question:&lt;/h3&gt;
 
@@ -855,17 +1112,15 @@ reduce = function (key,values) {
 }
 &lt;/code&gt;&lt;/pre&gt;
 </description>
-        </item>
-      
+    </item>
     
-      
-        <item>
-          <title>How to Track Versions with MongoDB</title>
-          <link>http://asya999.github.io/post/trackversions/</link>
-          <pubDate>Wed, 21 May 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/trackversions/</guid>
-          <description>
+    <item>
+      <title>How to Track Versions with MongoDB</title>
+      <link>http://asya999.github.io/post/trackversions/</link>
+      <pubDate>Wed, 21 May 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/trackversions/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:4d494242d33833a567dbfba012f85510&#34;&gt;Question:&lt;/h3&gt;
 
@@ -1182,17 +1437,15 @@ For each documentId, there is only one document which represented its current st
 
 &lt;p&gt;Since I just enabled comments and discussion on these pages, if you see a possible schema approach I didn&amp;rsquo;t mention, feel free to suggest it.  Free &amp;ldquo;MongoDB&amp;rdquo; t-shirt for you if you guess the &amp;ldquo;TBD&amp;rdquo; schema I have in mind.&lt;/p&gt;
 </description>
-        </item>
-      
+    </item>
     
-      
-        <item>
-          <title>What Does FindAndModify Do</title>
-          <link>http://asya999.github.io/post/findandmodify/</link>
-          <pubDate>Mon, 19 May 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/findandmodify/</guid>
-          <description>
+    <item>
+      <title>What Does FindAndModify Do</title>
+      <link>http://asya999.github.io/post/findandmodify/</link>
+      <pubDate>Mon, 19 May 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/findandmodify/</guid>
+      <description>
 
 &lt;h3 id=&#34;question:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;Question:&lt;/h3&gt;
 
@@ -1261,769 +1514,7 @@ For each documentId, there is only one document which represented its current st
 &lt;/ol&gt;
 &lt;/div&gt;
 </description>
-        </item>
-      
+    </item>
     
-      
-        <item>
-          <title>How to Balance Collections Across Your Sharded Cluster</title>
-          <link>http://asya999.github.io/post/taggedcollectionbalancing/</link>
-          <pubDate>Tue, 29 Apr 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/taggedcollectionbalancing/</guid>
-          <description>
-
-&lt;h3 id=&#34;question:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;Question:&lt;/h3&gt;
-
-&lt;p&gt;Is it possible to use &lt;a href=&#34;http://docs.mongodb.org/manual/core/tag-aware-sharding/&#34;&gt;&amp;ldquo;Tag aware sharding&amp;rdquo;&lt;/a&gt;  feature without having to use a special shard key?  The example in the tutorial makes it look like we would have to change our shard key to have a prefix value that we can define tag ranges on but we&amp;rsquo;re already sharded.  We have many collections in this database and we want to limit each collection to a subset of the shards so we can isolate the busy ones from each other.&lt;/p&gt;
-
-&lt;h3 id=&#34;answer:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;Answer:&lt;/h3&gt;
-
-&lt;p&gt;Yes, that is absolutely possible, and it&amp;rsquo;s one of the cool capabilities of tag aware sharding.   A quick review of the feature.&lt;/p&gt;
-
-&lt;h5 id=&#34;tag-aware-sharding-feature:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;Tag aware sharding feature&lt;/h5&gt;
-
-&lt;p&gt;Tags associate specific ranges of shard key values with specific shards for use in managing deployment patterns.
-What this means is that in your sharded cluster you can assign zero, one or more tags (or labels) to each shard.  Then you can assign ranges of shard key values in various sharded collections to these tags.  The balancer then moves the appropriate chunks to appropriate shards to keep things the way you &amp;ldquo;assigned&amp;rdquo; them.&lt;/p&gt;
-
-&lt;h5 id=&#34;the-balancer-diversion-into-migration-details:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;The Balancer: Diversion into migration details&lt;/h5&gt;
-
-&lt;p&gt;The whole balancing and migrations process is worthy of its own separate write-up but for now, I will simplify most of it and point out at the high level that the balancer is a thread that runs on mongos that wakes up periodically and checks (1) if it should be running (2) if there is anything for it to do.†  For the balancer &amp;ldquo;something to do&amp;rdquo; is always about moving chunks between shards.  The priorities that it considers when deciding which chunks need to be moved are as follows:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;draining shards: if one of the shards is &amp;ldquo;draining&amp;rdquo; - i.e. you plan to decommission it - then this will always be the first priority for all migrations unless it has no data left.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;tagged shards: if any chunks are on the &amp;ldquo;wrong&amp;rdquo; tagged shard for  its range, then it has to be moved to a &amp;ldquo;correct&amp;rdquo; shard.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;balance the remaining chunks: if the shard with the most chunks has nine+ more chunks than the shard with the fewest chunks, then the balancer will move chunks to try to keep things in balance.&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h5 id=&#34;how-do-you-tag-shards-and-ranges:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;How do you tag shards and ranges?&lt;/h5&gt;
-
-&lt;p&gt;All you have to do for tagging to work is mark some shards with &amp;ldquo;tags&amp;rdquo; and specify which ranges of shard key values will be associated with that tag.   The relevant commands are &lt;code&gt;sh.addTag(&amp;quot;shardName&amp;quot;,&amp;quot;tagName&amp;quot;)&lt;/code&gt; and &lt;code&gt;sh.addTagRange(&amp;quot;namespace&amp;quot;, { shardKey: minValue }, { shardKey: maxValue }, &amp;quot;tagName&amp;quot;)&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;The MongoDB docs have a great tutorial that you always see used as an example for tag aware sharding - your shard key has to include a prefix field that can be used to figure out which geographical region the user is in, and the range of shard key values that starts with certain regions will be associated with shards in that data center.&lt;/p&gt;
-
-&lt;p&gt;That&amp;rsquo;s all fine and good, but I&amp;rsquo;ll show you that it doesn&amp;rsquo;t have to be nearly that complex.&lt;/p&gt;
-
-&lt;h5 id=&#34;how-you-can-use-tags-to-designate-which-shards-a-sharded-collection-can-use:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;How you can use tags to designate which shards a sharded collection can use.&lt;/h5&gt;
-
-&lt;p&gt;Let&amp;rsquo;s walk through an example.   I have three shards in my test cluster:&lt;/p&gt;
-
-&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; db.getSiblingDB(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;config&amp;quot;&lt;/span&gt;).shards.find()
-    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0000&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30000&amp;quot;&lt;/span&gt; }
-    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30001&amp;quot;&lt;/span&gt; }
-    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0002&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30002&amp;quot;&lt;/span&gt; }
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
-
-&lt;p&gt;I will add two tags, each to two shards.  Let&amp;rsquo;s say that shards 0000 and 0001 have a lot of RAM, and shards 0001 and 0002 have very fast flash storage and I plan to distribute my data to take advantage of the different physical resources:&lt;/p&gt;
-
-&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0000&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt;)
-    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0002&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt;)
-    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt;)
-    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt;)
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
-
-&lt;p&gt;Now that I tagged my shards, I will add tag ranges to two different collections.  Note, I don&amp;rsquo;t have these collections yet, and I haven&amp;rsquo;t even sharded them yet, but I want to have the tags ready for them when they get created:&lt;/p&gt;
-
-&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addTagRange(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigidx&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MinKey},{_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MaxKey},&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt;);
-    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addTagRange(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigdata&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MinKey},{_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MaxKey},&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt;);
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
-
-&lt;p&gt;I have a collection with big indexes (called bigidx) that I want to constrain only to shards tagged &amp;ldquo;HI_MEM&amp;rdquo; and I have another collection with a lot of data (called bigdata) that I want to keep on shards that have flash storage because I know the data will be read from disk a lot.  Note that I only needed to know what I will be using as my shard key, and I specified MinKey to MaxKey as my range - that means &lt;em&gt;all&lt;/em&gt; of the chunks!&lt;/p&gt;
-
-&lt;p&gt;I will now shard the collections and take a look at how things are shaping up:&lt;/p&gt;
-
-&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.enableSharding(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb&amp;quot;&lt;/span&gt;)
-{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ok&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
-tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.shardCollection(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigdata&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;hashed&amp;quot;&lt;/span&gt;})
-{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;collectionsharded&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigdata&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ok&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
-tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.shardCollection(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigidx&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;hashed&amp;quot;&lt;/span&gt;})
-{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;collectionsharded&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigidx&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ok&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
-tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.status()
-&lt;span style=&#34;color: #666666&#34;&gt;---&lt;/span&gt; Sharding Status &lt;span style=&#34;color: #666666&#34;&gt;---&lt;/span&gt;
-  sharding version&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
-     &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
-     &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;version&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;4&lt;/span&gt;,
-     &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;minCompatibleVersion&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;4&lt;/span&gt;,
-     &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;currentVersion&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;5&lt;/span&gt;,
-     &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;clusterId&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; ObjectId(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;535be5d7d5274545e9d01426&amp;quot;&lt;/span&gt;)
-  }
-  shards&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
-     {  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0000&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30000&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tags&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt; ] }
-     {  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30001&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tags&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt; ] }
-     {  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0002&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30002&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tags&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt; ] }
-  databases&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
-     {  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;admin&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;partitioned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;primary&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;config&amp;quot;&lt;/span&gt; }
-     {  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;partitioned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;primary&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt; }
-         tagdb.bigdata
-             shard key&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;hashed&amp;quot;&lt;/span&gt; }
-             chunks&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
-                 shard0001    &lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;
-                 shard0002    &lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0002
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0002
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0002
-              tag&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; FLASH  { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } }
-         tagdb.bigidx
-             shard key&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;hashed&amp;quot;&lt;/span&gt; }
-             chunks&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
-                 shard0000    &lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;
-                 shard0001    &lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0000
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0000
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0000
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
-              tag&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; HI_MEM  { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } }
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
-
-&lt;h5 id=&#34;how-you-can-use-tags-to-make-collection-migrate-from-one-shard-to-another:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;How you can use tags to make collection migrate from one shard to another&lt;/h5&gt;
-
-&lt;p&gt;What if you have a number of unsharded collections in your sharded database and you don&amp;rsquo;t want for all of them to hang out on the primary shard for this DB?   Well, you might need unique tags for each shard, but then you can do this to move collection one to &lt;code&gt;shard0001&lt;/code&gt;:&lt;/p&gt;
-
-&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0002&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard2&amp;quot;&lt;/span&gt;)
-tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addTagRange(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.one&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MinKey},{_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MaxKey},&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard2&amp;quot;&lt;/span&gt;)
-tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.shardCollection(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.one&amp;quot;&lt;/span&gt;,{_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;})
-{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;collectionsharded&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.one&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ok&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
-tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.status()
-   ...
-      tagdb.one
-         shard key&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
-         chunks&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
-             shard0002    &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;
-         { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0002
-          tag&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard2  { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } }
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
-
-&lt;p&gt;If we peek inside the config database, we should see our tags in the &lt;code&gt;config.tags&lt;/code&gt; collection, our shard ranges attached to chunks in &lt;code&gt;config.chunks&lt;/code&gt; and we can find evidence of the chunk moves due to tag policy in the &lt;code&gt;config.changelog&lt;/code&gt; collection, as well as the &lt;code&gt;mongos&lt;/code&gt; and &lt;code&gt;mongod&lt;/code&gt; log files.&lt;/p&gt;
-
-&lt;p&gt;To summarize: tag aware sharding can be easily used to distribute a single collection a particular way across all shards,  to isolate whole collections on a subset of shards, and even to move an entire collection from one shard to another.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;† This is definitely a gross simplification of all the steps the balancer goes through - look for a more detailed write-up demystifying the inner workings of migrations some time soon.&lt;/p&gt;
-</description>
-        </item>
-      
-    
-      
-        <item>
-          <title>How to Model Dynamic Attributes</title>
-          <link>http://asya999.github.io/post/dynamicattributes/</link>
-          <pubDate>Tue, 15 Apr 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/dynamicattributes/</guid>
-          <description>
-
-&lt;h3 id=&#34;question:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Question:&lt;/h3&gt;
-
-&lt;p&gt;I&amp;rsquo;ve heard that MongoDB can be effectively used to model &amp;ldquo;dynamic attributes&amp;rdquo; - where you don&amp;rsquo;t know up front all the different attributes and not all attributes apply to all items.  Can you describe how that can be done, and in particular how it can be effectively indexed?&lt;/p&gt;
-
-&lt;h3 id=&#34;answer:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Answer:&lt;/h3&gt;
-
-&lt;h5 id=&#34;the-problem:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;The problem:&lt;/h5&gt;
-
-&lt;p&gt;Imagine you are building an e-commerce site and you aspire to be as big as amazon.com some day, which means you will be selling many different types of products.  It&amp;rsquo;s easy to see that there will be sets of attributes that will only apply to some of the products you sell.&lt;/p&gt;
-
-&lt;p&gt;Product document may look like this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;{
-  SKU: &amp;quot;XRD12349&amp;quot;,
-  type: &amp;quot;book&amp;quot;,
-  title: &amp;quot;MongoDB, The Definitive Guide&amp;quot;,
-  ISBN: &amp;quot;xxx&amp;quot;,
-  author: [ &amp;quot;Kristina Chodorow&amp;quot;, &amp;quot;Mike Dieroff&amp;quot;],
-  genre: [&amp;quot;computing&amp;quot;, &amp;quot;databases&amp;quot;]
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;or this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;{
-  SKU: &amp;quot;Y32944EW&amp;quot;,
-  type: &amp;quot;shoes&amp;quot;,
-  manufacturer: &amp;quot;ShoesForAll&amp;quot;,
-  color: &amp;quot;blue&amp;quot;,
-  style: &amp;quot;comfort&amp;quot;,
-  size: &amp;quot;7B&amp;quot;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can see how it would be extremely challenging to manage a collection that has an incredibly wide variety of document &amp;ldquo;shapes&amp;rdquo;.  Now, while some people call MongoDB &amp;ldquo;schemaless&amp;rdquo; I am not a fan of this designation.  The schema of each document is defined by the document itself.  To be able to build a robust applications you need to decide what the schema of the documents will be, otherwise your application will spend as much time examining the documents to learn their schema as providing actual functionality.&lt;/p&gt;
-
-&lt;h5 id=&#34;possible-solutions:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Possible solutions:&lt;/h5&gt;
-
-&lt;p&gt;One way to index the attributes you want to be able to search by is by creating an index on each such attribute in a schema like the one above.  This is not practical, even if you use &lt;a href=&#34;http://docs.mongodb.org/manual/core/index-sparse/&#34;&gt;&amp;ldquo;sparse&amp;rdquo; indexes&lt;/a&gt; (since many attributes will be set only on a small subset of the products), because you may end up with dozens, if not hundreds of indexes.  In addition, every time a new attribute is introduced, a new index has to be added on the collection.  Not very practical.&lt;/p&gt;
-
-&lt;p&gt;The other solution, which is a nice generalization of storing attributes which are numerous and not known up-front, is to use an array of key-value pairs.&lt;/p&gt;
-
-&lt;p&gt;Our two sample documents might then become:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;{
-  SKU: &amp;quot;XRD12349&amp;quot;,
-  type: &amp;quot;book&amp;quot;,
-  attr: [
-      { &amp;quot;k&amp;quot;: &amp;quot;title&amp;quot;, 
-        &amp;quot;v&amp;quot;: &amp;quot;MongoDB, The Definitive Guide, 1st Edition&amp;quot;
-      },
-      { &amp;quot;k&amp;quot;: &amp;quot;ISBN&amp;quot;,
-        &amp;quot;v&amp;quot;: &amp;quot;xxx&amp;quot;
-      },
-      { &amp;quot;k&amp;quot;: &amp;quot;author&amp;quot;,
-        &amp;quot;v&amp;quot;: &amp;quot;Kristina Chodorow&amp;quot;
-      },
-      { &amp;quot;k&amp;quot;: &amp;quot;author&amp;quot;,
-        &amp;quot;v&amp;quot;: &amp;quot;Mike Dieroff&amp;quot;
-      },
-      { &amp;quot;k&amp;quot;: &amp;quot;genre&amp;quot;,
-        &amp;quot;v&amp;quot;: [&amp;quot;computing&amp;quot;, &amp;quot;databases&amp;quot;] 
-      }
-  ]
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;and&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;{
-  SKU: &amp;quot;Y32944EW&amp;quot;,
-  type: &amp;quot;shoes&amp;quot;,
-  attr: [
-      { &amp;quot;k&amp;quot;: &amp;quot;manufacturer&amp;quot;, 
-        &amp;quot;v&amp;quot;: &amp;quot;ShoesForAll&amp;quot;,
-      },
-      { &amp;quot;k&amp;quot;: &amp;quot;color&amp;quot;, 
-        &amp;quot;v&amp;quot;: &amp;quot;blue&amp;quot;,
-      },
-      { &amp;quot;k&amp;quot;: &amp;quot;style&amp;quot;, 
-        &amp;quot;v&amp;quot;: &amp;quot;comfort&amp;quot;,
-      },
-      { &amp;quot;k&amp;quot;: &amp;quot;size&amp;quot;, 
-        &amp;quot;v&amp;quot;: &amp;quot;7B&amp;quot;
-      }
-  ]
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Note that for an attribute that can have multiple values you have a choice of storing it as an array in a single &amp;ldquo;key&amp;rdquo; or you can repeat keys that can have more than one value.&lt;/p&gt;
-
-&lt;p&gt;Now we can index all of these attribute values with the following:&lt;/p&gt;
-
-&lt;pre class=&#34;prettyprint lang-js&#34;&gt;
-PRIMARY(2.6.0) &gt; db.products.ensureIndex( { &#34;attr.k&#34;:1, &#34;attr.v&#34;:1 } )
-&lt;/pre&gt;
-
-&lt;p&gt;Let&amp;rsquo;s take a look at how the queries will execute and use the index by using the &amp;ldquo;explain()&amp;rdquo; helper in MongoDB shell.  When filtering based on attribute key-value pair, remember to use the &lt;code&gt;$elemMatch&lt;/code&gt; operator to indicate that both conditions must be satisfied by the same element of the array.&lt;/p&gt;
-
-&lt;pre class=&#34;prettyprint lang-js&#34;&gt;
-PRIMARY(2.6.0) &gt; db.products.find( 
-                                { &#34;attr&#34;: { &#34;$elemMatch&#34; : { &#34;k&#34;:&#34;size&#34;, &#34;v&#34;:&#34;8B&#34; } }
-                     } ).explain()
-{
-    &#34;cursor&#34; : &#34;BtreeCursor attr.k_1_attr.v_1&#34;,
-    &#34;isMultiKey&#34; : true,
-    &#34;n&#34; : 104,
-    &#34;nscannedObjects&#34; : 104,
-    &#34;nscanned&#34; : 104,
-    &#34;nscannedObjectsAllPlans&#34; : 104,
-    &#34;nscannedAllPlans&#34; : 104,
-    &#34;scanAndOrder&#34; : false,
-    &#34;indexOnly&#34; : false,
-    &#34;nYields&#34; : 0,
-    &#34;nChunkSkips&#34; : 0,
-    &#34;millis&#34; : 2,
-    &#34;indexBounds&#34; : {
-        &#34;attr.k&#34; : [
-            [
-                &#34;size&#34;,
-                &#34;size&#34;
-            ]
-        ],
-        &#34;attr.v&#34; : [
-            [
-                &#34;8B&#34;,
-                &#34;8B&#34;
-            ]
-        ]
-    },
-    &#34;server&#34; : &#34;asyasmacbook.local:27017&#34;,
-    &#34;filterSet&#34; : false
-}
-&lt;/pre&gt;
-
-&lt;pre class=&#34;prettyprint lang-js&#34;&gt;
-PRIMARY(2.6.0) &gt; db.products.find(
-                  { &#34;attr&#34; :  { &#34;$elemMatch&#34; : { &#34;k&#34;:&#34;color&#34;, &#34;v&#34;:&#34;blue&#34;}}
-              } ).explain()
-{
-    &#34;cursor&#34; : &#34;BtreeCursor attr.k_1_attr.v_1&#34;,
-    &#34;isMultiKey&#34; : true,
-    &#34;n&#34; : 98,
-    &#34;nscannedObjects&#34; : 98,
-    &#34;nscanned&#34; : 98,
-    &#34;nscannedObjectsAllPlans&#34; : 98,
-    &#34;nscannedAllPlans&#34; : 98,
-    &#34;scanAndOrder&#34; : false,
-    &#34;indexOnly&#34; : false,
-    &#34;nYields&#34; : 0,
-    &#34;nChunkSkips&#34; : 0,
-    &#34;millis&#34; : 0,
-    &#34;indexBounds&#34; : {
-        &#34;attr.k&#34; : [
-            [
-                &#34;color&#34;,
-                &#34;color&#34;
-            ]
-        ],
-        &#34;attr.v&#34; : [
-            [
-                &#34;blue&#34;,
-                &#34;blue&#34;
-            ]
-        ]
-    },
-    &#34;server&#34; : &#34;asyasmacbook.local:27017&#34;,
-    &#34;filterSet&#34; : false
-}
-&lt;/pre&gt;
-
-&lt;p&gt;Now I&amp;rsquo;ll use both criteria, and I&amp;rsquo;ll add another one for attribute &amp;ldquo;style&amp;rdquo; - since I want to match only when &lt;em&gt;all&lt;/em&gt; are true (rather than when any is true) I will use the &lt;code&gt;$all&lt;/code&gt; operator.  Passing &amp;ldquo;true&amp;rdquo; as an argument to explain will show all considered plans and not just the winning plan.&lt;/p&gt;
-
-&lt;pre class=&#34;prettyprint lang-js&#34;&gt;
-PRIMARY(2.6.0) &gt; db.products.find( { &#34;attr&#34; : { &#34;$all&#34; : [ 
-                    { &#34;$elemMatch&#34; : { &#34;k&#34;:&#34;style&#34;, &#34;v&#34;:&#34;comfort&#34; } }, 
-                    { &#34;$elemMatch&#34; : { &#34;k&#34;:&#34;color&#34;, &#34;v&#34;:&#34;blue&#34; } },
-                    { &#34;$elemMatch&#34; : { &#34;k&#34;:&#34;size&#34;, &#34;v&#34;:&#34;8B&#34; } } 
-                  ] } } ).explain(true)
-{
-    &#34;cursor&#34; : &#34;BtreeCursor attr.k_1_attr.v_1&#34;,
-    &#34;isMultiKey&#34; : true,
-    &#34;n&#34; : 1,
-    &#34;nscannedObjects&#34; : 98,
-    &#34;nscanned&#34; : 98,
-    &#34;nscannedObjectsAllPlans&#34; : 296,
-    &#34;nscannedAllPlans&#34; : 298,
-    &#34;scanAndOrder&#34; : false,
-    &#34;indexOnly&#34; : false,
-    &#34;nYields&#34; : 2,
-    &#34;nChunkSkips&#34; : 0,
-    &#34;millis&#34; : 1,
-    &#34;indexBounds&#34; : {
-        &#34;attr.k&#34; : [
-            [
-                &#34;color&#34;,
-                &#34;color&#34;
-            ]
-        ],
-        &#34;attr.v&#34; : [
-            [
-                &#34;blue&#34;,
-                &#34;blue&#34;
-            ]
-        ]
-    },
-    &#34;allPlans&#34; : [
-        {
-            &#34;cursor&#34; : &#34;BtreeCursor attr.k_1_attr.v_1&#34;,
-            &#34;isMultiKey&#34; : true,
-            &#34;n&#34; : 1,
-            &#34;nscannedObjects&#34; : 98,
-            &#34;nscanned&#34; : 98,
-            &#34;scanAndOrder&#34; : false,
-            &#34;indexOnly&#34; : false,
-            &#34;nChunkSkips&#34; : 0,
-            &#34;indexBounds&#34; : {
-                &#34;attributes.name&#34; : [
-                    [
-                        &#34;color&#34;,
-                        &#34;color&#34;
-                    ]
-                ],
-                &#34;attributes.value&#34; : [
-                    [
-                        &#34;blue&#34;,
-                        &#34;blue&#34;
-                    ]
-                ]
-            }
-        },
-        {
-            &#34;cursor&#34; : &#34;BtreeCursor attr.k_1_attr.v_1&#34;,
-            &#34;isMultiKey&#34; : true,
-            &#34;n&#34; : 1,
-            &#34;nscannedObjects&#34; : 99,
-            &#34;nscanned&#34; : 100,
-            &#34;scanAndOrder&#34; : false,
-            &#34;indexOnly&#34; : false,
-            &#34;nChunkSkips&#34; : 0,
-            &#34;indexBounds&#34; : {
-                &#34;attributes.name&#34; : [
-                    [
-                        &#34;style&#34;,
-                        &#34;style&#34;
-                    ]
-                ],
-                &#34;attributes.value&#34; : [
-                    [
-                        &#34;comfort&#34;,
-                        &#34;comfort&#34;
-                    ]
-                ]
-            }
-        },
-        {
-            &#34;cursor&#34; : &#34;BtreeCursor attr.k_1_attr.v_1&#34;,
-            &#34;isMultiKey&#34; : true,
-            &#34;n&#34; : 1,
-            &#34;nscannedObjects&#34; : 99,
-            &#34;nscanned&#34; : 100,
-            &#34;scanAndOrder&#34; : false,
-            &#34;indexOnly&#34; : false,
-            &#34;nChunkSkips&#34; : 0,
-            &#34;indexBounds&#34; : {
-                &#34;attributes.name&#34; : [
-                    [
-                        &#34;size&#34;,
-                        &#34;size&#34;
-                    ]
-                ],
-                &#34;attributes.value&#34; : [
-                    [
-                        &#34;8B&#34;,
-                        &#34;8B&#34;
-                    ]
-                ]
-            }
-        }
-    ],
-    &#34;server&#34; : &#34;asyasmacbook.local:27017&#34;,
-    &#34;filterSet&#34; : false,
-    &#34;stats&#34; : {
-        &#34;type&#34; : &#34;KEEP_MUTATIONS&#34;,
-        &#34;works&#34; : 100,
-        &#34;yields&#34; : 2,
-        &#34;unyields&#34; : 2,
-        &#34;invalidates&#34; : 0,
-        &#34;advanced&#34; : 1,
-        &#34;needTime&#34; : 97,
-        &#34;needFetch&#34; : 0,
-        &#34;isEOF&#34; : 1,
-        &#34;children&#34; : [
-            {
-                &#34;type&#34; : &#34;FETCH&#34;,
-                &#34;works&#34; : 99,
-                &#34;yields&#34; : 2,
-                &#34;unyields&#34; : 2,
-                &#34;invalidates&#34; : 0,
-                &#34;advanced&#34; : 1,
-                &#34;needTime&#34; : 97,
-                &#34;needFetch&#34; : 0,
-                &#34;isEOF&#34; : 1,
-                &#34;alreadyHasObj&#34; : 0,
-                &#34;forcedFetches&#34; : 0,
-                &#34;matchTested&#34; : 1,
-                &#34;children&#34; : [
-                    {
-                        &#34;type&#34; : &#34;IXSCAN&#34;,
-                        &#34;works&#34; : 98,
-                        &#34;yields&#34; : 2,
-                        &#34;unyields&#34; : 2,
-                        &#34;invalidates&#34; : 0,
-                        &#34;advanced&#34; : 98,
-                        &#34;needTime&#34; : 0,
-                        &#34;needFetch&#34; : 0,
-                        &#34;isEOF&#34; : 1,
-                        &#34;keyPattern&#34; : &#34;{ attr.k: 1.0, attr.v: 1.0 }&#34;,
-                        &#34;boundsVerbose&#34; : &#34;field #0[&#39;attr.k&#39;]: [\&#34;color\&#34;, \&#34;color\&#34;], field #1[&#39;attr.v&#39;]: [\&#34;blue\&#34;, \&#34;blue\&#34;]&#34;,
-                        &#34;isMultiKey&#34; : 1,
-                        &#34;yieldMovedCursor&#34; : 0,
-                        &#34;dupsTested&#34; : 98,
-                        &#34;dupsDropped&#34; : 0,
-                        &#34;seenInvalidated&#34; : 0,
-                        &#34;matchTested&#34; : 0,
-                        &#34;keysExamined&#34; : 98,
-                        &#34;children&#34; : [ ]
-                    }
-                ]
-            }
-        ]
-    }
-}
-&lt;/pre&gt;
-
-&lt;p&gt;What does this mean?   If we look at &lt;code&gt;allPlans&lt;/code&gt; we see that the optimizer tried our attribute index separately (but in parallel) with each of the clauses inside the $all array.  The winning plan was for &amp;ldquo;color&amp;rdquo; attribute because it turned out to be the most selective.&lt;/p&gt;
-
-&lt;p&gt;In MongoDB 2.4 this was not possible and unfortunately the optimizer would use the index for the first clause of the &lt;code&gt;$all&lt;/code&gt; expression.  If it happened to have low selectivity, then you didn&amp;rsquo;t get as good performance as you might have, had you ordered your conditions differently.  In 2.6 the order of expressions inside &lt;code&gt;$all&lt;/code&gt; does not make a difference as the one that&amp;rsquo;s most selective will be the one used by the query optimizer.&lt;/p&gt;
-
-&lt;p&gt;Depending on how you need to query your attributes, there are different ways of structuring the attribute array.  You can use key-value pairs as I showed, you can use the attribute name as the key value, or you can even store a single string value &amp;ldquo;attrname::attrvalue&amp;rdquo; - best thing is to take a look at the types of queries and updates you will be running and try it different ways, benchmark which one works best and use that one.&lt;/p&gt;
-</description>
-        </item>
-      
-    
-      
-    
-      
-        <item>
-          <title>Schema Design - Blog Posts and Comments revisited</title>
-          <link>http://asya999.github.io/post/embedorlink/</link>
-          <pubDate>Sat, 29 Mar 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/embedorlink/</guid>
-          <description>
-
-&lt;h3 id=&#34;question:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Question:&lt;/h3&gt;
-
-&lt;p&gt;I have a question about whether I should store comments inside the blog post entry or in a separate collection. It&amp;rsquo;d be nice to see examples of how to access various fields in both cases, how to index and in general how to know when to embed and when to link.&lt;/p&gt;
-
-&lt;h3 id=&#34;answer:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Answer:&lt;/h3&gt;
-
-&lt;h4 id=&#34;the-blog-schema:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;The Blog Schema&lt;/h4&gt;
-
-&lt;p&gt;There has been a lot of discussion and write-ups about how to model a simple blog that allows comments on posts - it&amp;rsquo;s a fairly simple example that everyone can understand, and at the same time it offers several opportunities to choose different ways to structure the schema.  The example usually consists of four concepts: users(or authors), posts, tags on posts and comments on posts.&lt;/p&gt;
-
-&lt;h5 id=&#34;authors:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Authors&lt;/h5&gt;
-
-&lt;p&gt;Typically everyone agrees that the authors or users are stored in a  collection of their own where you keep their information - everything from their username, password, when they last logged in, when they signed up for the service, etc.&lt;/p&gt;
-
-&lt;h5 id=&#34;posts:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Posts&lt;/h5&gt;
-
-&lt;p&gt;There is also little argument that posts should be stored separately from authors - I don&amp;rsquo;t think I&amp;rsquo;ve ever heard anyone advocate for embedding posts within author document - that makes no sense for many reason, not the least of them are the fact that you want to avoid unbounded growth of the author document, and querying over posts is a natural function of the use case so posts really should be first class object.&lt;/p&gt;
-
-&lt;p&gt;What isn&amp;rsquo;t always agreed on is whether the author of the post should have just their unique primary key (or username) saved in each post or whether some of the information, like their full name, should also be denormalized into each post.&lt;/p&gt;
-
-&lt;h5 id=&#34;tags:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Tags&lt;/h5&gt;
-
-&lt;p&gt;Tags being simple strings should be stored inside the post document.  The it advantage of document model over relational is that it allows you to embed an array with multiple values without sacrificing the ability to index the tags:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;{ &amp;quot;_id&amp;quot; : &amp;lt;Id&amp;gt;,
-    &amp;quot;author&amp;quot; :  { &amp;quot;id&amp;quot; :  &amp;lt;authorId&amp;gt;, &amp;quot;name&amp;quot; :  &amp;quot;Asya Kamsky&amp;quot; },
-    &amp;quot;tags&amp;quot; :  [ &amp;quot;schema&amp;quot;, &amp;quot;embed&amp;quot;, &amp;quot;link&amp;quot; ],
-    ...
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We can index tags with &lt;code&gt;db.posts.ensureIndex( { tags:1 } )&lt;/code&gt; which will be used in queries like
-    db.posts.find( { &amp;ldquo;tags&amp;rdquo; : { &amp;ldquo;$in&amp;rdquo;:  [&amp;ldquo;schema&amp;rdquo;, &amp;ldquo;performance&amp;rdquo;] } } )&lt;/p&gt;
-
-&lt;p&gt;You probably noticed that I happen to think it&amp;rsquo;s right to denormalize the author&amp;rsquo;s name into the post - I&amp;rsquo;m a strong believer in optimizing for the common case, not exceptional one&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:7db8f99d4cb4bf37c187790fa7b90df5:fn-f1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:7db8f99d4cb4bf37c187790fa7b90df5:fn-f1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; and I think optimizing query performance is more important than trying to minimize storage at the cost of performance.&lt;/p&gt;
-
-&lt;h5 id=&#34;comments:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Comments&lt;/h5&gt;
-
-&lt;p&gt;Comment documents, or rather where to store them, usually generates the most discussion and disagreement.&lt;/p&gt;
-
-&lt;p&gt;Let&amp;rsquo;s consider both options and see what we can gain from each:&lt;/p&gt;
-
-&lt;h6 id=&#34;embed-comments:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;embed comments&lt;/h6&gt;
-
-&lt;pre&gt;&lt;code&gt;{
-     _id: &amp;lt;Id&amp;gt;,
-     author: { id: &amp;lt;authorId&amp;gt;, name: &amp;quot;Asya Kamsky&amp;quot; },
-     tags: [ &amp;quot;schema&amp;quot;, &amp;quot;embed&amp;quot;, &amp;quot;link&amp;quot; ],
-     comments: [
-         { author : { id:&amp;lt;authorId&amp;gt;,name:&amp;quot;Joe Shmoe&amp;quot;}, 
-           date:ISODate(&amp;quot; &amp;quot;), 
-           text:&amp;quot;Blah Blah Blah&amp;quot; },
-         { author : { id:&amp;lt;authorId&amp;gt;,name:&amp;quot;Jane Doe&amp;quot;}, 
-           date:ISODate(&amp;quot; &amp;quot;), 
-           text:&amp;quot;Blah Blah Blah&amp;quot; },
-         { author : { id:&amp;lt;authorId&amp;gt;,name:&amp;quot;Asya Kamsky&amp;quot;}, 
-           date:ISODate(&amp;quot; &amp;quot;), 
-           text:&amp;quot;Blah Blah Blah&amp;quot; },
-         ...
-     ]
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In addition to other indexes we already plan to have on posts, we will probably need to add several indexes to support querying for comments or by comments.  For example, when someone logs in, I can see wanting to show them all the threads/posts that they commented on, which means we need to index on &amp;ldquo;comments.author.id&amp;rdquo; so that we can query for posts that this author commented on.  We also might need to include fields inside the comments array to track which comments are responses to which other comments, and the biggest downside of them all, if the discussion in comments gets really heated, we will end up with a huge array inside this post.&lt;/p&gt;
-
-&lt;h6 id=&#34;have-separate-comments-collection:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;have separate comments collection&lt;/h6&gt;
-
-&lt;pre&gt;&lt;code&gt;{  post : &amp;lt;postId&amp;gt;,
-    author : { id:&amp;lt;authorId&amp;gt;,name:&amp;quot;Joe Shmoe&amp;quot;}, 
-    date:ISODate(&amp;quot; &amp;quot;), 
-    text:&amp;quot;Blah Blah Blah&amp;quot; 
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;A collection of comments would have to have an index on the postId so that we can look up the comments for a particular post, probably compound index with date so that we can query for the most recent posts.  We would want to index author.id and date as well.  But the nice thing is that here we can control how many comments we want returned, and even though querying for all comments for a post might involve some random IO, we can minimize it by only querying for as many comments as we intend to display.  The fact is that most of the time the reader of the blog post won&amp;rsquo;t even look at the comments, and if they do then they might read a few and never click on &amp;ldquo;show more&amp;rdquo; which we would normally have.&lt;/p&gt;
-
-&lt;p&gt;Is there a third option?&lt;/p&gt;
-
-&lt;h6 id=&#34;hybrid-option:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;hybrid option&lt;/h6&gt;
-
-&lt;p&gt;The nice thing about flexible schema is that in cases like these you can keep comments in separate collection but also choose to denormalize some small number of comments into the post itself, either first few or the last few or whatever fits your requirements best.&lt;/p&gt;
-
-&lt;p&gt;This hybrid approach may be analogous to the product collection for an e-commerce site where they store reviews of products separately from the product itself, but keep the highest voted reviews  (one positive and one negative) embedded in the product. This is a good schema because when you display the product, you want to display a few most helpful reviews, but you don&amp;rsquo;t need to display all the reviews at that time.&lt;/p&gt;
-
-&lt;h4 id=&#34;summary:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Summary&lt;/h4&gt;
-
-&lt;p&gt;The general principal to use when trying to decide between embedding and linking is this:
-- consider which objects are first class entities and which are properties of such entities
-- consider what your use case requires to display fast and what allows for additional queries
-- when two choices both seem to be viable, prototype both and see which works better&lt;/p&gt;
-&lt;div class=&#34;footnotes&#34;&gt;
-
-&lt;hr /&gt;
-
-&lt;ol&gt;
-&lt;li id=&#34;fn:7db8f99d4cb4bf37c187790fa7b90df5:fn-f1&#34;&gt;Someone always brings up the possibility that the author will change their name, as if that&amp;rsquo;s an everyday occurrence
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:7db8f99d4cb4bf37c187790fa7b90df5:fn-f1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-</description>
-        </item>
-      
-    
-      
-        <item>
-          <title>Can I use more replica nodes to scale?</title>
-          <link>http://asya999.github.io/post/canreplicashelpscaling/</link>
-          <pubDate>Thu, 20 Feb 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/canreplicashelpscaling/</guid>
-          <description>
-
-&lt;h3 id=&#34;question:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Question:&lt;/h3&gt;
-
-&lt;p&gt;Do replica sets help with read scaling?  If there are more servers to service all my read requests, why wouldn&amp;rsquo;t they be able to service more read requests, or service the same number of read requests faster?&lt;/p&gt;
-
-&lt;h3 id=&#34;answer:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Answer:&lt;/h3&gt;
-
-&lt;h5 id=&#34;replica-sets:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Replica Sets.&lt;/h5&gt;
-
-&lt;p&gt;Replica sets are an awesome feature of MongoDB.  They give you &amp;ldquo;High Availability&amp;rdquo; - meaning that when the primary node becomes unavailable (crashes, gets unplugged from the network, gets DOS&amp;rsquo;ed by another process on the same box) the rest of the nodes will &lt;strong&gt;elect&lt;/strong&gt; a new primary and the driver (which your application uses to communicate with MongoDB) will automatically track all nodes and when the primary role changes from one server to another, it will automatically detect to send requests there.&lt;/p&gt;
-
-&lt;h5 id=&#34;single-master:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Single Master:&lt;/h5&gt;
-
-&lt;p&gt;MongoDB Replica Sets are a &amp;ldquo;single master&amp;rdquo; architecture.  That means that all writes must go to the one primary and from there they are asynchronously replicated to all secondaries.   Your reads also go to the primary, meaning you can always read your own writes.  Your read requests would &lt;em&gt;never&lt;/em&gt; be sent to a secondary unless your application &lt;em&gt;explicitly&lt;/em&gt; requests that the read go somewhere other than the primary, so you would never be getting &amp;ldquo;stale&amp;rdquo; data without being aware of it.&lt;/p&gt;
-
-&lt;h5 id=&#34;the-questions-we-have-are:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;The questions we have are:&lt;/h5&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Should you use secondary reads?&lt;br /&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Will they help you handle more reads?&lt;/li&gt;
-&lt;li&gt;Will they help you handle same reads faster?&lt;/li&gt;
-&lt;li&gt;Are there downsides?&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;When should you use secondary reads?&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Because secondary reads create complexity for your application which now needs to handle (possibly very) stale data and situations where just-made-write is not available for read, I would caution users to be sure that they are getting some benefits from secondary reads.  I’m going to look at possible benefits and discuss whether they are likely to be realized using secondary replica nodes or not.&lt;/p&gt;
-
-&lt;h5 id=&#34;will-more-servers-help-you-handle-same-reads-faster:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Will more servers help you handle same reads faster?&lt;/h5&gt;
-
-&lt;p&gt;I think the answer for simple operational reads is obviously no.  If a read takes 10μs then it&amp;rsquo;s not likely to take 1/5th of that just because there are five servers - this is a single unit of work.  That&amp;rsquo;s the actual duration of the read.&lt;/p&gt;
-
-&lt;h5 id=&#34;will-more-servers-help-you-handle-more-reads:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Will more servers help you handle more reads?&lt;/h5&gt;
-
-&lt;p&gt;Intuitively, it feels like the answer should be “yes” - but that would only be the case if the reads somehow interfered with each other on the single node.  If they are reading the same “hot” data then they can be working in parallel up to the limit of your CPUs.   So in real life, the answer to whether all your replica nodes together can handle more reads than just your primary is maybe yes and maybe no. Usually no. It all depends on why your single primary cannot handle all of the reads by itself.&lt;/p&gt;
-
-&lt;p&gt;My assumption is if your primary can handle all of the reads by itself, then you would have very little reason to even consider reading stale data from a secondary - you gain very little and lose strong consistency of data. There can be some scenarios where reading from a secondary will reduce the latency to the server (not the actual duration of the read) but those are rather specific use cases I’ll point out at the end of the article.&lt;/p&gt;
-
-&lt;p&gt;Okay, so that leaves us with the sad case of a primary that is not able to handle all the reads all by itself. Now we must ask ourselves why it cannot handle all the reads. Depending on the reason why, we can try to predict whether directing some of those reads to secondaries will help the overall situation.&lt;/p&gt;
-
-&lt;p&gt;If reads are not handled by primary alone because they are too slow then it doesn&amp;rsquo;t matter why they are too slow - they will be too slow on the secondaries as well. You can try to tune your queries, but it’s more likely that the queries are slow because of underlying root causes&amp;hellip; let&amp;rsquo;s look at those&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Indexes don&amp;rsquo;t fit in RAM - oops! we know that every replica set member has identical data so if indexes don&amp;rsquo;t fit in RAM on the primary, they don&amp;rsquo;t fit in RAM on the secondary either!&lt;/li&gt;
-&lt;li&gt;Too much data being scanned (usually because working set doesn&amp;rsquo;t fit in RAM) and the disks are slow - pretty much the same as (1) since the secondaries will have the same limitation&lt;/li&gt;
-&lt;li&gt;The large number of writes are starving out the reads (i.e. readers have to wait for writers and if there are too many writers when writers yield other writers go and reads can get starved in extreme cases).  But the writes that happen on the primary also have to happen on the secondary!  So moving the readers to the secondary will just starve them on the secondary instead of starving them on the primary.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;I know what some of you may be thinking on (3) - you&amp;rsquo;re thinking that all the reads may be starving on the primary but if you split the reads between the primary and the secondary maybe they won&amp;rsquo;t get starved?&lt;/p&gt;
-
-&lt;p&gt;Maybe.  But you know what you did when you achieved your read
-requirements by splitting the load between the primary and the
-secondary?   &lt;strong&gt;You gave up HA&lt;/strong&gt;.  Remember, if you can only service the incoming load when all of your nodes are up, then you don&amp;rsquo;t have &lt;em&gt;any&lt;/em&gt; high availability, as losing a node will basically start starving out some of the incoming requests which means you won&amp;rsquo;t meet your SLAs.&lt;/p&gt;
-
-&lt;p&gt;Since replication is for High Availability, it means some of its capacity simply must not be tied up so that it can be “standing by” in case of a failover. If you want to use some extra capacity that you perceive is otherwise going &amp;ldquo;wasted&amp;rdquo; to service your every day load, maybe you can do it, as long as you have a very clear understanding that you may have given up some of that High Availability, and I would definitely recommend against that.&lt;/p&gt;
-
-&lt;p&gt;One thing I invite you to try is to set up a simple test &lt;code&gt;mongod&lt;/code&gt; instance where you take some collection with some indexes that all fit in RAM and start up a bunch of multi-threaded clients (from other machines otherwise you&amp;rsquo;ll be testing something else) and have those clients hammer the server with read requests. See how many clients you have to add and how many requests you have to throw at &lt;code&gt;mongod&lt;/code&gt; before you can&amp;rsquo;t add any more clients requesting more reads without performance of existing reads suffering.  Trying it out will give you an idea of the maximum read throughput that a single node can handle.&lt;/p&gt;
-
-&lt;p&gt;Of course, this is not the complete story.  It turns out that there are some excellent use cases for secondary reads, some more common, some less so.&lt;/p&gt;
-
-&lt;h5 id=&#34;the-types-of-reads-to-route-to-secondaries:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;The types of reads to route to secondaries&lt;/h5&gt;
-
-&lt;p&gt;There are two types of use cases for reads that you do want to route to secondaries. One I already alluded to: if you have a read heavy system and reads are not super-sensitive to staleness of data but they &lt;em&gt;are&lt;/em&gt; super sensitive to overall latency of satisfying a read request, you can realize a big win reading from the nearest member of the replica set rather than the primary.  If your SLA says reads must return in under 100ms but your one way network latency to the primary is 75ms how can you satisfy the SLA from various parts of the world? That&amp;rsquo;s a use case for distributing data all over the world via secondaries in your replica set!  If you have nodes in data centers on different continents (and the PRIMARY near your write source) you can specify read preference of &amp;ldquo;nearest&amp;rdquo; and make sure that each read request goes to the node that has the lowest network latency from the requester.&lt;/p&gt;
-
-&lt;p&gt;Note that this is &lt;em&gt;not&lt;/em&gt; technically &amp;ldquo;scaling&amp;rdquo; your read capacity, this is basically taking advantage of replication already having pulled the data over the long network connection and reducing your network latency to the DB.  Don’t forget that if you are relying on reading from “nearest” to meet your SLAs for total round trip to get the data, you have to consider whether your SLAs will still be met if a secondary in a particular region fails.&lt;/p&gt;
-
-&lt;p&gt;The second use case is about reads that are not &amp;ldquo;typical&amp;rdquo; of your &amp;ldquo;normal&amp;rdquo; operational load.  Now, “typical” and “normal” is going to be different for different use cases, but some common examples are things like nightly ETL jobs, ad hoc &amp;ldquo;historical&amp;rdquo; or analytical queries, regular backup jobs, or a Hadoop job.  It could also be something else.  The reason you want to isolate this “atypical” load to the secondary is because it will &amp;ldquo;mess up&amp;rdquo; your memory-resident data set on the primary!&lt;/p&gt;
-
-&lt;p&gt;Imagine you worked very hard to optimize your queries so that indexes are always in RAM and there is just enough RAM left over for the &amp;ldquo;hot&amp;rdquo; subset of data to give you excellent performance. You then start running an analytics query and it&amp;rsquo;s pulling &lt;em&gt;all&lt;/em&gt; the data from mongo which means your entire data set, hot and cold, now gets pulled into resident memory. Guess what just got evicted to make room for it? Yep, your &amp;ldquo;normal&amp;rdquo; data set, or at least a very large portion of it.†&lt;/p&gt;
-
-&lt;p&gt;To keep &amp;ldquo;atypical&amp;rdquo; jobs from interfering with your &amp;ldquo;typical&amp;rdquo; work load, configure the atypical ones to use read preference Secondary. Note that Secondary is different from SecondaryPreferred as the latter will go to the Primary if there is no available Secondary but the former will return an error if there is no Secondary to read from.  Since these jobs are usually not urgent, you’d rather have them wait and retry later than interfere with operational responsiveness of your app anyway.  You can even use &lt;a href=&#34;http://docs.mongodb.org/manual/tutorial/configure-replica-set-tag-sets/&#34;&gt;&amp;ldquo;tags&amp;rdquo;&lt;/a&gt; to isolate different jobs to specific nodes even further.&lt;/p&gt;
-
-&lt;h5 id=&#34;bottom-line:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Bottom line&lt;/h5&gt;
-
-&lt;p&gt;Make your primary do the work that the application relies on every second.  Make sure that &lt;em&gt;at least&lt;/em&gt; one secondary is idle and ready to take over for the primary in case of failure.  Use additional secondaries (&lt;em&gt;not&lt;/em&gt; the hot standby one!) for all other needs whether it’s backups, analytical reports, ad hoc queries, ETL, etc.  This way, you know that you can handle the application requirements after a failover just as well as before.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;†  By the way, this is exactly what happens when you have a query that doesn&amp;rsquo;t have a good index to use - it does a full collection scan - more on that in a future &amp;ldquo;answer&amp;rdquo;.&lt;/p&gt;
-</description>
-        </item>
-      
-    
-      
-        <item>
-          <title>Why shouldn&#39;t I embed large arrays in my documents?</title>
-          <link>http://asya999.github.io/post/largeembeddedarrays/</link>
-          <pubDate>Thu, 13 Feb 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/largeembeddedarrays/</guid>
-          <description>
-
-&lt;h3 id=&#34;question:b03b8c475184befd19c41be5b8f8950d&#34;&gt;Question:&lt;/h3&gt;
-
-&lt;p&gt;Why shouldn&amp;rsquo;t I embed large arrays in my documents?  It seems incredibly convenient and intuitive but I&amp;rsquo;ve heard there are performance penalties.  What causes them and how do I know if I should avoid using arrays?&lt;/p&gt;
-
-&lt;h3 id=&#34;answer:b03b8c475184befd19c41be5b8f8950d&#34;&gt;Answer:&lt;/h3&gt;
-
-&lt;p&gt;Arrays are wonderful when used properly.  When talking about performance, the main reason to be wary of arrays is when they grow without bounds.&lt;/p&gt;
-
-&lt;p&gt;Imagine you create a document:
-&lt;pre class=&#34;prettyprint&#34;&gt;
-{ user: &amp;ldquo;Asya&amp;rdquo;,
-  email: &amp;ldquo;asya@mongodb.com&amp;rdquo;,
-  twitter: [&amp;ldquo;@asya999&amp;rdquo;, &amp;ldquo;@ask-asya&amp;rdquo;]
-}
-&lt;/pre&gt;&lt;/p&gt;
-
-&lt;p&gt;Notice that twitter field is an array.  That&amp;rsquo;s perfectly fine and excellent - we don&amp;rsquo;t want to create a separate collection like we&amp;rsquo;d have to do in relational model, just because a person might have multiple twitter accounts/handles.&lt;/p&gt;
-
-&lt;p&gt;Now that the document has been created, a certain amount of space has been allocated for it.  If we continue growing the document by adding new fields to it, it will have to be moved and a larger allocation will be made for it because MongoDB dynamically tracks how often documents outgrow their allocation and tries to allocate more space for newly written or moved documents to account for the future growth.&lt;/p&gt;
-
-&lt;p&gt;Compare the cost of an update to a document when you can make an in-place change, versus rewriting the entire document somewhere else.  First, instead of just rewriting part of a document &amp;ldquo;in place&amp;rdquo; we have to allocate new space for it.  We have to rewrite the entire document, put the space that it used to occupy on the free list so that it can get re-used, and then repoint all the index entries that used to point to the old document location to the new location.  All of this must be done atomically, so your single write suddenly took a bit longer than a few microseconds that it used to take when the document didn&amp;rsquo;t have to move.&lt;/p&gt;
-
-&lt;p&gt;Now imagine what happens if you add a new array field to the document representing something that&amp;rsquo;s not naturally bound the way someone&amp;rsquo;s twitter handles or shipping addresses would be bound.  What if we want to embed into this document every time I perform some activity, let&amp;rsquo;s say click on a like button, or make a comment on someone&amp;rsquo;s blog?&lt;/p&gt;
-
-&lt;p&gt;First of all, we have to consider why we would want to do such a thing.  Normally, I would advise people to embed things that they always want to get back when they are fetching this document.  The flip side of this is that you don&amp;rsquo;t want to embed things in the document that you don&amp;rsquo;t want to get back with it.&lt;/p&gt;
-
-&lt;p&gt;If you embed activity I perform into the document, it&amp;rsquo;ll work great at first because all of my activity is right there and with a single read you can get back everything you might want to show me: &amp;ldquo;you recently clicked on this and here are your last two comments&amp;rdquo; but what happens after six months go by and I don&amp;rsquo;t care about things I did a long time ago and you don&amp;rsquo;t want to show them to me unless I specifically go to look for some old activity?&lt;/p&gt;
-
-&lt;p&gt;First, you&amp;rsquo;ll end up returning bigger and bigger document and caring about smaller and smaller portion of it.  But you can use projection to only return some of the array, the real pain is that the document on disk will get bigger and it will still all be read even if you&amp;rsquo;re only going to return part of it to the end user, but since my activity is not going to stop as long as I&amp;rsquo;m active, the document will continue growing and growing.&lt;/p&gt;
-
-&lt;p&gt;The most obvious problem with this is eventually you&amp;rsquo;ll hit the 16MB document limit, but that&amp;rsquo;s not at all what you should be concerned about.  A document that continuously grows will incur higher and higher cost every time it has to get relocated on disk, and even if you take steps to mitigate the effects of fragmentation, your writes will overall be unnecessarily long, impacting overall performance of your entire application.&lt;/p&gt;
-
-&lt;p&gt;There is one more thing that you can do that will completely kill your application&amp;rsquo;s performance and that&amp;rsquo;s to index this ever-increasing array.  What that means is that every single time the document with this array is relocated, the number of index entries that need to be updated is directly proportional to the number of indexed values in that document, and the bigger the array, the larger that number will be.&lt;/p&gt;
-
-&lt;p&gt;I don&amp;rsquo;t want this to scare you from using arrays when they are a good fit for the data model - they are a powerful feature of the document database data model, but like all powerful tools, it needs to be used in the right circumstances and it should be used with care.&lt;/p&gt;
-</description>
-        </item>
-      
-    
-
   </channel>
 </rss>

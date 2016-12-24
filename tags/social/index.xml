@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Ask Asya </title>
+      <title>Social on Ask Asya </title>
     <link>http://asya999.github.io/tags/social/</link>
-    <language>en-us</language>
-    <author></author>
-    <rights>(C) 2014</rights>
-    <updated>2014-08-27 00:00:00 &#43;0000 UTC</updated>
-
+    <language>en-US</language>
+    <author>Asya Kamsky</author>
+    <rights>Copyright (c) 2016, Asya Kamsky; all rights reserved.</rights>
+    <updated>Wed, 27 Aug 2014 00:00:00 UTC</updated>
     
-      
-        <item>
-          <title>Social Status Feed in MongoDB</title>
-          <link>http://asya999.github.io/post/socialstatusfeed/</link>
-          <pubDate>Wed, 27 Aug 2014 00:00:00 UTC</pubDate>
-          <author></author>
-          <guid>http://asya999.github.io/post/socialstatusfeed/</guid>
-          <description>
+    <item>
+      <title>Social Status Feed in MongoDB</title>
+      <link>http://asya999.github.io/post/socialstatusfeed/</link>
+      <pubDate>Wed, 27 Aug 2014 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/socialstatusfeed/</guid>
+      <description>
 
 &lt;h3 id=&#34;socialite:36d9d7ac96775ede158c079032b00e59&#34;&gt;Socialite&lt;/h3&gt;
 
@@ -53,9 +51,7 @@
 
 &lt;p&gt;Over the next few months as I write up different parts of the system, and consider the schema, indexes and possible shard data distribution, you will see me return to these two litmus tests again and again.   In order to have highest chance of success at large scale any option that hinders one of these goals should be out of the running.&lt;/p&gt;
 </description>
-        </item>
-      
+    </item>
     
-
   </channel>
 </rss>
