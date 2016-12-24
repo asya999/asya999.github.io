@@ -9,7 +9,7 @@
     <updated>Sun, 09 Oct 2016 00:00:00 UTC</updated>
     
     <item>
-      <title>How do I match documents where all array elements match some predicate?</title>
+      <title>How to match documents where all array elements match predicate.</title>
       <link>http://asya999.github.io/post/matchallarrayelements/</link>
       <pubDate>Sun, 09 Oct 2016 00:00:00 UTC</pubDate>
       <author>Asya Kamsky</author>
@@ -156,18 +156,16 @@ db.coll.find({&#34;$nor&#34;:[{&#34;a&#34;:{&#34;$elemMatch&#34;:{$not:/^str/}}}
 { &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-09T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 2, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-04-19T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 3, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-01-01T00:00:00Z&amp;quot;) }, { &amp;quot;x&amp;quot; : 4, &amp;quot;y&amp;quot; : ISODate(&amp;quot;2016-01-01T00:00:00Z&amp;quot;) } ] }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;If our predicate was just about &amp;ldquo;b.x&amp;rdquo; or just about &amp;ldquo;b.y&amp;rdquo; we would use &amp;ldquo;$elemMatch&amp;rdquo; rather than dotted notation to run a query just like our first example.  To find all documents where &amp;ldquo;b.x&amp;rdquo; is either 1, 2 or 3, we can go through these steps (assume all queries ask in projection just for the field I&amp;rsquo;m querying by):
-````
-// find all documents where &amp;ldquo;b.x&amp;rdquo; is one of 1,2,3
-db.coll.find({&amp;ldquo;b.x&amp;rdquo;:{$in:[1,2,3]}})
-{ &amp;ldquo;b&amp;rdquo; : [ { &amp;ldquo;x&amp;rdquo; : 1 }, { &amp;ldquo;x&amp;rdquo; : 2 }, { &amp;ldquo;x&amp;rdquo; : 3 } ] }
-{ &amp;ldquo;b&amp;rdquo; : [ { &amp;ldquo;x&amp;rdquo; : 1 }, { &amp;ldquo;x&amp;rdquo; : 9 }, { &amp;ldquo;x&amp;rdquo; : 5 } ] }
-{ &amp;ldquo;b&amp;rdquo; : [ { &amp;ldquo;x&amp;rdquo; : 3 }, { &amp;ldquo;x&amp;rdquo; : 6 }, { &amp;ldquo;x&amp;rdquo; : 1 } ] }
-{ &amp;ldquo;b&amp;rdquo; : [ { &amp;ldquo;x&amp;rdquo; : 1 }, { &amp;ldquo;x&amp;rdquo; : 2 }, { &amp;ldquo;x&amp;rdquo; : 3 } ] }
-{ &amp;ldquo;b&amp;rdquo; : [ { &amp;ldquo;x&amp;rdquo; : 1 }, { &amp;ldquo;x&amp;rdquo; : 2 }, { &amp;ldquo;x&amp;rdquo; : 3 }, { &amp;ldquo;x&amp;rdquo; : 4 } ] }
-// another way of structuring this query is with $or
-db.coll.find({$or:[{&amp;ldquo;b.x&amp;rdquo;:1},{&amp;ldquo;b.x&amp;rdquo;:2},{&amp;ldquo;b.x&amp;rdquo;:3}]})
-db.coll.find({$and:[{&amp;ldquo;b.x&amp;rdquo;:1},{&amp;ldquo;b.x&amp;rdquo;:2},{&amp;ldquo;b.x&amp;rdquo;:3}]})&lt;/p&gt;
+&lt;p&gt;If our predicate was just about &amp;ldquo;b.x&amp;rdquo; or just about &amp;ldquo;b.y&amp;rdquo; we would use &amp;ldquo;$elemMatch&amp;rdquo; rather than dotted notation to run a query just like our first example.  To find all documents where &amp;ldquo;b.x&amp;rdquo; is either 1, 2 or 3, we can go through these steps (assume all queries ask in projection just for the field I&amp;rsquo;m querying by):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// find all documents where &amp;quot;b.x&amp;quot; is one of 1,2,3
+db.coll.find({&amp;quot;b.x&amp;quot;:{$in:[1,2,3]}})
+{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1 }, { &amp;quot;x&amp;quot; : 2 }, { &amp;quot;x&amp;quot; : 3 } ] }
+{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1 }, { &amp;quot;x&amp;quot; : 9 }, { &amp;quot;x&amp;quot; : 5 } ] }
+{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 3 }, { &amp;quot;x&amp;quot; : 6 }, { &amp;quot;x&amp;quot; : 1 } ] }
+{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1 }, { &amp;quot;x&amp;quot; : 2 }, { &amp;quot;x&amp;quot; : 3 } ] }
+{ &amp;quot;b&amp;quot; : [ { &amp;quot;x&amp;quot; : 1 }, { &amp;quot;x&amp;quot; : 2 }, { &amp;quot;x&amp;quot; : 3 }, { &amp;quot;x&amp;quot; : 4 } ] }
+&lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
     
