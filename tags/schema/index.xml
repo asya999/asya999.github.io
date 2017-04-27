@@ -677,45 +677,48 @@ while (cursor.hasNext()) {
     prevTS=doc.ts; /* save in case we need to refetch from the oplog */
 }
 &lt;/pre&gt;
-Of course this code does minimal error checking and it&#39;s not set up to automatically restart if it loses connection to the primary, or the primary changes in the replica set.  This is because here we are reading from a local oplog when in real life you may be fetching data from another server or cluster entirely.  Even so, about 15 lines of code there are for error checking and information printing, so the actual &#34;work&#34; we do is quite simple.  
 
-##### Creating a full archive from tailing the oplog #####
+&lt;p&gt;Of course this code does minimal error checking and it&amp;rsquo;s not set up to automatically restart if it loses connection to the primary, or the primary changes in the replica set.  This is because here we are reading from a local oplog when in real life you may be fetching data from another server or cluster entirely.  Even so, about 15 lines of code there are for error checking and information printing, so the actual &amp;ldquo;work&amp;rdquo; we do is quite simple.&lt;/p&gt;
 
-Now that we know how to replay original documents to maintain an indentical &#34;copy&#34; collection, let&#39;s see what we have to do differently when we want to insert a new version of the document without losing any of the old versions.
+&lt;h5 id=&#34;creating-a-full-archive-from-tailing-the-oplog&#34;&gt;Creating a full archive from tailing the oplog&lt;/h5&gt;
 
-For simplicity, I put the docId in the example collection into the `_id` field, so I will need to structure the full archive collection schema differently, since it cannot have multiple documents with the same `_id`.[^2]  For simplicity, I will let MongoDB generate the `_id` and I will use the combination of docId and version with a unique index on them to prevent duplicate versions.  I could achieve something similar by using the combination of original `_id` (which is the docId) and `version` fields as a compound `_id` field but then I would need to do more complicated transformations on the oplog entry.  I always choose the method that is  simpler.
+&lt;p&gt;Now that we know how to replay original documents to maintain an indentical &amp;ldquo;copy&amp;rdquo; collection, let&amp;rsquo;s see what we have to do differently when we want to insert a new version of the document without losing any of the old versions.&lt;/p&gt;
 
-Now when we get an insert operation in the oplog, we should be able to insert the document the same way we were doing it before, except we want to move `_id` value into `docId` field.  If the save fails to insert a new document because of a duplicate constraint violation, then we already have that docId and version - we would expect that when we are replaying the same entry in the oplog more than once.   
+&lt;p&gt;For simplicity, I put the docId in the example collection into the &lt;code&gt;_id&lt;/code&gt; field, so I will need to structure the full archive collection schema differently, since it cannot have multiple documents with the same &lt;code&gt;_id&lt;/code&gt;.&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:2&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;  For simplicity, I will let MongoDB generate the &lt;code&gt;_id&lt;/code&gt; and I will use the combination of docId and version with a unique index on them to prevent duplicate versions.  I could achieve something similar by using the combination of original &lt;code&gt;_id&lt;/code&gt; (which is the docId) and &lt;code&gt;version&lt;/code&gt; fields as a compound &lt;code&gt;_id&lt;/code&gt; field but then I would need to do more complicated transformations on the oplog entry.  I always choose the method that is  simpler.&lt;/p&gt;
 
-If we get an update, it can be one of two kinds - it can be one that sets or unsets specific fields, or it can be the kind that overwrites the entire document with a new document (with the same `_id` of course).  The latter case can be handled by the same code we have for the insert, with an appropriate transformation of the document.   If it&#39;s the `$set` and `$unset` kind, then we have to fetch the previous version of this document and apply the changes to it before inserting it as a document representing a new version.[^3]
+&lt;p&gt;Now when we get an insert operation in the oplog, we should be able to insert the document the same way we were doing it before, except we want to move &lt;code&gt;_id&lt;/code&gt; value into &lt;code&gt;docId&lt;/code&gt; field.  If the save fails to insert a new document because of a duplicate constraint violation, then we already have that docId and version - we would expect that when we are replaying the same entry in the oplog more than once.&lt;/p&gt;
 
-Here is our code, with comments:
+&lt;p&gt;If we get an update, it can be one of two kinds - it can be one that sets or unsets specific fields, or it can be the kind that overwrites the entire document with a new document (with the same &lt;code&gt;_id&lt;/code&gt; of course).  The latter case can be handled by the same code we have for the insert, with an appropriate transformation of the document.   If it&amp;rsquo;s the &lt;code&gt;$set&lt;/code&gt; and &lt;code&gt;$unset&lt;/code&gt; kind, then we have to fetch the previous version of this document and apply the changes to it before inserting it as a document representing a new version.&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:3&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:3&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
 
-The setup:
+&lt;p&gt;Here is our code, with comments:&lt;/p&gt;
+
+&lt;p&gt;The setup:
 &lt;pre class=&#34;prettyprint lang-js&#34;&gt;
-var coll=&#34;docs_full_archive&#34;;  // different collection
+var coll=&amp;ldquo;docs_full_archive&amp;rdquo;;  // different collection
 db.getCollection(coll).drop();     // first time only!
-db.getCollection(coll).ensureIndex( 
-         { &#34;docId&#34;:1, &#34;version&#34;: 1 },
-         { &#34;unique&#34; : true, &#34;background&#34; : true } );
-if (db.getCollection(&#34;lastApplied&#34;).count({&#34;_id&#34;:coll})==0) {
-   prevTS=db.getSiblingDB(&#34;local&#34;).oplog.rs.findOne({&#34;ns&#34;:namespace}).ts;
-   db.getCollection(&#34;lastApplied&#34;).update( { &#34;_id&#34; : coll }, 
-      {&#34;$set&#34; : { &#34;ts&#34; : prevTS } }, { &#34;upsert&#34; : true } );
+db.getCollection(coll).ensureIndex(
+         { &amp;ldquo;docId&amp;rdquo;:1, &amp;ldquo;version&amp;rdquo;: 1 },
+         { &amp;ldquo;unique&amp;rdquo; : true, &amp;ldquo;background&amp;rdquo; : true } );
+if (db.getCollection(&amp;ldquo;lastApplied&amp;rdquo;).count({&amp;rdquo;_id&amp;rdquo;:coll})==0) {
+   prevTS=db.getSiblingDB(&amp;ldquo;local&amp;rdquo;).oplog.rs.findOne({&amp;ldquo;ns&amp;rdquo;:namespace}).ts;
+   db.getCollection(&amp;ldquo;lastApplied&amp;rdquo;).update( { &amp;ldquo;_id&amp;rdquo; : coll },
+      {&amp;ldquo;$set&amp;rdquo; : { &amp;ldquo;ts&amp;rdquo; : prevTS } }, { &amp;ldquo;upsert&amp;rdquo; : true } );
 } else {
-   prevTS=db.getCollection(&#34;lastApplied&#34;).findOne({&#34;_id&#34;:coll}).ts;
+   prevTS=db.getCollection(&amp;ldquo;lastApplied&amp;rdquo;).findOne({&amp;rdquo;_id&amp;rdquo;:coll}).ts;
 }
 &lt;/pre&gt;
 The cursor (same as before):
 &lt;pre class=&#34;prettyprint lang-js&#34;&gt;
-var cursor=db.getSiblingDB(&#34;local&#34;).getCollection(&#34;oplog.rs&#34;
-       ).find({&#34;ns&#34;:namespace,&#34;ts&#34;:{&#34;$gte&#34;:prevTS}}
+var cursor=db.getSiblingDB(&amp;ldquo;local&amp;rdquo;).getCollection(&amp;ldquo;oplog.rs&amp;rdquo;
+       ).find({&amp;ldquo;ns&amp;rdquo;:namespace,&amp;ldquo;ts&amp;rdquo;:{&amp;ldquo;$gte&amp;rdquo;:prevTS}}
        ).addOption(DBQuery.Option.oplogReplay
        ).addOption(DBQuery.Option.awaitData
        ).addOption(DBQuery.Option.tailable
        ).addOption(DBQuery.Option.noTimeout);
-&lt;/pre&gt;
-The worker loop (slightly adjusted):
+&lt;/pre&gt;&lt;/p&gt;
+
+&lt;p&gt;The worker loop (slightly adjusted):&lt;/p&gt;
+
 &lt;pre class=&#34;prettyprint lang-java&#34;&gt;
 while (cursor.hasNext()) {
     var doc=cursor.next();
@@ -795,8 +798,9 @@ db.getSiblingDB(&amp;ldquo;local&amp;rdquo;).getCollection(&amp;ldquo;oplog.rs&a
 { &amp;ldquo;o&amp;rdquo; : { &amp;ldquo;_id&amp;rdquo; : 279, &amp;ldquo;version&amp;rdquo; : 7 } }
 { &amp;ldquo;o&amp;rdquo; : { &amp;ldquo;$set&amp;rdquo; : { &amp;ldquo;version&amp;rdquo; : 8, &amp;ldquo;attrCounter&amp;rdquo; : 1, &amp;ldquo;a&amp;rdquo; : 1 } } }
 { &amp;ldquo;o&amp;rdquo; : { &amp;ldquo;$set&amp;rdquo; : { &amp;ldquo;version&amp;rdquo; : 9 }, &amp;ldquo;$unset&amp;rdquo; : { &amp;ldquo;a&amp;rdquo; : true, &amp;ldquo;attrCounter&amp;rdquo; : true } } }
-&lt;/pre&gt;
-The archive collection contents (slightly formatted for readability):
+&lt;/pre&gt;&lt;/p&gt;
+
+&lt;p&gt;The archive collection contents (slightly formatted for readability):
 &lt;pre class=&#34;prettyprint lang-js&#34;&gt;
 db.docs_full_archive.find( {&amp;ldquo;docId&amp;rdquo;:279}, {&amp;rdquo;_id&amp;rdquo;:0} )
 { &amp;ldquo;docId&amp;rdquo; : 279, &amp;ldquo;version&amp;rdquo; : 1, &amp;ldquo;attr7&amp;rdquo; : &amp;ldquo;xxx279&amp;rdquo; }
@@ -824,6 +828,10 @@ db.docs_full_archive.find( {&amp;ldquo;docId&amp;rdquo;:279}, {&amp;rdquo;_id&am
 &lt;ol&gt;
 &lt;li id=&#34;fn:1&#34;&gt;Because the oplog must write change operations in &lt;a href=&#34;http://docs.mongodb.org/manual/reference/glossary/#term-idempotent&#34;&gt;&amp;ldquo;idemponent&amp;rdquo;&lt;/a&gt; form, all update operators are transformed into their equivalent &lt;code&gt;$set&lt;/code&gt; operations.
  &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:2&#34;&gt;Note that if I used a separate &lt;code&gt;docId&lt;/code&gt; field, I would have to do extra work, since replication identifies the document by &lt;code&gt;_id&lt;/code&gt; the &lt;code&gt;docId&lt;/code&gt; field would not be in the oplog, so I would need to store the original collection&amp;rsquo;s &lt;code&gt;_id&lt;/code&gt; fields in my documents, otherwise I wouldn&amp;rsquo;t know which docId was being updated.
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:2&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:3&#34;&gt;See footnote &lt;strong&gt;1.&lt;/strong&gt;
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:3&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;
 </description>
