@@ -16,11 +16,11 @@
       <guid>http://asya999.github.io/post/matchallarrayelements/</guid>
       <description>
 
-&lt;h3 id=&#34;question:292757d8f30706addf536c1c5ac8ae1a&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;I need to match all documents where every element of an array matches some predicate.  Can that be done?&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:292757d8f30706addf536c1c5ac8ae1a&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
 &lt;p&gt;Yes, the query to do this is actually quite simple to construct.&lt;/p&gt;
 
@@ -185,13 +185,13 @@ db.coll.find({$nor:[{&amp;quot;b&amp;quot;:{$elemMatch:{&amp;quot;x&amp;quot;:{$
       <guid>http://asya999.github.io/post/dynamicattributes/</guid>
       <description>
 
-&lt;h3 id=&#34;question:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;I&amp;rsquo;ve heard that MongoDB can be effectively used to model &amp;ldquo;dynamic attributes&amp;rdquo; - where you don&amp;rsquo;t know up front all the different attributes and not all attributes apply to all items.  Can you describe how that can be done, and in particular how it can be effectively indexed?&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
-&lt;h5 id=&#34;the-problem:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;The problem:&lt;/h5&gt;
+&lt;h5 id=&#34;the-problem&#34;&gt;The problem:&lt;/h5&gt;
 
 &lt;p&gt;Imagine you are building an e-commerce site and you aspire to be as big as amazon.com some day, which means you will be selling many different types of products.  It&amp;rsquo;s easy to see that there will be sets of attributes that will only apply to some of the products you sell.&lt;/p&gt;
 
@@ -221,7 +221,7 @@ db.coll.find({$nor:[{&amp;quot;b&amp;quot;:{$elemMatch:{&amp;quot;x&amp;quot;:{$
 
 &lt;p&gt;You can see how it would be extremely challenging to manage a collection that has an incredibly wide variety of document &amp;ldquo;shapes&amp;rdquo;.  Now, while some people call MongoDB &amp;ldquo;schemaless&amp;rdquo; I am not a fan of this designation.  The schema of each document is defined by the document itself.  To be able to build a robust applications you need to decide what the schema of the documents will be, otherwise your application will spend as much time examining the documents to learn their schema as providing actual functionality.&lt;/p&gt;
 
-&lt;h5 id=&#34;possible-solutions:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Possible solutions:&lt;/h5&gt;
+&lt;h5 id=&#34;possible-solutions&#34;&gt;Possible solutions:&lt;/h5&gt;
 
 &lt;p&gt;One way to index the attributes you want to be able to search by is by creating an index on each such attribute in a schema like the one above.  This is not practical, even if you use &lt;a href=&#34;http://docs.mongodb.org/manual/core/index-sparse/&#34;&gt;&amp;ldquo;sparse&amp;rdquo; indexes&lt;/a&gt; (since many attributes will be set only on a small subset of the products), because you may end up with dozens, if not hundreds of indexes.  In addition, every time a new attribute is introduced, a new index has to be added on the collection.  Not very practical.&lt;/p&gt;
 
@@ -536,27 +536,27 @@ PRIMARY(2.6.0) &gt; db.products.find( { &#34;attr&#34; : { &#34;$all&#34; : [
       <guid>http://asya999.github.io/post/blogsandcommentsrevisted/</guid>
       <description>
 
-&lt;h3 id=&#34;question:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;I have a question about whether I should store comments inside the blog post entry or in a separate collection. It&amp;rsquo;d be nice to see examples of how to access various fields in both cases, how to index and in general how to know when to embed and when to link.&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
-&lt;h4 id=&#34;the-blog-schema:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;The Blog Schema&lt;/h4&gt;
+&lt;h4 id=&#34;the-blog-schema&#34;&gt;The Blog Schema&lt;/h4&gt;
 
 &lt;p&gt;There has been a lot of discussion and write-ups about how to model a simple blog that allows comments on posts - it&amp;rsquo;s a fairly simple example that everyone can understand, and at the same time it offers several opportunities to choose different ways to structure the schema.  The example usually consists of four concepts: users(or authors), posts, tags on posts and comments on posts.&lt;/p&gt;
 
-&lt;h5 id=&#34;authors:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Authors&lt;/h5&gt;
+&lt;h5 id=&#34;authors&#34;&gt;Authors&lt;/h5&gt;
 
 &lt;p&gt;Typically everyone agrees that the authors or users are stored in a  collection of their own where you keep their information - everything from their username, password, when they last logged in, when they signed up for the service, etc.&lt;/p&gt;
 
-&lt;h5 id=&#34;posts:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Posts&lt;/h5&gt;
+&lt;h5 id=&#34;posts&#34;&gt;Posts&lt;/h5&gt;
 
 &lt;p&gt;There is also little argument that posts should be stored separately from authors - I don&amp;rsquo;t think I&amp;rsquo;ve ever heard anyone advocate for embedding posts within author document - that makes no sense for many reason, not the least of them are the fact that you want to avoid unbounded growth of the author document, and querying over posts is a natural function of the use case so posts really should be first class object.&lt;/p&gt;
 
 &lt;p&gt;What isn&amp;rsquo;t always agreed on is whether the author of the post should have just their unique primary key (or username) saved in each post or whether some of the information, like their full name, should also be denormalized into each post.&lt;/p&gt;
 
-&lt;h5 id=&#34;tags:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Tags&lt;/h5&gt;
+&lt;h5 id=&#34;tags&#34;&gt;Tags&lt;/h5&gt;
 
 &lt;p&gt;Tags being simple strings should be stored inside the post document.  The it advantage of document model over relational is that it allows you to embed an array with multiple values without sacrificing the ability to index the tags:&lt;/p&gt;
 
@@ -570,15 +570,15 @@ PRIMARY(2.6.0) &gt; db.products.find( { &#34;attr&#34; : { &#34;$all&#34; : [
 &lt;p&gt;We can index tags with &lt;code&gt;db.posts.ensureIndex( { tags:1 } )&lt;/code&gt; which will be used in queries like
     db.posts.find( { &amp;ldquo;tags&amp;rdquo; : { &amp;ldquo;$in&amp;rdquo;:  [&amp;ldquo;schema&amp;rdquo;, &amp;ldquo;performance&amp;rdquo;] } } )&lt;/p&gt;
 
-&lt;p&gt;You probably noticed that I happen to think it&amp;rsquo;s right to denormalize the author&amp;rsquo;s name into the post - I&amp;rsquo;m a strong believer in optimizing for the common case, not exceptional one&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:7db8f99d4cb4bf37c187790fa7b90df5:fn-f1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:7db8f99d4cb4bf37c187790fa7b90df5:fn-f1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; and I think optimizing query performance is more important than trying to minimize storage at the cost of performance.&lt;/p&gt;
+&lt;p&gt;You probably noticed that I happen to think it&amp;rsquo;s right to denormalize the author&amp;rsquo;s name into the post - I&amp;rsquo;m a strong believer in optimizing for the common case, not exceptional one&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:fn-f1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:fn-f1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; and I think optimizing query performance is more important than trying to minimize storage at the cost of performance.&lt;/p&gt;
 
-&lt;h5 id=&#34;comments:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Comments&lt;/h5&gt;
+&lt;h5 id=&#34;comments&#34;&gt;Comments&lt;/h5&gt;
 
 &lt;p&gt;Comment documents, or rather where to store them, usually generates the most discussion and disagreement.&lt;/p&gt;
 
 &lt;p&gt;Let&amp;rsquo;s consider both options and see what we can gain from each:&lt;/p&gt;
 
-&lt;h6 id=&#34;embed-comments:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;embed comments&lt;/h6&gt;
+&lt;h6 id=&#34;embed-comments&#34;&gt;embed comments&lt;/h6&gt;
 
 &lt;pre&gt;&lt;code&gt;{
      _id: &amp;lt;Id&amp;gt;,
@@ -601,7 +601,7 @@ PRIMARY(2.6.0) &gt; db.products.find( { &#34;attr&#34; : { &#34;$all&#34; : [
 
 &lt;p&gt;In addition to other indexes we already plan to have on posts, we will probably need to add several indexes to support querying for comments or by comments.  For example, when someone logs in, I can see wanting to show them all the threads/posts that they commented on, which means we need to index on &amp;ldquo;comments.author.id&amp;rdquo; so that we can query for posts that this author commented on.  We also might need to include fields inside the comments array to track which comments are responses to which other comments, and the biggest downside of them all, if the discussion in comments gets really heated, we will end up with a huge array inside this post.&lt;/p&gt;
 
-&lt;h6 id=&#34;have-separate-comments-collection:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;have separate comments collection&lt;/h6&gt;
+&lt;h6 id=&#34;have-separate-comments-collection&#34;&gt;have separate comments collection&lt;/h6&gt;
 
 &lt;pre&gt;&lt;code&gt;{  post : &amp;lt;postId&amp;gt;,
     author : { id:&amp;lt;authorId&amp;gt;,name:&amp;quot;Joe Shmoe&amp;quot;}, 
@@ -614,13 +614,13 @@ PRIMARY(2.6.0) &gt; db.products.find( { &#34;attr&#34; : { &#34;$all&#34; : [
 
 &lt;p&gt;Is there a third option?&lt;/p&gt;
 
-&lt;h6 id=&#34;hybrid-option:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;hybrid option&lt;/h6&gt;
+&lt;h6 id=&#34;hybrid-option&#34;&gt;hybrid option&lt;/h6&gt;
 
 &lt;p&gt;The nice thing about flexible schema is that in cases like these you can keep comments in separate collection but also choose to denormalize some small number of comments into the post itself, either first few or the last few or whatever fits your requirements best.&lt;/p&gt;
 
 &lt;p&gt;This hybrid approach may be analogous to the product collection for an e-commerce site where they store reviews of products separately from the product itself, but keep the highest voted reviews  (one positive and one negative) embedded in the product. This is a good schema because when you display the product, you want to display a few most helpful reviews, but you don&amp;rsquo;t need to display all the reviews at that time.&lt;/p&gt;
 
-&lt;h4 id=&#34;summary:7db8f99d4cb4bf37c187790fa7b90df5&#34;&gt;Summary&lt;/h4&gt;
+&lt;h4 id=&#34;summary&#34;&gt;Summary&lt;/h4&gt;
 
 &lt;p&gt;The general principal to use when trying to decide between embedding and linking is this:
 - consider which objects are first class entities and which are properties of such entities
@@ -631,8 +631,8 @@ PRIMARY(2.6.0) &gt; db.products.find( { &#34;attr&#34; : { &#34;$all&#34; : [
 &lt;hr /&gt;
 
 &lt;ol&gt;
-&lt;li id=&#34;fn:7db8f99d4cb4bf37c187790fa7b90df5:fn-f1&#34;&gt;Someone always brings up the possibility that the author will change their name, as if that&amp;rsquo;s an everyday occurrence
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:7db8f99d4cb4bf37c187790fa7b90df5:fn-f1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:fn-f1&#34;&gt;Someone always brings up the possibility that the author will change their name, as if that&amp;rsquo;s an everyday occurrence
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:fn-f1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;
 </description>
@@ -654,11 +654,11 @@ Slug= &amp;ldquo;largeembeddedarrays&amp;rdquo;
 Tags= [&amp;ldquo;schema&amp;rdquo;,&amp;ldquo;performance&amp;rdquo;,&amp;ldquo;arrays&amp;rdquo;,&amp;ldquo;mongodb&amp;rdquo;]
 +++&lt;/p&gt;
 
-&lt;h3 id=&#34;question:b03b8c475184befd19c41be5b8f8950d&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;Why shouldn&amp;rsquo;t I embed large arrays in my documents?  It seems incredibly convenient and intuitive but I&amp;rsquo;ve heard there are performance penalties.  What causes them and how do I know if I should avoid using arrays?&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:b03b8c475184befd19c41be5b8f8950d&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
 &lt;p&gt;Arrays are wonderful when used properly.  When talking about performance, the main reason to be wary of arrays is when they grow without bounds.&lt;/p&gt;
 

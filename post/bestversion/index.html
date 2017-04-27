@@ -18,7 +18,6 @@
     <link href="http://asya999.github.io/css/lavish-bootstrap.css" rel="stylesheet">
     <link href="http://asya999.github.io/css/custom.css" rel="stylesheet">
 
-    
 </head>
 
 <body>
@@ -51,17 +50,17 @@
                     <hr>
                     
 
-<h3 id="question:897d8a06bfdbaecbf747ed08c519e7de">Question:</h3>
+<h3 id="question">Question:</h3>
 
 <p>Recall <a href="http://askasya.com/post/trackversions">our previous discussion</a> about ways to  recreate older version of a document that ever existed in a particular collection.</p>
 
 <p>The goal was to preserve every state for each object, but to respond to queries with the &ldquo;current&rdquo; or &ldquo;latest&rdquo; version.   We had a requirement to be able to have an infrequent audit to review all or some previous versions of the document.</p>
 
-<h3 id="answer:897d8a06bfdbaecbf747ed08c519e7de">Answer:</h3>
+<h3 id="answer">Answer:</h3>
 
 <p>I had suggested at the time that there was a different way to achieve this that I liked better than the discussed methods and I&rsquo;m going to describe it now.</p>
 
-<h4 id="previous-discussion-summary:897d8a06bfdbaecbf747ed08c519e7de">Previous Discussion Summary:</h4>
+<h4 id="previous-discussion-summary">Previous Discussion Summary:</h4>
 
 <p>Up to this point, we considered keeping versions of the same document within one MongoDB document, in separate documents within the same collection, or by &ldquo;archiving off&rdquo; older versions of the document into a separate collection.</p>
 
@@ -76,7 +75,7 @@
 </ul></li>
 </ul>
 
-<h5 id="where-we-left-off:897d8a06bfdbaecbf747ed08c519e7de">Where we left off:</h5>
+<h5 id="where-we-left-off">Where we left off:</h5>
 
 <p>Here&rsquo;s a table that shows for each schema choice that we considered how well we can handle the reads, writes and if an update has to make more than one write, how easy it is to recover or to be in a relatively &ldquo;safe&rdquo; state:</p>
 
@@ -150,7 +149,7 @@
 
 <p>How do we get fast updates that keep the current document current but save the previous version somewhere else?  We know that we don&rsquo;t have multi-statement transaction in MongoDB so we can&rsquo;t ensure that a regular  update of one document and an insert of another document are atomic.  However, there <em>is</em> something that&rsquo;s always updated atomically along with <em>every</em> write that happens in your collection, and that is the &ldquo;Oplog&rdquo;.</p>
 
-<h4 id="the-oplog:897d8a06bfdbaecbf747ed08c519e7de">The Oplog</h4>
+<h4 id="the-oplog">The Oplog</h4>
 
 <p>The oplog (full name: &lsquo;oplog.rs&rsquo; collection in &lsquo;local&rsquo; database) is a special collection that&rsquo;s used by the replication mechanism.  Every single write operation is persisted into the oplog atomically with being applied to the data files, indexes and the journal.  You can read more about the oplog in <a href="http://docs.mongodb.org/manual/core/replica-set-oplog/">the docs</a>, but what I&rsquo;m going to show you is what it looks like in the oplog when an insert or update happens, and how we can use that for our own purposes.</p>
 
@@ -241,7 +240,7 @@ WriteResult({
 }
 </code></pre>
 
-<p>Looks like the oplog entry reflects the actual operation that was performed, <strong>not</strong> the operation that I specified.  I asked for an update - when it&rsquo;s an update, the oplog will show it as an update, when it&rsquo;s turned into an upsert, the oplog will show it as an insert.  When it was an update, I had asked it to &ldquo;increment&rdquo; but what it put in the oplog was what the actual value saved was.<sup class="footnote-ref" id="fnref:897d8a06bfdbaecbf747ed08c519e7de:1"><a rel="footnote" href="#fn:897d8a06bfdbaecbf747ed08c519e7de:1">1</a></sup></p>
+<p>Looks like the oplog entry reflects the actual operation that was performed, <strong>not</strong> the operation that I specified.  I asked for an update - when it&rsquo;s an update, the oplog will show it as an update, when it&rsquo;s turned into an upsert, the oplog will show it as an insert.  When it was an update, I had asked it to &ldquo;increment&rdquo; but what it put in the oplog was what the actual value saved was.<sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="#fn:1">1</a></sup></p>
 
 <p>I&rsquo;m sure most of you see where I&rsquo;m going with this.  Rather than fumbling with creating and updating documents in the &ldquo;previous versions&rdquo; collection when we perform an update to a document, we can do it asynchronously, the way MongoDB secondaries do it.</p>
 
@@ -249,7 +248,7 @@ WriteResult({
 
 <p>Here is a little demo.  The code and explanations are after the video, so feel free to browse ahead before watching, or you can watch first and read the explanations after.</p>
 
-<h5 id="tailing-the-oplog-to-maintain-a-copy-of-a-collection-elsewhere:897d8a06bfdbaecbf747ed08c519e7de">Tailing the oplog to maintain a copy of a collection elsewhere</h5>
+<h5 id="tailing-the-oplog-to-maintain-a-copy-of-a-collection-elsewhere">Tailing the oplog to maintain a copy of a collection elsewhere</h5>
 
 <p>For our first example, we&rsquo;ll do something simple - we will watch the oplog for changes to a specific collection, and then we will apply those changes to our own copy of the collection - we will call our collection something else.  Our example stores the copy in the same database, but of course, it could be anywhere else, including in a completely different replica set or standalone server.</p>
 
@@ -412,11 +411,12 @@ while (cursor.hasNext()) {
             for (i in doc.o["$set"]) {
                 newDoc[i]=doc.o["$set"][i];
             }
-        } else if (doc.o.hasOwnProperty("$unset")) { 
+        } 
+        if (doc.o.hasOwnProperty("$unset")) { 
             for (i in doc.o["$unset"]) {
                 delete(newDoc[i]);
             }
-        } else throw "Can only handle update with '_id', '$set' or '$unset' ";
+        }
     } else if (doc.op != "c") throw "Unexpected op! " + tojson(doc);
 
     var  result = db.getCollection(coll).insert(newDoc);
@@ -443,7 +443,7 @@ while (cursor.hasNext()) {
 
 <p>It turns out that the loop will be slightly simpler because no matter what comes in, we will always do an insert into the full archive collection.</p>
 
-<h5 id="test-it-out:897d8a06bfdbaecbf747ed08c519e7de">Test it out!</h5>
+<h5 id="test-it-out">Test it out!</h5>
 
 <p>Let&rsquo;s run this code and then compare for a single docId the operations in the oplog, and what we end up with in the archive collection:</p>
 
@@ -490,8 +490,8 @@ db.docs_full_archive.find( {&ldquo;docId&rdquo;:279}, {&rdquo;_id&rdquo;:0} )
 <hr />
 
 <ol>
-<li id="fn:897d8a06bfdbaecbf747ed08c519e7de:1">Because the oplog must write change operations in <a href="http://docs.mongodb.org/manual/reference/glossary/#term-idempotent">&ldquo;idemponent&rdquo;</a> form, all update operators are transformed into their equivalent <code>$set</code> operations.
- <a class="footnote-return" href="#fnref:897d8a06bfdbaecbf747ed08c519e7de:1"><sup>[return]</sup></a></li>
+<li id="fn:1">Because the oplog must write change operations in <a href="http://docs.mongodb.org/manual/reference/glossary/#term-idempotent">&ldquo;idemponent&rdquo;</a> form, all update operators are transformed into their equivalent <code>$set</code> operations.
+ <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
 </ol>
 </div>
 
@@ -513,7 +513,7 @@ db.docs_full_archive.find( {&ldquo;docId&rdquo;:279}, {&rdquo;_id&rdquo;:0} )
         <div class="col-md-3">
             <div class="well well-sm"> 
                 <h4>May 30, 2014<br>
-                <small>2929 words</small></h4>
+                <small>2916 words</small></h4>
                 <hr>
                 <strong>Categories</strong>
                 <ul class="list-unstyled">
@@ -549,7 +549,7 @@ db.docs_full_archive.find( {&ldquo;docId&rdquo;:279}, {&rdquo;_id&rdquo;:0} )
             <div class="row">
                 <hr>
                 <div class="col-sm-12">
-                    <p>&copy; Asya Kamsky 2016 &middot;
+                    <p>&copy; Asya Kamsky 2017 &middot;
                     Built with <a href="https://github.com/spf13/hugo">Hugo</a></p>
                 </div>
             </div>

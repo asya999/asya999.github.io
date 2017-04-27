@@ -16,11 +16,11 @@
       <guid>http://asya999.github.io/post/matchallarrayelements/</guid>
       <description>
 
-&lt;h3 id=&#34;question:292757d8f30706addf536c1c5ac8ae1a&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;I need to match all documents where every element of an array matches some predicate.  Can that be done?&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:292757d8f30706addf536c1c5ac8ae1a&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
 &lt;p&gt;Yes, the query to do this is actually quite simple to construct.&lt;/p&gt;
 

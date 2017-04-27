@@ -18,7 +18,6 @@
     <link href="http://asya999.github.io/css/lavish-bootstrap.css" rel="stylesheet">
     <link href="http://asya999.github.io/css/custom.css" rel="stylesheet">
 
-    
 </head>
 
 <body>
@@ -51,21 +50,21 @@
                     <hr>
                     
 
-<h3 id="question:d15f8c1ea7d4b31deafbbed0f16c3829">Question:</h3>
+<h3 id="question">Question:</h3>
 
 <p>Do replica sets help with read scaling?  If there are more servers to service all my read requests, why wouldn&rsquo;t they be able to service more read requests, or service the same number of read requests faster?</p>
 
-<h3 id="answer:d15f8c1ea7d4b31deafbbed0f16c3829">Answer:</h3>
+<h3 id="answer">Answer:</h3>
 
-<h5 id="replica-sets:d15f8c1ea7d4b31deafbbed0f16c3829">Replica Sets.</h5>
+<h5 id="replica-sets">Replica Sets.</h5>
 
 <p>Replica sets are an awesome feature of MongoDB.  They give you &ldquo;High Availability&rdquo; - meaning that when the primary node becomes unavailable (crashes, gets unplugged from the network, gets DOS&rsquo;ed by another process on the same box) the rest of the nodes will <strong>elect</strong> a new primary and the driver (which your application uses to communicate with MongoDB) will automatically track all nodes and when the primary role changes from one server to another, it will automatically detect to send requests there.</p>
 
-<h5 id="single-master:d15f8c1ea7d4b31deafbbed0f16c3829">Single Master:</h5>
+<h5 id="single-master">Single Master:</h5>
 
 <p>MongoDB Replica Sets are a &ldquo;single master&rdquo; architecture.  That means that all writes must go to the one primary and from there they are asynchronously replicated to all secondaries.   Your reads also go to the primary, meaning you can always read your own writes.  Your read requests would <em>never</em> be sent to a secondary unless your application <em>explicitly</em> requests that the read go somewhere other than the primary, so you would never be getting &ldquo;stale&rdquo; data without being aware of it.</p>
 
-<h5 id="the-questions-we-have-are:d15f8c1ea7d4b31deafbbed0f16c3829">The questions we have are:</h5>
+<h5 id="the-questions-we-have-are">The questions we have are:</h5>
 
 <ul>
 <li>Should you use secondary reads?<br />
@@ -80,11 +79,11 @@
 
 <p>Because secondary reads create complexity for your application which now needs to handle (possibly very) stale data and situations where just-made-write is not available for read, I would caution users to be sure that they are getting some benefits from secondary reads.  I’m going to look at possible benefits and discuss whether they are likely to be realized using secondary replica nodes or not.</p>
 
-<h5 id="will-more-servers-help-you-handle-same-reads-faster:d15f8c1ea7d4b31deafbbed0f16c3829">Will more servers help you handle same reads faster?</h5>
+<h5 id="will-more-servers-help-you-handle-same-reads-faster">Will more servers help you handle same reads faster?</h5>
 
 <p>I think the answer for simple operational reads is obviously no.  If a read takes 10μs then it&rsquo;s not likely to take 1/5th of that just because there are five servers - this is a single unit of work.  That&rsquo;s the actual duration of the read.</p>
 
-<h5 id="will-more-servers-help-you-handle-more-reads:d15f8c1ea7d4b31deafbbed0f16c3829">Will more servers help you handle more reads?</h5>
+<h5 id="will-more-servers-help-you-handle-more-reads">Will more servers help you handle more reads?</h5>
 
 <p>Intuitively, it feels like the answer should be “yes” - but that would only be the case if the reads somehow interfered with each other on the single node.  If they are reading the same “hot” data then they can be working in parallel up to the limit of your CPUs.   So in real life, the answer to whether all your replica nodes together can handle more reads than just your primary is maybe yes and maybe no. Usually no. It all depends on why your single primary cannot handle all of the reads by itself.</p>
 
@@ -112,7 +111,7 @@ secondary?   <strong>You gave up HA</strong>.  Remember, if you can only service
 
 <p>Of course, this is not the complete story.  It turns out that there are some excellent use cases for secondary reads, some more common, some less so.</p>
 
-<h5 id="the-types-of-reads-to-route-to-secondaries:d15f8c1ea7d4b31deafbbed0f16c3829">The types of reads to route to secondaries</h5>
+<h5 id="the-types-of-reads-to-route-to-secondaries">The types of reads to route to secondaries</h5>
 
 <p>There are two types of use cases for reads that you do want to route to secondaries. One I already alluded to: if you have a read heavy system and reads are not super-sensitive to staleness of data but they <em>are</em> super sensitive to overall latency of satisfying a read request, you can realize a big win reading from the nearest member of the replica set rather than the primary.  If your SLA says reads must return in under 100ms but your one way network latency to the primary is 75ms how can you satisfy the SLA from various parts of the world? That&rsquo;s a use case for distributing data all over the world via secondaries in your replica set!  If you have nodes in data centers on different continents (and the PRIMARY near your write source) you can specify read preference of &ldquo;nearest&rdquo; and make sure that each read request goes to the node that has the lowest network latency from the requester.</p>
 
@@ -124,7 +123,7 @@ secondary?   <strong>You gave up HA</strong>.  Remember, if you can only service
 
 <p>To keep &ldquo;atypical&rdquo; jobs from interfering with your &ldquo;typical&rdquo; work load, configure the atypical ones to use read preference Secondary. Note that Secondary is different from SecondaryPreferred as the latter will go to the Primary if there is no available Secondary but the former will return an error if there is no Secondary to read from.  Since these jobs are usually not urgent, you’d rather have them wait and retry later than interfere with operational responsiveness of your app anyway.  You can even use <a href="http://docs.mongodb.org/manual/tutorial/configure-replica-set-tag-sets/">&ldquo;tags&rdquo;</a> to isolate different jobs to specific nodes even further.</p>
 
-<h5 id="bottom-line:d15f8c1ea7d4b31deafbbed0f16c3829">Bottom line</h5>
+<h5 id="bottom-line">Bottom line</h5>
 
 <p>Make your primary do the work that the application relies on every second.  Make sure that <em>at least</em> one secondary is idle and ready to take over for the primary in case of failure.  Use additional secondaries (<em>not</em> the hot standby one!) for all other needs whether it’s backups, analytical reports, ad hoc queries, ETL, etc.  This way, you know that you can handle the application requirements after a failover just as well as before.</p>
 
@@ -186,7 +185,7 @@ secondary?   <strong>You gave up HA</strong>.  Remember, if you can only service
             <div class="row">
                 <hr>
                 <div class="col-sm-12">
-                    <p>&copy; Asya Kamsky 2016 &middot;
+                    <p>&copy; Asya Kamsky 2017 &middot;
                     Built with <a href="https://github.com/spf13/hugo">Hugo</a></p>
                 </div>
             </div>

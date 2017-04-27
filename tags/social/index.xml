@@ -16,7 +16,7 @@
       <guid>http://asya999.github.io/post/socialstatusfeed/</guid>
       <description>
 
-&lt;h3 id=&#34;socialite:36d9d7ac96775ede158c079032b00e59&#34;&gt;Socialite&lt;/h3&gt;
+&lt;h3 id=&#34;socialite&#34;&gt;Socialite&lt;/h3&gt;
 
 &lt;p&gt;At MongoDBWorld, my colleague Darren Wood and I gave &lt;a href=&#34;http://www.mongodb.com/search/google/socialite?query=socialite&amp;amp;cx=017213726194841070573%3Ak6mpwzohlje&amp;amp;cof=FORID%3A9&amp;amp;sitesearch=&#34;&gt;three back-to-back presentations&lt;/a&gt; about an &lt;a href=&#34;http://github.com/10gen-labs/socialite&#34;&gt;open source project called Socialite&lt;/a&gt; which is a reference architecture implementation of a social status feed service.  Darren was the one who wrote the bulk of the source code and I installed and ran extensive performance tests in different configurations to determine how the different schema and indexing options scale and to get an understanding of the resources required for various sizes and distributions of workloads.&lt;/p&gt;
 

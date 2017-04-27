@@ -16,11 +16,11 @@
       <guid>http://asya999.github.io/post/findkillslowqueries/</guid>
       <description>
 
-&lt;h3 id=&#34;question:18aaff1e2e315456fa60158351f7ffe2&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;Is there a way that I can prevent slow queries in MongoDB?  I&amp;rsquo;d like to be able to set something on the server that will kill all queries running longer than a certain amount of time.&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:18aaff1e2e315456fa60158351f7ffe2&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
 &lt;p&gt;There are some options available on the &lt;strong&gt;client&lt;/strong&gt; side, for example &lt;a href=&#34;http://docs.mongodb.org/manual/reference/operator/meta/maxTimeMS/&#34;&gt;$maxTimeMS&lt;/a&gt; starting in 2.6 release.  This gives you a way to inject an option to your queries &lt;em&gt;before&lt;/em&gt; they get to the server that tells the server to kill this query if it takes longer than a certain amount of time.  However, this does not help with any query which already got to the server without having this option added to it.&lt;/p&gt;
 
@@ -42,32 +42,32 @@
       <guid>http://asya999.github.io/post/findandmodify/</guid>
       <description>
 
-&lt;h3 id=&#34;question:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;I saw &lt;a href=&#34;1&#34; title=&#34;Actually [William_Shakespeare][2] said it. 
 &#34;&gt;your answer on SO&lt;/a&gt; about the difference between &amp;ldquo;update&amp;rdquo; and &amp;ldquo;findAndModify&amp;rdquo;, could you explain in more detail what the difference is, and why MongoDB findAndModify is named what it is?&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
 &lt;p&gt;&lt;em&gt;What&amp;rsquo;s in a name?  that which we call a rose&lt;br /&gt;
  By any other name would smell as sweet&lt;/em&gt;;
-&lt;p style=&#34;text-align:right&#34; markdown=&#34;1&#34;&gt; - said Juliet&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:8efa43574f94dcc0d1d4b4a79faa202f:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:8efa43574f94dcc0d1d4b4a79faa202f:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; &lt;/p&gt;&lt;/p&gt;
+&lt;p style=&#34;text-align:right&#34; markdown=&#34;1&#34;&gt; - said Juliet&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; &lt;/p&gt;&lt;/p&gt;
 
 &lt;p&gt;As it turns out, a lot is in a name.  A poorly chosen name can confuse many users, year after year.  I believe &lt;code&gt;findAndModify&lt;/code&gt; was probably not the best name for the role that it plays.&lt;/p&gt;
 
-&lt;h5 id=&#34;update:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;update&lt;/h5&gt;
+&lt;h5 id=&#34;update&#34;&gt;update&lt;/h5&gt;
 
 &lt;p&gt;An &lt;a href=&#34;http://docs.mongodb.org/manual/reference/method/db.collection.update/&#34;&gt;update&lt;/a&gt; finds an appropriate document (by default it&amp;rsquo;s just one) and then it changes its contents according to your specification.&lt;/p&gt;
 
-&lt;h5 id=&#34;findandmodify:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;findAndModify&lt;/h5&gt;
+&lt;h5 id=&#34;findandmodify&#34;&gt;findAndModify&lt;/h5&gt;
 
 &lt;p&gt;The &lt;a href=&#34;http://docs.mongodb.org/manual/reference/command/findAndModify/#dbcmd.findAndModify&#34;&gt;findAndModify command&lt;/a&gt; finds an appropriate document (it&amp;rsquo;s always just one) and then it changes its contents according to your specification and &lt;em&gt;then it returns that exact document that it changed&lt;/em&gt; (old version or new version, depending on which you ask for)&lt;/p&gt;
 
-&lt;h5 id=&#34;what-s-the-difference:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;What&amp;rsquo;s the Difference?&lt;/h5&gt;
+&lt;h5 id=&#34;what-s-the-difference&#34;&gt;What&amp;rsquo;s the Difference?&lt;/h5&gt;
 
 &lt;p&gt;They both find a document and update it atomically.  What that means is that it&amp;rsquo;s not possible for another thread to change part of this document between the time we find it and start updating it and when we finish updating it.   It also means that no other thread will see this document in &amp;ldquo;half-updated&amp;rdquo; state.  That&amp;rsquo;s what &amp;ldquo;atomic&amp;rdquo; means - all-or-nothing.&lt;/p&gt;
 
-&lt;h5 id=&#34;why-do-we-even-need-findandmodify-then:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;Why do we even need &lt;code&gt;findAndModify&lt;/code&gt; then?&lt;/h5&gt;
+&lt;h5 id=&#34;why-do-we-even-need-findandmodify-then&#34;&gt;Why do we even need &lt;code&gt;findAndModify&lt;/code&gt; then?&lt;/h5&gt;
 
 &lt;p&gt;What if we need to get the full document that we just updated (like marking an item in a queue &amp;ldquo;yours&amp;rdquo; and then working on it)?&lt;/p&gt;
 
@@ -81,7 +81,7 @@
 
 &lt;p&gt;That&amp;rsquo;s why you&amp;rsquo;ll hear people talk about &lt;code&gt;findAndModify&lt;/code&gt; in the context of implementing a queue mechanism - &lt;code&gt;findAndModify&lt;/code&gt; can update a single document to indicate that you are now working on it, and return that same document to you in one operation.&lt;/p&gt;
 
-&lt;h5 id=&#34;when-not-to-use-findandmodify:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;When Not to Use &lt;code&gt;findAndModify&lt;/code&gt;&lt;/h5&gt;
+&lt;h5 id=&#34;when-not-to-use-findandmodify&#34;&gt;When Not to Use &lt;code&gt;findAndModify&lt;/code&gt;&lt;/h5&gt;
 
 &lt;p&gt;There are scenarios where &lt;code&gt;findAndModify&lt;/code&gt; cannot help you.   If you need to update a document based on existing values of a document, you can use many &lt;a href=&#34;http://docs.mongodb.org/manual/reference/operator/update/#id1&#34;&gt;update operators&lt;/a&gt; which are atomic and allow you to change a field value without knowing what its current value is, like &lt;code&gt;$inc&lt;/code&gt; and &lt;code&gt;$addToSet&lt;/code&gt; and &lt;code&gt;$min&lt;/code&gt;  and &lt;code&gt;$max&lt;/code&gt;, etc.  They allow you to modify a field without having to read the value of that field first.  And they work with a regular &lt;code&gt;update&lt;/code&gt; as well as with &lt;code&gt;findAndModify&lt;/code&gt;.&lt;/p&gt;
 
@@ -89,23 +89,23 @@
 
 &lt;p&gt;There is no way to utilize &lt;code&gt;findAndModify&lt;/code&gt; here, because it&amp;rsquo;s limited to the exact set of operators that &lt;code&gt;update&lt;/code&gt; uses, all it adds is the ability to return the exact document you modified.  Of course, &lt;code&gt;findAndModify&lt;/code&gt; has to do more work than &lt;code&gt;update&lt;/code&gt; so for best performance you should only use &lt;code&gt;findAndModify&lt;/code&gt; when you must have the document that you just updated back in the application.   If you just want to know if an &lt;code&gt;update&lt;/code&gt; succeeded, you can examine the &lt;a href=&#34;http://docs.mongodb.org/manual/reference/command/update/#output&#34;&gt;WriteResult&lt;/a&gt; that update returns.&lt;/p&gt;
 
-&lt;h3 id=&#34;proposal:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;Proposal&lt;/h3&gt;
+&lt;h3 id=&#34;proposal&#34;&gt;Proposal&lt;/h3&gt;
 
 &lt;p&gt;Let&amp;rsquo;s rename &lt;code&gt;findAndModify&lt;/code&gt; to a name that more accurately describes its function.  It updates a document and returns it, but to maintain a small connection to its current name, I nearby propose we rename it:&lt;/p&gt;
 
-&lt;h2 id=&#34;modifyandreturn:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;modifyAndReturn&lt;/h2&gt;
+&lt;h2 id=&#34;modifyandreturn&#34;&gt;modifyAndReturn&lt;/h2&gt;
 
-&lt;p&gt;Who&amp;rsquo;s with me? &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:8efa43574f94dcc0d1d4b4a79faa202f:2&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:8efa43574f94dcc0d1d4b4a79faa202f:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;p&gt;Who&amp;rsquo;s with me? &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:2&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
 &lt;div class=&#34;footnotes&#34;&gt;
 
 &lt;hr /&gt;
 
 &lt;ol&gt;
-&lt;li id=&#34;fn:8efa43574f94dcc0d1d4b4a79faa202f:1&#34;&gt;Actually &lt;a href=&#34;2&#34; title=&#34;Please vote for [SERVER-13979][a] if you agree.
+&lt;li id=&#34;fn:1&#34;&gt;Actually &lt;a href=&#34;2&#34; title=&#34;Please vote for [SERVER-13979][a] if you agree.
 &#34;&gt;William_Shakespeare&lt;/a&gt; said it.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:8efa43574f94dcc0d1d4b4a79faa202f:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li id=&#34;fn:8efa43574f94dcc0d1d4b4a79faa202f:2&#34;&gt;Please vote for &lt;a href=&#34;https://jira.mongodb.org/browse/SERVER-13979&#34;&gt;SERVER-13979&lt;/a&gt; if you agree.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:8efa43574f94dcc0d1d4b4a79faa202f:2&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:2&#34;&gt;Please vote for &lt;a href=&#34;https://jira.mongodb.org/browse/SERVER-13979&#34;&gt;SERVER-13979&lt;/a&gt; if you agree.
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:2&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;
 </description>
@@ -119,21 +119,21 @@
       <guid>http://asya999.github.io/post/canreplicashelpscaling/</guid>
       <description>
 
-&lt;h3 id=&#34;question:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;Do replica sets help with read scaling?  If there are more servers to service all my read requests, why wouldn&amp;rsquo;t they be able to service more read requests, or service the same number of read requests faster?&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
-&lt;h5 id=&#34;replica-sets:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Replica Sets.&lt;/h5&gt;
+&lt;h5 id=&#34;replica-sets&#34;&gt;Replica Sets.&lt;/h5&gt;
 
 &lt;p&gt;Replica sets are an awesome feature of MongoDB.  They give you &amp;ldquo;High Availability&amp;rdquo; - meaning that when the primary node becomes unavailable (crashes, gets unplugged from the network, gets DOS&amp;rsquo;ed by another process on the same box) the rest of the nodes will &lt;strong&gt;elect&lt;/strong&gt; a new primary and the driver (which your application uses to communicate with MongoDB) will automatically track all nodes and when the primary role changes from one server to another, it will automatically detect to send requests there.&lt;/p&gt;
 
-&lt;h5 id=&#34;single-master:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Single Master:&lt;/h5&gt;
+&lt;h5 id=&#34;single-master&#34;&gt;Single Master:&lt;/h5&gt;
 
 &lt;p&gt;MongoDB Replica Sets are a &amp;ldquo;single master&amp;rdquo; architecture.  That means that all writes must go to the one primary and from there they are asynchronously replicated to all secondaries.   Your reads also go to the primary, meaning you can always read your own writes.  Your read requests would &lt;em&gt;never&lt;/em&gt; be sent to a secondary unless your application &lt;em&gt;explicitly&lt;/em&gt; requests that the read go somewhere other than the primary, so you would never be getting &amp;ldquo;stale&amp;rdquo; data without being aware of it.&lt;/p&gt;
 
-&lt;h5 id=&#34;the-questions-we-have-are:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;The questions we have are:&lt;/h5&gt;
+&lt;h5 id=&#34;the-questions-we-have-are&#34;&gt;The questions we have are:&lt;/h5&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Should you use secondary reads?&lt;br /&gt;
@@ -148,11 +148,11 @@
 
 &lt;p&gt;Because secondary reads create complexity for your application which now needs to handle (possibly very) stale data and situations where just-made-write is not available for read, I would caution users to be sure that they are getting some benefits from secondary reads.  I’m going to look at possible benefits and discuss whether they are likely to be realized using secondary replica nodes or not.&lt;/p&gt;
 
-&lt;h5 id=&#34;will-more-servers-help-you-handle-same-reads-faster:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Will more servers help you handle same reads faster?&lt;/h5&gt;
+&lt;h5 id=&#34;will-more-servers-help-you-handle-same-reads-faster&#34;&gt;Will more servers help you handle same reads faster?&lt;/h5&gt;
 
 &lt;p&gt;I think the answer for simple operational reads is obviously no.  If a read takes 10μs then it&amp;rsquo;s not likely to take 1/5th of that just because there are five servers - this is a single unit of work.  That&amp;rsquo;s the actual duration of the read.&lt;/p&gt;
 
-&lt;h5 id=&#34;will-more-servers-help-you-handle-more-reads:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Will more servers help you handle more reads?&lt;/h5&gt;
+&lt;h5 id=&#34;will-more-servers-help-you-handle-more-reads&#34;&gt;Will more servers help you handle more reads?&lt;/h5&gt;
 
 &lt;p&gt;Intuitively, it feels like the answer should be “yes” - but that would only be the case if the reads somehow interfered with each other on the single node.  If they are reading the same “hot” data then they can be working in parallel up to the limit of your CPUs.   So in real life, the answer to whether all your replica nodes together can handle more reads than just your primary is maybe yes and maybe no. Usually no. It all depends on why your single primary cannot handle all of the reads by itself.&lt;/p&gt;
 
@@ -180,7 +180,7 @@ secondary?   &lt;strong&gt;You gave up HA&lt;/strong&gt;.  Remember, if you can 
 
 &lt;p&gt;Of course, this is not the complete story.  It turns out that there are some excellent use cases for secondary reads, some more common, some less so.&lt;/p&gt;
 
-&lt;h5 id=&#34;the-types-of-reads-to-route-to-secondaries:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;The types of reads to route to secondaries&lt;/h5&gt;
+&lt;h5 id=&#34;the-types-of-reads-to-route-to-secondaries&#34;&gt;The types of reads to route to secondaries&lt;/h5&gt;
 
 &lt;p&gt;There are two types of use cases for reads that you do want to route to secondaries. One I already alluded to: if you have a read heavy system and reads are not super-sensitive to staleness of data but they &lt;em&gt;are&lt;/em&gt; super sensitive to overall latency of satisfying a read request, you can realize a big win reading from the nearest member of the replica set rather than the primary.  If your SLA says reads must return in under 100ms but your one way network latency to the primary is 75ms how can you satisfy the SLA from various parts of the world? That&amp;rsquo;s a use case for distributing data all over the world via secondaries in your replica set!  If you have nodes in data centers on different continents (and the PRIMARY near your write source) you can specify read preference of &amp;ldquo;nearest&amp;rdquo; and make sure that each read request goes to the node that has the lowest network latency from the requester.&lt;/p&gt;
 
@@ -192,7 +192,7 @@ secondary?   &lt;strong&gt;You gave up HA&lt;/strong&gt;.  Remember, if you can 
 
 &lt;p&gt;To keep &amp;ldquo;atypical&amp;rdquo; jobs from interfering with your &amp;ldquo;typical&amp;rdquo; work load, configure the atypical ones to use read preference Secondary. Note that Secondary is different from SecondaryPreferred as the latter will go to the Primary if there is no available Secondary but the former will return an error if there is no Secondary to read from.  Since these jobs are usually not urgent, you’d rather have them wait and retry later than interfere with operational responsiveness of your app anyway.  You can even use &lt;a href=&#34;http://docs.mongodb.org/manual/tutorial/configure-replica-set-tag-sets/&#34;&gt;&amp;ldquo;tags&amp;rdquo;&lt;/a&gt; to isolate different jobs to specific nodes even further.&lt;/p&gt;
 
-&lt;h5 id=&#34;bottom-line:d15f8c1ea7d4b31deafbbed0f16c3829&#34;&gt;Bottom line&lt;/h5&gt;
+&lt;h5 id=&#34;bottom-line&#34;&gt;Bottom line&lt;/h5&gt;
 
 &lt;p&gt;Make your primary do the work that the application relies on every second.  Make sure that &lt;em&gt;at least&lt;/em&gt; one secondary is idle and ready to take over for the primary in case of failure.  Use additional secondaries (&lt;em&gt;not&lt;/em&gt; the hot standby one!) for all other needs whether it’s backups, analytical reports, ad hoc queries, ETL, etc.  This way, you know that you can handle the application requirements after a failover just as well as before.&lt;/p&gt;
 
@@ -218,11 +218,11 @@ Slug= &amp;ldquo;largeembeddedarrays&amp;rdquo;
 Tags= [&amp;ldquo;schema&amp;rdquo;,&amp;ldquo;performance&amp;rdquo;,&amp;ldquo;arrays&amp;rdquo;,&amp;ldquo;mongodb&amp;rdquo;]
 +++&lt;/p&gt;
 
-&lt;h3 id=&#34;question:b03b8c475184befd19c41be5b8f8950d&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;Why shouldn&amp;rsquo;t I embed large arrays in my documents?  It seems incredibly convenient and intuitive but I&amp;rsquo;ve heard there are performance penalties.  What causes them and how do I know if I should avoid using arrays?&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:b03b8c475184befd19c41be5b8f8950d&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
 &lt;p&gt;Arrays are wonderful when used properly.  When talking about performance, the main reason to be wary of arrays is when they grow without bounds.&lt;/p&gt;
 

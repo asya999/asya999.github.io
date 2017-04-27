@@ -18,7 +18,6 @@
     <link href="http://asya999.github.io/css/lavish-bootstrap.css" rel="stylesheet">
     <link href="http://asya999.github.io/css/custom.css" rel="stylesheet">
 
-    
 </head>
 
 <body>
@@ -51,32 +50,32 @@
                     <hr>
                     
 
-<h3 id="question:8efa43574f94dcc0d1d4b4a79faa202f">Question:</h3>
+<h3 id="question">Question:</h3>
 
 <p>I saw <a href="1" title="Actually [William_Shakespeare][2] said it. 
 ">your answer on SO</a> about the difference between &ldquo;update&rdquo; and &ldquo;findAndModify&rdquo;, could you explain in more detail what the difference is, and why MongoDB findAndModify is named what it is?</p>
 
-<h3 id="answer:8efa43574f94dcc0d1d4b4a79faa202f">Answer:</h3>
+<h3 id="answer">Answer:</h3>
 
 <p><em>What&rsquo;s in a name?  that which we call a rose<br />
  By any other name would smell as sweet</em>;
-<p style="text-align:right" markdown="1"> - said Juliet<sup class="footnote-ref" id="fnref:8efa43574f94dcc0d1d4b4a79faa202f:1"><a rel="footnote" href="#fn:8efa43574f94dcc0d1d4b4a79faa202f:1">1</a></sup> </p></p>
+<p style="text-align:right" markdown="1"> - said Juliet<sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="#fn:1">1</a></sup> </p></p>
 
 <p>As it turns out, a lot is in a name.  A poorly chosen name can confuse many users, year after year.  I believe <code>findAndModify</code> was probably not the best name for the role that it plays.</p>
 
-<h5 id="update:8efa43574f94dcc0d1d4b4a79faa202f">update</h5>
+<h5 id="update">update</h5>
 
 <p>An <a href="http://docs.mongodb.org/manual/reference/method/db.collection.update/">update</a> finds an appropriate document (by default it&rsquo;s just one) and then it changes its contents according to your specification.</p>
 
-<h5 id="findandmodify:8efa43574f94dcc0d1d4b4a79faa202f">findAndModify</h5>
+<h5 id="findandmodify">findAndModify</h5>
 
 <p>The <a href="http://docs.mongodb.org/manual/reference/command/findAndModify/#dbcmd.findAndModify">findAndModify command</a> finds an appropriate document (it&rsquo;s always just one) and then it changes its contents according to your specification and <em>then it returns that exact document that it changed</em> (old version or new version, depending on which you ask for)</p>
 
-<h5 id="what-s-the-difference:8efa43574f94dcc0d1d4b4a79faa202f">What&rsquo;s the Difference?</h5>
+<h5 id="what-s-the-difference">What&rsquo;s the Difference?</h5>
 
 <p>They both find a document and update it atomically.  What that means is that it&rsquo;s not possible for another thread to change part of this document between the time we find it and start updating it and when we finish updating it.   It also means that no other thread will see this document in &ldquo;half-updated&rdquo; state.  That&rsquo;s what &ldquo;atomic&rdquo; means - all-or-nothing.</p>
 
-<h5 id="why-do-we-even-need-findandmodify-then:8efa43574f94dcc0d1d4b4a79faa202f">Why do we even need <code>findAndModify</code> then?</h5>
+<h5 id="why-do-we-even-need-findandmodify-then">Why do we even need <code>findAndModify</code> then?</h5>
 
 <p>What if we need to get the full document that we just updated (like marking an item in a queue &ldquo;yours&rdquo; and then working on it)?</p>
 
@@ -90,7 +89,7 @@
 
 <p>That&rsquo;s why you&rsquo;ll hear people talk about <code>findAndModify</code> in the context of implementing a queue mechanism - <code>findAndModify</code> can update a single document to indicate that you are now working on it, and return that same document to you in one operation.</p>
 
-<h5 id="when-not-to-use-findandmodify:8efa43574f94dcc0d1d4b4a79faa202f">When Not to Use <code>findAndModify</code></h5>
+<h5 id="when-not-to-use-findandmodify">When Not to Use <code>findAndModify</code></h5>
 
 <p>There are scenarios where <code>findAndModify</code> cannot help you.   If you need to update a document based on existing values of a document, you can use many <a href="http://docs.mongodb.org/manual/reference/operator/update/#id1">update operators</a> which are atomic and allow you to change a field value without knowing what its current value is, like <code>$inc</code> and <code>$addToSet</code> and <code>$min</code>  and <code>$max</code>, etc.  They allow you to modify a field without having to read the value of that field first.  And they work with a regular <code>update</code> as well as with <code>findAndModify</code>.</p>
 
@@ -98,23 +97,23 @@
 
 <p>There is no way to utilize <code>findAndModify</code> here, because it&rsquo;s limited to the exact set of operators that <code>update</code> uses, all it adds is the ability to return the exact document you modified.  Of course, <code>findAndModify</code> has to do more work than <code>update</code> so for best performance you should only use <code>findAndModify</code> when you must have the document that you just updated back in the application.   If you just want to know if an <code>update</code> succeeded, you can examine the <a href="http://docs.mongodb.org/manual/reference/command/update/#output">WriteResult</a> that update returns.</p>
 
-<h3 id="proposal:8efa43574f94dcc0d1d4b4a79faa202f">Proposal</h3>
+<h3 id="proposal">Proposal</h3>
 
 <p>Let&rsquo;s rename <code>findAndModify</code> to a name that more accurately describes its function.  It updates a document and returns it, but to maintain a small connection to its current name, I nearby propose we rename it:</p>
 
-<h2 id="modifyandreturn:8efa43574f94dcc0d1d4b4a79faa202f">modifyAndReturn</h2>
+<h2 id="modifyandreturn">modifyAndReturn</h2>
 
-<p>Who&rsquo;s with me? <sup class="footnote-ref" id="fnref:8efa43574f94dcc0d1d4b4a79faa202f:2"><a rel="footnote" href="#fn:8efa43574f94dcc0d1d4b4a79faa202f:2">2</a></sup></p>
+<p>Who&rsquo;s with me? <sup class="footnote-ref" id="fnref:2"><a rel="footnote" href="#fn:2">2</a></sup></p>
 <div class="footnotes">
 
 <hr />
 
 <ol>
-<li id="fn:8efa43574f94dcc0d1d4b4a79faa202f:1">Actually <a href="2" title="Please vote for [SERVER-13979][a] if you agree.
+<li id="fn:1">Actually <a href="2" title="Please vote for [SERVER-13979][a] if you agree.
 ">William_Shakespeare</a> said it.
- <a class="footnote-return" href="#fnref:8efa43574f94dcc0d1d4b4a79faa202f:1"><sup>[return]</sup></a></li>
-<li id="fn:8efa43574f94dcc0d1d4b4a79faa202f:2">Please vote for <a href="https://jira.mongodb.org/browse/SERVER-13979">SERVER-13979</a> if you agree.
- <a class="footnote-return" href="#fnref:8efa43574f94dcc0d1d4b4a79faa202f:2"><sup>[return]</sup></a></li>
+ <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
+<li id="fn:2">Please vote for <a href="https://jira.mongodb.org/browse/SERVER-13979">SERVER-13979</a> if you agree.
+ <a class="footnote-return" href="#fnref:2"><sup>[return]</sup></a></li>
 </ol>
 </div>
 
@@ -172,7 +171,7 @@
             <div class="row">
                 <hr>
                 <div class="col-sm-12">
-                    <p>&copy; Asya Kamsky 2016 &middot;
+                    <p>&copy; Asya Kamsky 2017 &middot;
                     Built with <a href="https://github.com/spf13/hugo">Hugo</a></p>
                 </div>
             </div>

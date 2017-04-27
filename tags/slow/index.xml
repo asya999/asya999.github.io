@@ -16,11 +16,11 @@
       <guid>http://asya999.github.io/post/findkillslowqueries/</guid>
       <description>
 
-&lt;h3 id=&#34;question:18aaff1e2e315456fa60158351f7ffe2&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;Is there a way that I can prevent slow queries in MongoDB?  I&amp;rsquo;d like to be able to set something on the server that will kill all queries running longer than a certain amount of time.&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:18aaff1e2e315456fa60158351f7ffe2&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
 &lt;p&gt;There are some options available on the &lt;strong&gt;client&lt;/strong&gt; side, for example &lt;a href=&#34;http://docs.mongodb.org/manual/reference/operator/meta/maxTimeMS/&#34;&gt;$maxTimeMS&lt;/a&gt; starting in 2.6 release.  This gives you a way to inject an option to your queries &lt;em&gt;before&lt;/em&gt; they get to the server that tells the server to kill this query if it takes longer than a certain amount of time.  However, this does not help with any query which already got to the server without having this option added to it.&lt;/p&gt;
 

@@ -16,11 +16,11 @@
       <guid>http://asya999.github.io/post/matchallarrayelements/</guid>
       <description>
 
-&lt;h3 id=&#34;question:292757d8f30706addf536c1c5ac8ae1a&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;I need to match all documents where every element of an array matches some predicate.  Can that be done?&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:292757d8f30706addf536c1c5ac8ae1a&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
 &lt;p&gt;Yes, the query to do this is actually quite simple to construct.&lt;/p&gt;
 
@@ -185,11 +185,11 @@ db.coll.find({$nor:[{&amp;quot;b&amp;quot;:{$elemMatch:{&amp;quot;x&amp;quot;:{$
       <guid>http://asya999.github.io/post/findkillslowqueries/</guid>
       <description>
 
-&lt;h3 id=&#34;question:18aaff1e2e315456fa60158351f7ffe2&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;Is there a way that I can prevent slow queries in MongoDB?  I&amp;rsquo;d like to be able to set something on the server that will kill all queries running longer than a certain amount of time.&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:18aaff1e2e315456fa60158351f7ffe2&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
 &lt;p&gt;There are some options available on the &lt;strong&gt;client&lt;/strong&gt; side, for example &lt;a href=&#34;http://docs.mongodb.org/manual/reference/operator/meta/maxTimeMS/&#34;&gt;$maxTimeMS&lt;/a&gt; starting in 2.6 release.  This gives you a way to inject an option to your queries &lt;em&gt;before&lt;/em&gt; they get to the server that tells the server to kill this query if it takes longer than a certain amount of time.  However, this does not help with any query which already got to the server without having this option added to it.&lt;/p&gt;
 
@@ -209,19 +209,19 @@ db.coll.find({$nor:[{&amp;quot;b&amp;quot;:{$elemMatch:{&amp;quot;x&amp;quot;:{$
       <pubDate>Sun, 07 Sep 2014 00:00:00 UTC</pubDate>
       <author>Asya Kamsky</author>
       <guid>http://asya999.github.io/post/revisitversions/</guid>
-      <description>
-
-&lt;h3 id=&#34;guest-post-by-paul-done-http-pauldone-blogspot-co-uk:a2980dc88478af7ab881c721f66e9b4d&#34;&gt;GUEST POST by &lt;a href=&#34;http://pauldone.blogspot.co.uk/&#34;&gt;Paul Done&lt;/a&gt; &lt;/h3&gt;
+      <description>&lt;h3 id=&#34;guest-post-by-paul-done-http-pauldone-blogspot-co-uk&#34;&gt;GUEST POST by &lt;a href=&#34;http://pauldone.blogspot.co.uk/&#34;&gt;Paul Done&lt;/a&gt; &lt;/h3&gt;
 
 &lt;p&gt;In a &lt;a href=&#34;http://askasya.com/post/trackversions&#34;&gt;previous Ask Asya blog post&lt;/a&gt;,
 Asya outlined various approaches for preserving historical versions of records for auditing purposes, whilst allowing current versions of records to be easily inserted and queried. Having found the post to be extremely useful for one of my projects, and following some further investigations of my own, I realised that two of the choices could be refined a little to be more optimal. Upon feeding back my findings, Asya graciously asked me to document them here, so here goes.&lt;/p&gt;
 
-&lt;h4 id=&#34;revisit-of-choice-2-embed-versions-in-a-single-document:a2980dc88478af7ab881c721f66e9b4d&#34;&gt;Revisit of Choice 2  (Embed Versions in a Single Document)&lt;/h4&gt;
+&lt;h4 id=&#34;revisit-of-choice-2-embed-versions-in-a-single-document&#34;&gt;Revisit of Choice 2  (Embed Versions in a Single Document)&lt;/h4&gt;
 
 &lt;p&gt;The presented ‘compare-and-swap&amp;rsquo; example code, to generate a new version and update version history, is very effective at ensuring consistency of versions in a thread-safe manner. However, I felt that there was scope
 to reduce the update latency which will be particularly high when a document has grown, with many previous versions embedded.&lt;/p&gt;
 
 &lt;p&gt;eor example, if a current document has tens of embedded previous versions, then projecting the whole document back to the client application, updating part of the document copy and then sending the whole document as an update to the database, will be slower than necessary. I prototyped a refactored version of the example code (shown below) which exhibits the same functional behaviour, but avoids projecting the entire document and uses an in-place update to push changes to the database.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
 
 &lt;p&gt;Don&amp;rsquo;t return all the old versions:&lt;/p&gt;
 
@@ -252,7 +252,7 @@ to reduce the update latency which will be particularly high when a document has
 &lt;p&gt;As a result, even when the number of versions held in a document
 increases over time, the update latency for adding a new version remains roughly constant.&lt;/p&gt;
 
-&lt;h4 id=&#34;revisit-of-choice-3-separate-collection-for-previous-versions:a2980dc88478af7ab881c721f66e9b4d&#34;&gt;Revisit of Choice 3  (Separate Collection for Previous Versions)&lt;/h4&gt;
+&lt;h4 id=&#34;revisit-of-choice-3-separate-collection-for-previous-versions&#34;&gt;Revisit of Choice 3  (Separate Collection for Previous Versions)&lt;/h4&gt;
 
 &lt;p&gt;The original post implies that this choice is technically challenging to implement, to ingest a new document version whilst maintaining consistency with previous versions, in the face of system failure.  However, I don&amp;rsquo;t feel it&amp;rsquo;s that bad, if the update flow is crafted carefully. If the order of writes is implemented as &amp;ldquo;write to previous collection before writing to current collection&amp;rdquo;, then in a failure scenario, there is potential for a duplicate record version but not a lost record version. Also, there are ways for subsequent querying code to gracefully deal with the duplicate.&lt;/p&gt;
 
@@ -346,14 +346,13 @@ increases over time, the update latency for adding a new version remains roughly
 
 &lt;p&gt;As a result of this approach, it is easy to query current versions of entities, easy to query the full version history of a given entity and easy to update an entity with a new version.&lt;/p&gt;
 
-&lt;h3 id=&#34;in-summary:a2980dc88478af7ab881c721f66e9b4d&#34;&gt;In Summary&lt;/h3&gt;
+&lt;h3 id=&#34;in-summary&#34;&gt;In Summary&lt;/h3&gt;
 
 &lt;p&gt;I&amp;rsquo;ve taken the liberty of providing a modified version of Asya&amp;rsquo;s summary table below, to expand out the criteria that may be relevant when choosing a versioning strategy for a given use case. My version of the table also reflects the improved results for choices 2 and 3, on the back of what has been discussed in this blog post.&lt;/p&gt;
 
 &lt;p&gt;Updated Table of Tradeoffs:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://dl.dropboxusercontent.com/u/35111849/table.png&#34; alt=&#34;Updated Table of Tradeoffs&#34; /&gt;.&lt;/p&gt;
-</description>
+&lt;p&gt;&lt;img src=&#34;http://www.askasya.com/assets/table.png&#34; alt=&#34;Updated Table of Tradeoffs&#34; /&gt;.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -364,7 +363,7 @@ increases over time, the update latency for adding a new version remains roughly
       <guid>http://asya999.github.io/post/socialstatusfeed/</guid>
       <description>
 
-&lt;h3 id=&#34;socialite:36d9d7ac96775ede158c079032b00e59&#34;&gt;Socialite&lt;/h3&gt;
+&lt;h3 id=&#34;socialite&#34;&gt;Socialite&lt;/h3&gt;
 
 &lt;p&gt;At MongoDBWorld, my colleague Darren Wood and I gave &lt;a href=&#34;http://www.mongodb.com/search/google/socialite?query=socialite&amp;amp;cx=017213726194841070573%3Ak6mpwzohlje&amp;amp;cof=FORID%3A9&amp;amp;sitesearch=&#34;&gt;three back-to-back presentations&lt;/a&gt; about an &lt;a href=&#34;http://github.com/10gen-labs/socialite&#34;&gt;open source project called Socialite&lt;/a&gt; which is a reference architecture implementation of a social status feed service.  Darren was the one who wrote the bulk of the source code and I installed and ran extensive performance tests in different configurations to determine how the different schema and indexing options scale and to get an understanding of the resources required for various sizes and distributions of workloads.&lt;/p&gt;
 
@@ -409,17 +408,17 @@ increases over time, the update latency for adding a new version remains roughly
       <guid>http://asya999.github.io/post/bestversion/</guid>
       <description>
 
-&lt;h3 id=&#34;question:897d8a06bfdbaecbf747ed08c519e7de&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;Recall &lt;a href=&#34;http://askasya.com/post/trackversions&#34;&gt;our previous discussion&lt;/a&gt; about ways to  recreate older version of a document that ever existed in a particular collection.&lt;/p&gt;
 
 &lt;p&gt;The goal was to preserve every state for each object, but to respond to queries with the &amp;ldquo;current&amp;rdquo; or &amp;ldquo;latest&amp;rdquo; version.   We had a requirement to be able to have an infrequent audit to review all or some previous versions of the document.&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:897d8a06bfdbaecbf747ed08c519e7de&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
 &lt;p&gt;I had suggested at the time that there was a different way to achieve this that I liked better than the discussed methods and I&amp;rsquo;m going to describe it now.&lt;/p&gt;
 
-&lt;h4 id=&#34;previous-discussion-summary:897d8a06bfdbaecbf747ed08c519e7de&#34;&gt;Previous Discussion Summary:&lt;/h4&gt;
+&lt;h4 id=&#34;previous-discussion-summary&#34;&gt;Previous Discussion Summary:&lt;/h4&gt;
 
 &lt;p&gt;Up to this point, we considered keeping versions of the same document within one MongoDB document, in separate documents within the same collection, or by &amp;ldquo;archiving off&amp;rdquo; older versions of the document into a separate collection.&lt;/p&gt;
 
@@ -434,7 +433,7 @@ increases over time, the update latency for adding a new version remains roughly
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h5 id=&#34;where-we-left-off:897d8a06bfdbaecbf747ed08c519e7de&#34;&gt;Where we left off:&lt;/h5&gt;
+&lt;h5 id=&#34;where-we-left-off&#34;&gt;Where we left off:&lt;/h5&gt;
 
 &lt;p&gt;Here&amp;rsquo;s a table that shows for each schema choice that we considered how well we can handle the reads, writes and if an update has to make more than one write, how easy it is to recover or to be in a relatively &amp;ldquo;safe&amp;rdquo; state:&lt;/p&gt;
 
@@ -508,7 +507,7 @@ increases over time, the update latency for adding a new version remains roughly
 
 &lt;p&gt;How do we get fast updates that keep the current document current but save the previous version somewhere else?  We know that we don&amp;rsquo;t have multi-statement transaction in MongoDB so we can&amp;rsquo;t ensure that a regular  update of one document and an insert of another document are atomic.  However, there &lt;em&gt;is&lt;/em&gt; something that&amp;rsquo;s always updated atomically along with &lt;em&gt;every&lt;/em&gt; write that happens in your collection, and that is the &amp;ldquo;Oplog&amp;rdquo;.&lt;/p&gt;
 
-&lt;h4 id=&#34;the-oplog:897d8a06bfdbaecbf747ed08c519e7de&#34;&gt;The Oplog&lt;/h4&gt;
+&lt;h4 id=&#34;the-oplog&#34;&gt;The Oplog&lt;/h4&gt;
 
 &lt;p&gt;The oplog (full name: &amp;lsquo;oplog.rs&amp;rsquo; collection in &amp;lsquo;local&amp;rsquo; database) is a special collection that&amp;rsquo;s used by the replication mechanism.  Every single write operation is persisted into the oplog atomically with being applied to the data files, indexes and the journal.  You can read more about the oplog in &lt;a href=&#34;http://docs.mongodb.org/manual/core/replica-set-oplog/&#34;&gt;the docs&lt;/a&gt;, but what I&amp;rsquo;m going to show you is what it looks like in the oplog when an insert or update happens, and how we can use that for our own purposes.&lt;/p&gt;
 
@@ -599,7 +598,7 @@ WriteResult({
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Looks like the oplog entry reflects the actual operation that was performed, &lt;strong&gt;not&lt;/strong&gt; the operation that I specified.  I asked for an update - when it&amp;rsquo;s an update, the oplog will show it as an update, when it&amp;rsquo;s turned into an upsert, the oplog will show it as an insert.  When it was an update, I had asked it to &amp;ldquo;increment&amp;rdquo; but what it put in the oplog was what the actual value saved was.&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:897d8a06bfdbaecbf747ed08c519e7de:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:897d8a06bfdbaecbf747ed08c519e7de:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;p&gt;Looks like the oplog entry reflects the actual operation that was performed, &lt;strong&gt;not&lt;/strong&gt; the operation that I specified.  I asked for an update - when it&amp;rsquo;s an update, the oplog will show it as an update, when it&amp;rsquo;s turned into an upsert, the oplog will show it as an insert.  When it was an update, I had asked it to &amp;ldquo;increment&amp;rdquo; but what it put in the oplog was what the actual value saved was.&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
 
 &lt;p&gt;I&amp;rsquo;m sure most of you see where I&amp;rsquo;m going with this.  Rather than fumbling with creating and updating documents in the &amp;ldquo;previous versions&amp;rdquo; collection when we perform an update to a document, we can do it asynchronously, the way MongoDB secondaries do it.&lt;/p&gt;
 
@@ -607,7 +606,7 @@ WriteResult({
 
 &lt;p&gt;Here is a little demo.  The code and explanations are after the video, so feel free to browse ahead before watching, or you can watch first and read the explanations after.&lt;/p&gt;
 
-&lt;h5 id=&#34;tailing-the-oplog-to-maintain-a-copy-of-a-collection-elsewhere:897d8a06bfdbaecbf747ed08c519e7de&#34;&gt;Tailing the oplog to maintain a copy of a collection elsewhere&lt;/h5&gt;
+&lt;h5 id=&#34;tailing-the-oplog-to-maintain-a-copy-of-a-collection-elsewhere&#34;&gt;Tailing the oplog to maintain a copy of a collection elsewhere&lt;/h5&gt;
 
 &lt;p&gt;For our first example, we&amp;rsquo;ll do something simple - we will watch the oplog for changes to a specific collection, and then we will apply those changes to our own copy of the collection - we will call our collection something else.  Our example stores the copy in the same database, but of course, it could be anywhere else, including in a completely different replica set or standalone server.&lt;/p&gt;
 
@@ -770,11 +769,12 @@ while (cursor.hasNext()) {
             for (i in doc.o[&#34;$set&#34;]) {
                 newDoc[i]=doc.o[&#34;$set&#34;][i];
             }
-        } else if (doc.o.hasOwnProperty(&#34;$unset&#34;)) { 
+        } 
+        if (doc.o.hasOwnProperty(&#34;$unset&#34;)) { 
             for (i in doc.o[&#34;$unset&#34;]) {
                 delete(newDoc[i]);
             }
-        } else throw &#34;Can only handle update with &#39;_id&#39;, &#39;$set&#39; or &#39;$unset&#39; &#34;;
+        }
     } else if (doc.op != &#34;c&#34;) throw &#34;Unexpected op! &#34; + tojson(doc);
 
     var  result = db.getCollection(coll).insert(newDoc);
@@ -801,7 +801,7 @@ while (cursor.hasNext()) {
 
 &lt;p&gt;It turns out that the loop will be slightly simpler because no matter what comes in, we will always do an insert into the full archive collection.&lt;/p&gt;
 
-&lt;h5 id=&#34;test-it-out:897d8a06bfdbaecbf747ed08c519e7de&#34;&gt;Test it out!&lt;/h5&gt;
+&lt;h5 id=&#34;test-it-out&#34;&gt;Test it out!&lt;/h5&gt;
 
 &lt;p&gt;Let&amp;rsquo;s run this code and then compare for a single docId the operations in the oplog, and what we end up with in the archive collection:&lt;/p&gt;
 
@@ -848,8 +848,8 @@ db.docs_full_archive.find( {&amp;ldquo;docId&amp;rdquo;:279}, {&amp;rdquo;_id&am
 &lt;hr /&gt;
 
 &lt;ol&gt;
-&lt;li id=&#34;fn:897d8a06bfdbaecbf747ed08c519e7de:1&#34;&gt;Because the oplog must write change operations in &lt;a href=&#34;http://docs.mongodb.org/manual/reference/glossary/#term-idempotent&#34;&gt;&amp;ldquo;idemponent&amp;rdquo;&lt;/a&gt; form, all update operators are transformed into their equivalent &lt;code&gt;$set&lt;/code&gt; operations.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:897d8a06bfdbaecbf747ed08c519e7de:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:1&#34;&gt;Because the oplog must write change operations in &lt;a href=&#34;http://docs.mongodb.org/manual/reference/glossary/#term-idempotent&#34;&gt;&amp;ldquo;idemponent&amp;rdquo;&lt;/a&gt; form, all update operators are transformed into their equivalent &lt;code&gt;$set&lt;/code&gt; operations.
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;
 </description>
@@ -863,7 +863,7 @@ db.docs_full_archive.find( {&amp;ldquo;docId&amp;rdquo;:279}, {&amp;rdquo;_id&am
       <guid>http://asya999.github.io/post/mergeshapes/</guid>
       <description>
 
-&lt;h3 id=&#34;question:03d96d95380719f8d4c3b2ad2c7c545e&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;Consider two separate shapes of data like this in a single collection:&lt;/p&gt;
 
@@ -889,15 +889,15 @@ db.docs_full_archive.find( {&amp;ldquo;docId&amp;rdquo;:279}, {&amp;rdquo;_id&am
 
 &lt;p&gt;If no level 1 data exists, the app would see the default (level 0) shape.   Think of it as a layered merge.&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:03d96d95380719f8d4c3b2ad2c7c545e&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
 &lt;p&gt;In the &lt;a href=&#34;http://askasya.com/post/trackversions&#34;&gt;previous &amp;ldquo;AskAsya&amp;rdquo; on tracking versions&lt;/a&gt; we looked at different ways of tracking all versions of changing objects, and this happens to be a complex variant of that problem that we considered as &amp;ldquo;schema 4&amp;rdquo; - it&amp;rsquo;s a possible approach to versioning, but it presents an interesting challenge returning the &amp;ldquo;full&amp;rdquo; current object back to the client.&lt;/p&gt;
 
-&lt;h4 id=&#34;merging-different-shapes:03d96d95380719f8d4c3b2ad2c7c545e&#34;&gt;Merging Different Shapes&lt;/h4&gt;
+&lt;h4 id=&#34;merging-different-shapes&#34;&gt;Merging Different Shapes&lt;/h4&gt;
 
 &lt;p&gt;This problem would be easily solved with aggregation framework query, except for the problem that we need to know the names of all the keys/fields, and we might not  know all of the possible fields that could exist in our documents. Without this information, the only way we have of merging documents is using MapReduce, which is both more complex &lt;em&gt;and&lt;/em&gt; slower.   I will show both solutions and I&amp;rsquo;ll leave it up to you to determine which will be more performant in your scenario (or whether you want to switch to a different versioning schema).&lt;/p&gt;
 
-&lt;h5 id=&#34;aggregation-framework:03d96d95380719f8d4c3b2ad2c7c545e&#34;&gt;Aggregation Framework&lt;/h5&gt;
+&lt;h5 id=&#34;aggregation-framework&#34;&gt;Aggregation Framework&lt;/h5&gt;
 
 &lt;p&gt;This will be the fastest way if you either have all possible attribute names that your documents could have, or get them via a scan of the entire collection (note that the latter immediately becomes stale, as new documents with new attributes could show up as soon as you start querying, but that&amp;rsquo;s inherently an issue that always exists in any system that doesn&amp;rsquo;t provide repeatable read isolation).&lt;/p&gt;
 
@@ -1024,7 +1024,7 @@ reduce = function (key,values) {
       <guid>http://asya999.github.io/post/trackversions/</guid>
       <description>
 
-&lt;h3 id=&#34;question:4d494242d33833a567dbfba012f85510&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;Consider requirement that we have to be able to recreate/query any version of a document that ever existed in a particular collection.   So we start out with:&lt;/p&gt;
 
@@ -1046,11 +1046,11 @@ reduce = function (key,values) {
 
 &lt;p&gt;The goal is to preserve every state for each object, but we only respond to queries with the &amp;ldquo;current&amp;rdquo; or &amp;ldquo;latest&amp;rdquo; version, we just have a requirement to be able to have an audit (which would be very infrequent so it&amp;rsquo;s okay if it&amp;rsquo;s slow).    Is keeping each version as we do in this example the best schema/approach to this problem?&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:4d494242d33833a567dbfba012f85510&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
 &lt;p&gt;Versioning can be tricky to get right if you don&amp;rsquo;t know all of the requirements of the application and approximate expected loads for various operations.  I&amp;rsquo;ll lay out a few possible approaches and point out their strength and weaknesses.&lt;/p&gt;
 
-&lt;h4 id=&#34;problem-statement:4d494242d33833a567dbfba012f85510&#34;&gt;Problem Statement:&lt;/h4&gt;
+&lt;h4 id=&#34;problem-statement&#34;&gt;Problem Statement:&lt;/h4&gt;
 
 &lt;p&gt;In some systems, rather than updating an existing object and overwriting its various attributes there is a business requirement to preserve the original document and to create a new version of this document, instead of updating it.  This raises the following interesting challenges:&lt;/p&gt;
 
@@ -1061,7 +1061,7 @@ reduce = function (key,values) {
 &lt;li&gt;If the system fails at any point, you must either have a consistent state of the data, or it must be possible on re-start to infer the state of the data and clean it up, or otherwise bring it to consistent state.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h5 id=&#34;possible-schema-approaches:4d494242d33833a567dbfba012f85510&#34;&gt;Possible Schema Approaches:&lt;/h5&gt;
+&lt;h5 id=&#34;possible-schema-approaches&#34;&gt;Possible Schema Approaches:&lt;/h5&gt;
 
 &lt;ol&gt;
 &lt;li&gt;Store full document each write with monotonically increasing version number.
@@ -1074,7 +1074,7 @@ reduce = function (key,values) {
 &lt;li&gt;Store only &amp;ldquo;deltas&amp;rdquo; with each increasing version.&lt;br /&gt;&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h5 id=&#34;generating-correct-version-number:4d494242d33833a567dbfba012f85510&#34;&gt;Generating correct version number&lt;/h5&gt;
+&lt;h5 id=&#34;generating-correct-version-number&#34;&gt;Generating correct version number&lt;/h5&gt;
 
 &lt;p&gt;No matter which schema you choose, the issue of generating the correct &amp;ldquo;higher&amp;rdquo; version number will come down to one of three possible approaches:&lt;/p&gt;
 
@@ -1086,7 +1086,7 @@ reduce = function (key,values) {
 
 &lt;p&gt;I like optimistic locking option and it works well with all four of our schema options.  It involves a &amp;ldquo;compare-and-swap&amp;rdquo; technique where you read the current document,  do the appropriate calculation of new version and adding new attributes, and then try the insert or update, contingent on no one having updated the document ahead of you.  If it&amp;rsquo;s an update, you include parts of the original document in your query condition, and if it&amp;rsquo;s an insert you must have a unique constraint to prevent success of multiple simultaneous attempts to version the same document.   In both cases you must check the result of your write - knowing if it succeeded or failed is how the thread knows it has to try again.&lt;/p&gt;
 
-&lt;h4 id=&#34;how-does-each-schema:4d494242d33833a567dbfba012f85510&#34;&gt;How does each schema:&lt;/h4&gt;
+&lt;h4 id=&#34;how-does-each-schema&#34;&gt;How does each schema:&lt;/h4&gt;
 
 &lt;ul&gt;
 &lt;li&gt;return only the current document&lt;/li&gt;
@@ -1099,7 +1099,7 @@ reduce = function (key,values) {
 
 &lt;hr /&gt;
 
-&lt;h5 id=&#34;choice-1:4d494242d33833a567dbfba012f85510&#34;&gt;Choice 1&lt;/h5&gt;
+&lt;h5 id=&#34;choice-1&#34;&gt;Choice 1&lt;/h5&gt;
 
 &lt;p&gt;Store full document each time there is a write with monotonically increasing version number inside.&lt;/p&gt;
 
@@ -1110,7 +1110,7 @@ reduce = function (key,values) {
 
 &lt;p&gt;For each docId value the document with the highest &amp;ldquo;v&amp;rdquo; represents the full current object state.  In this example, docId 174 v:3 represents the total current state.   There is a unique index on &lt;code&gt;{&amp;quot;docId&amp;quot;:1,&amp;quot;v&amp;quot;:1}&lt;/code&gt;&lt;/p&gt;
 
-&lt;h6 id=&#34;to-return-only-current-document:4d494242d33833a567dbfba012f85510&#34;&gt;To return only current document&lt;/h6&gt;
+&lt;h6 id=&#34;to-return-only-current-document&#34;&gt;To return only current document&lt;/h6&gt;
 
 &lt;p&gt;If the query is for a single docId, the query would be:&lt;/p&gt;
 
@@ -1144,7 +1144,7 @@ db.collection.aggregate( sort, group, match )
 
 &lt;p&gt;This is not efficient, sadly, as the indexes on our collection can only be effectively used &lt;strong&gt;before&lt;/strong&gt; the first group operation.&lt;/p&gt;
 
-&lt;h6 id=&#34;to-generate-new-version-and-update:4d494242d33833a567dbfba012f85510&#34;&gt;To generate new version and update&lt;/h6&gt;
+&lt;h6 id=&#34;to-generate-new-version-and-update&#34;&gt;To generate new version and update&lt;/h6&gt;
 
 &lt;p&gt;Optimistic locking: each thread reads in the most current document (in this case &lt;code&gt;docId:174, v:3&lt;/code&gt;) makes attribute changes, increments &lt;code&gt;v&lt;/code&gt; by one and then tries the insert of this document:&lt;/p&gt;
 
@@ -1155,7 +1155,7 @@ db.collection.aggregate( sort, group, match )
 
 &lt;p&gt;Failure does &lt;em&gt;not&lt;/em&gt; create an inconsistent state, since there is only a single write.&lt;/p&gt;
 
-&lt;h5 id=&#34;choice-1a:4d494242d33833a567dbfba012f85510&#34;&gt;Choice 1a&lt;/h5&gt;
+&lt;h5 id=&#34;choice-1a&#34;&gt;Choice 1a&lt;/h5&gt;
 
 &lt;p&gt;In a variant of 1. we might add a field in the &amp;ldquo;current&amp;rdquo; version of each documentId&lt;/p&gt;
 
@@ -1170,7 +1170,7 @@ db.collection.aggregate( sort, group, match )
 
 &lt;p&gt;Now if our process fails between those two write operations, we will have two documents for a particular docId that have &amp;ldquo;current&amp;rdquo; set to true and that means all of our queries will have to guard against that possibility - that  seems unnecessarily complex, so let&amp;rsquo;s hold off on this method for now.&lt;/p&gt;
 
-&lt;h5 id=&#34;choice-2:4d494242d33833a567dbfba012f85510&#34;&gt;Choice 2&lt;/h5&gt;
+&lt;h5 id=&#34;choice-2&#34;&gt;Choice 2&lt;/h5&gt;
 
 &lt;p&gt;Store all document versions inside a single document.&lt;/p&gt;
 
@@ -1186,11 +1186,11 @@ db.collection.aggregate( sort, group, match )
 
 &lt;p&gt;The merits of multiple possible solutions mostly depend on how many versions of each object you expect to have and how long you have to keep them.  If the lifetime of a document usually has a number of versions that are in the single digits or low double digits, you can do well embedding the versions inside of the single document that represents each object.&lt;/p&gt;
 
-&lt;h6 id=&#34;to-return-only-current-document-1:4d494242d33833a567dbfba012f85510&#34;&gt;To return only current document&lt;/h6&gt;
+&lt;h6 id=&#34;to-return-only-current-document-1&#34;&gt;To return only current document&lt;/h6&gt;
 
 &lt;p&gt;Since there is only one document, we just search by docId or other attributes of &amp;ldquo;current&amp;rdquo; and we use projection to exclude the previous array: &lt;code&gt;db.collection.find({&amp;quot;docId&amp;quot;:174}, {&amp;quot;prev&amp;quot;:0})&lt;/code&gt; except in cases we want to see it.&lt;/p&gt;
 
-&lt;h6 id=&#34;to-generate-new-version-and-update-1:4d494242d33833a567dbfba012f85510&#34;&gt;To generate new version and update&lt;/h6&gt;
+&lt;h6 id=&#34;to-generate-new-version-and-update-1&#34;&gt;To generate new version and update&lt;/h6&gt;
 
 &lt;p&gt;Even though you only have one document per docId, you really can&amp;rsquo;t create a new version with a single update, since it depends on knowing what the current subdocument is, but what you can do is utilize the &amp;ldquo;compare-and-swap&amp;rdquo; technique where you read the current document, move &amp;ldquo;current&amp;rdquo; field to the end of the previous array, set the new &amp;ldquo;current&amp;rdquo; field appropriately, and then do the update &lt;strong&gt;contingent on no one having updated the document ahead of you&lt;/strong&gt;:&lt;/p&gt;
 
@@ -1207,7 +1207,7 @@ if (result.nModified != 1) {
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h6 id=&#34;atomicity-and-maintainability:4d494242d33833a567dbfba012f85510&#34;&gt;atomicity and maintainability&lt;/h6&gt;
+&lt;h6 id=&#34;atomicity-and-maintainability&#34;&gt;atomicity and maintainability&lt;/h6&gt;
 
 &lt;p&gt;There are many pros in this approach:
 - atomic updates of document (single operation both, sets new current and updates previous)
@@ -1224,7 +1224,7 @@ if (result.nModified != 1) {
 
 &lt;p&gt;The last &amp;ldquo;con&amp;rdquo; shouldn&amp;rsquo;t really be a concern if you are genuinely talking about a system where each document is only going to have a handful of versions (or updates) in its lifecycle, and this schema isn&amp;rsquo;t appropriate for systems where a single document will live through hundreds (or thousands) of updates.&lt;/p&gt;
 
-&lt;h5 id=&#34;choice-3:4d494242d33833a567dbfba012f85510&#34;&gt;Choice 3&lt;/h5&gt;
+&lt;h5 id=&#34;choice-3&#34;&gt;Choice 3&lt;/h5&gt;
 
 &lt;p&gt;Store current document in your &amp;ldquo;primary&amp;rdquo; collection, and keep older versions in another collection.&lt;/p&gt;
 
@@ -1236,11 +1236,11 @@ if (result.nModified != 1) {
 For each documentId, there is only one document which represented its current state.
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h6 id=&#34;to-return-only-current-document-2:4d494242d33833a567dbfba012f85510&#34;&gt;To return only current document&lt;/h6&gt;
+&lt;h6 id=&#34;to-return-only-current-document-2&#34;&gt;To return only current document&lt;/h6&gt;
 
 &lt;p&gt;This one is the simplest of them all.  Since the old versions are in another collection, you just query normally when you need to find a single or multiple documents - they will all be the current version.&lt;/p&gt;
 
-&lt;h6 id=&#34;to-generate-new-version-and-update-2:4d494242d33833a567dbfba012f85510&#34;&gt;To generate new version and update&lt;/h6&gt;
+&lt;h6 id=&#34;to-generate-new-version-and-update-2&#34;&gt;To generate new version and update&lt;/h6&gt;
 
 &lt;p&gt;This one may be the hardest.  Technically, you only need to do a few things: read the current document, construct out of it the new current document, save the new current document on top of previous one and if successful, then insert the old current document into the &amp;ldquo;previous&amp;rdquo; collection.   Of course we would use the same compare-and-swap update to make sure that no one changed the document between our read and our write, and only insert into previous collection if we successfully update current.&lt;/p&gt;
 
@@ -1252,7 +1252,7 @@ For each documentId, there is only one document which represented its current st
 
 &lt;p&gt;Luckily, clean-up may be simple, as any time we detect that there exists a docId, version in &amp;ldquo;current&amp;rdquo; that also exists in &amp;ldquo;previous&amp;rdquo; it means either there is an update &amp;ldquo;in progress&amp;rdquo; or it means that an update &amp;ldquo;died&amp;rdquo; and we should clean up.  Of course the devil is in the details - and it could cause delays in the system since you have to wait long enough to be sure that this &amp;ldquo;in progress&amp;rdquo; update actually died.  Or you can have another field that you update after successful writes in both places (now making it easier to recover, but needing to do three writes before you&amp;rsquo;re done with a single document update!)  Let&amp;rsquo;s call this Medium Hard still.&lt;/p&gt;
 
-&lt;h5 id=&#34;choice-4:4d494242d33833a567dbfba012f85510&#34;&gt;Choice 4&lt;/h5&gt;
+&lt;h5 id=&#34;choice-4&#34;&gt;Choice 4&lt;/h5&gt;
 
 &lt;p&gt;Store only &amp;ldquo;deltas&amp;rdquo; with increasing versions&lt;/p&gt;
 
@@ -1265,7 +1265,7 @@ For each documentId, there is only one document which represented its current st
 
 &lt;p&gt;This one is quite complex, and the answer is getting quite long, so let&amp;rsquo;s call it hard and defer the details of how we accomplish this merge till &lt;a href=&#34;http://askasya.com/post/mergeshapes&#34;&gt;next time&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h4 id=&#34;let-s-summarize:4d494242d33833a567dbfba012f85510&#34;&gt;Let&amp;rsquo;s Summarize&lt;/h4&gt;
+&lt;h4 id=&#34;let-s-summarize&#34;&gt;Let&amp;rsquo;s Summarize&lt;/h4&gt;
 
 &lt;p&gt;Here&amp;rsquo;s a table that shows for each schema choice how well we can handle the reads, writes and if an update has to make more than one write, how easy it is to recover or to be in a relatively &amp;ldquo;safe&amp;rdquo; state:&lt;/p&gt;
 
@@ -1349,32 +1349,32 @@ For each documentId, there is only one document which represented its current st
       <guid>http://asya999.github.io/post/findandmodify/</guid>
       <description>
 
-&lt;h3 id=&#34;question:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;I saw &lt;a href=&#34;1&#34; title=&#34;Actually [William_Shakespeare][2] said it. 
 &#34;&gt;your answer on SO&lt;/a&gt; about the difference between &amp;ldquo;update&amp;rdquo; and &amp;ldquo;findAndModify&amp;rdquo;, could you explain in more detail what the difference is, and why MongoDB findAndModify is named what it is?&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
 &lt;p&gt;&lt;em&gt;What&amp;rsquo;s in a name?  that which we call a rose&lt;br /&gt;
  By any other name would smell as sweet&lt;/em&gt;;
-&lt;p style=&#34;text-align:right&#34; markdown=&#34;1&#34;&gt; - said Juliet&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:8efa43574f94dcc0d1d4b4a79faa202f:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:8efa43574f94dcc0d1d4b4a79faa202f:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; &lt;/p&gt;&lt;/p&gt;
+&lt;p style=&#34;text-align:right&#34; markdown=&#34;1&#34;&gt; - said Juliet&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; &lt;/p&gt;&lt;/p&gt;
 
 &lt;p&gt;As it turns out, a lot is in a name.  A poorly chosen name can confuse many users, year after year.  I believe &lt;code&gt;findAndModify&lt;/code&gt; was probably not the best name for the role that it plays.&lt;/p&gt;
 
-&lt;h5 id=&#34;update:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;update&lt;/h5&gt;
+&lt;h5 id=&#34;update&#34;&gt;update&lt;/h5&gt;
 
 &lt;p&gt;An &lt;a href=&#34;http://docs.mongodb.org/manual/reference/method/db.collection.update/&#34;&gt;update&lt;/a&gt; finds an appropriate document (by default it&amp;rsquo;s just one) and then it changes its contents according to your specification.&lt;/p&gt;
 
-&lt;h5 id=&#34;findandmodify:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;findAndModify&lt;/h5&gt;
+&lt;h5 id=&#34;findandmodify&#34;&gt;findAndModify&lt;/h5&gt;
 
 &lt;p&gt;The &lt;a href=&#34;http://docs.mongodb.org/manual/reference/command/findAndModify/#dbcmd.findAndModify&#34;&gt;findAndModify command&lt;/a&gt; finds an appropriate document (it&amp;rsquo;s always just one) and then it changes its contents according to your specification and &lt;em&gt;then it returns that exact document that it changed&lt;/em&gt; (old version or new version, depending on which you ask for)&lt;/p&gt;
 
-&lt;h5 id=&#34;what-s-the-difference:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;What&amp;rsquo;s the Difference?&lt;/h5&gt;
+&lt;h5 id=&#34;what-s-the-difference&#34;&gt;What&amp;rsquo;s the Difference?&lt;/h5&gt;
 
 &lt;p&gt;They both find a document and update it atomically.  What that means is that it&amp;rsquo;s not possible for another thread to change part of this document between the time we find it and start updating it and when we finish updating it.   It also means that no other thread will see this document in &amp;ldquo;half-updated&amp;rdquo; state.  That&amp;rsquo;s what &amp;ldquo;atomic&amp;rdquo; means - all-or-nothing.&lt;/p&gt;
 
-&lt;h5 id=&#34;why-do-we-even-need-findandmodify-then:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;Why do we even need &lt;code&gt;findAndModify&lt;/code&gt; then?&lt;/h5&gt;
+&lt;h5 id=&#34;why-do-we-even-need-findandmodify-then&#34;&gt;Why do we even need &lt;code&gt;findAndModify&lt;/code&gt; then?&lt;/h5&gt;
 
 &lt;p&gt;What if we need to get the full document that we just updated (like marking an item in a queue &amp;ldquo;yours&amp;rdquo; and then working on it)?&lt;/p&gt;
 
@@ -1388,7 +1388,7 @@ For each documentId, there is only one document which represented its current st
 
 &lt;p&gt;That&amp;rsquo;s why you&amp;rsquo;ll hear people talk about &lt;code&gt;findAndModify&lt;/code&gt; in the context of implementing a queue mechanism - &lt;code&gt;findAndModify&lt;/code&gt; can update a single document to indicate that you are now working on it, and return that same document to you in one operation.&lt;/p&gt;
 
-&lt;h5 id=&#34;when-not-to-use-findandmodify:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;When Not to Use &lt;code&gt;findAndModify&lt;/code&gt;&lt;/h5&gt;
+&lt;h5 id=&#34;when-not-to-use-findandmodify&#34;&gt;When Not to Use &lt;code&gt;findAndModify&lt;/code&gt;&lt;/h5&gt;
 
 &lt;p&gt;There are scenarios where &lt;code&gt;findAndModify&lt;/code&gt; cannot help you.   If you need to update a document based on existing values of a document, you can use many &lt;a href=&#34;http://docs.mongodb.org/manual/reference/operator/update/#id1&#34;&gt;update operators&lt;/a&gt; which are atomic and allow you to change a field value without knowing what its current value is, like &lt;code&gt;$inc&lt;/code&gt; and &lt;code&gt;$addToSet&lt;/code&gt; and &lt;code&gt;$min&lt;/code&gt;  and &lt;code&gt;$max&lt;/code&gt;, etc.  They allow you to modify a field without having to read the value of that field first.  And they work with a regular &lt;code&gt;update&lt;/code&gt; as well as with &lt;code&gt;findAndModify&lt;/code&gt;.&lt;/p&gt;
 
@@ -1396,23 +1396,23 @@ For each documentId, there is only one document which represented its current st
 
 &lt;p&gt;There is no way to utilize &lt;code&gt;findAndModify&lt;/code&gt; here, because it&amp;rsquo;s limited to the exact set of operators that &lt;code&gt;update&lt;/code&gt; uses, all it adds is the ability to return the exact document you modified.  Of course, &lt;code&gt;findAndModify&lt;/code&gt; has to do more work than &lt;code&gt;update&lt;/code&gt; so for best performance you should only use &lt;code&gt;findAndModify&lt;/code&gt; when you must have the document that you just updated back in the application.   If you just want to know if an &lt;code&gt;update&lt;/code&gt; succeeded, you can examine the &lt;a href=&#34;http://docs.mongodb.org/manual/reference/command/update/#output&#34;&gt;WriteResult&lt;/a&gt; that update returns.&lt;/p&gt;
 
-&lt;h3 id=&#34;proposal:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;Proposal&lt;/h3&gt;
+&lt;h3 id=&#34;proposal&#34;&gt;Proposal&lt;/h3&gt;
 
 &lt;p&gt;Let&amp;rsquo;s rename &lt;code&gt;findAndModify&lt;/code&gt; to a name that more accurately describes its function.  It updates a document and returns it, but to maintain a small connection to its current name, I nearby propose we rename it:&lt;/p&gt;
 
-&lt;h2 id=&#34;modifyandreturn:8efa43574f94dcc0d1d4b4a79faa202f&#34;&gt;modifyAndReturn&lt;/h2&gt;
+&lt;h2 id=&#34;modifyandreturn&#34;&gt;modifyAndReturn&lt;/h2&gt;
 
-&lt;p&gt;Who&amp;rsquo;s with me? &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:8efa43574f94dcc0d1d4b4a79faa202f:2&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:8efa43574f94dcc0d1d4b4a79faa202f:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;p&gt;Who&amp;rsquo;s with me? &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:2&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
 &lt;div class=&#34;footnotes&#34;&gt;
 
 &lt;hr /&gt;
 
 &lt;ol&gt;
-&lt;li id=&#34;fn:8efa43574f94dcc0d1d4b4a79faa202f:1&#34;&gt;Actually &lt;a href=&#34;2&#34; title=&#34;Please vote for [SERVER-13979][a] if you agree.
+&lt;li id=&#34;fn:1&#34;&gt;Actually &lt;a href=&#34;2&#34; title=&#34;Please vote for [SERVER-13979][a] if you agree.
 &#34;&gt;William_Shakespeare&lt;/a&gt; said it.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:8efa43574f94dcc0d1d4b4a79faa202f:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li id=&#34;fn:8efa43574f94dcc0d1d4b4a79faa202f:2&#34;&gt;Please vote for &lt;a href=&#34;https://jira.mongodb.org/browse/SERVER-13979&#34;&gt;SERVER-13979&lt;/a&gt; if you agree.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:8efa43574f94dcc0d1d4b4a79faa202f:2&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:2&#34;&gt;Please vote for &lt;a href=&#34;https://jira.mongodb.org/browse/SERVER-13979&#34;&gt;SERVER-13979&lt;/a&gt; if you agree.
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:2&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;
 </description>
@@ -1426,20 +1426,20 @@ For each documentId, there is only one document which represented its current st
       <guid>http://asya999.github.io/post/taggedcollectionbalancing/</guid>
       <description>
 
-&lt;h3 id=&#34;question:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;Is it possible to use &lt;a href=&#34;http://docs.mongodb.org/manual/core/tag-aware-sharding/&#34;&gt;&amp;ldquo;Tag aware sharding&amp;rdquo;&lt;/a&gt;  feature without having to use a special shard key?  The example in the tutorial makes it look like we would have to change our shard key to have a prefix value that we can define tag ranges on but we&amp;rsquo;re already sharded.  We have many collections in this database and we want to limit each collection to a subset of the shards so we can isolate the busy ones from each other.&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
 &lt;p&gt;Yes, that is absolutely possible, and it&amp;rsquo;s one of the cool capabilities of tag aware sharding.   A quick review of the feature.&lt;/p&gt;
 
-&lt;h5 id=&#34;tag-aware-sharding-feature:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;Tag aware sharding feature&lt;/h5&gt;
+&lt;h5 id=&#34;tag-aware-sharding-feature&#34;&gt;Tag aware sharding feature&lt;/h5&gt;
 
 &lt;p&gt;Tags associate specific ranges of shard key values with specific shards for use in managing deployment patterns.
 What this means is that in your sharded cluster you can assign zero, one or more tags (or labels) to each shard.  Then you can assign ranges of shard key values in various sharded collections to these tags.  The balancer then moves the appropriate chunks to appropriate shards to keep things the way you &amp;ldquo;assigned&amp;rdquo; them.&lt;/p&gt;
 
-&lt;h5 id=&#34;the-balancer-diversion-into-migration-details:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;The Balancer: Diversion into migration details&lt;/h5&gt;
+&lt;h5 id=&#34;the-balancer-diversion-into-migration-details&#34;&gt;The Balancer: Diversion into migration details&lt;/h5&gt;
 
 &lt;p&gt;The whole balancing and migrations process is worthy of its own separate write-up but for now, I will simplify most of it and point out at the high level that the balancer is a thread that runs on mongos that wakes up periodically and checks (1) if it should be running (2) if there is anything for it to do.†  For the balancer &amp;ldquo;something to do&amp;rdquo; is always about moving chunks between shards.  The priorities that it considers when deciding which chunks need to be moved are as follows:&lt;/p&gt;
 
@@ -1451,7 +1451,7 @@ What this means is that in your sharded cluster you can assign zero, one or more
 &lt;li&gt;&lt;p&gt;balance the remaining chunks: if the shard with the most chunks has nine+ more chunks than the shard with the fewest chunks, then the balancer will move chunks to try to keep things in balance.&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h5 id=&#34;how-do-you-tag-shards-and-ranges:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;How do you tag shards and ranges?&lt;/h5&gt;
+&lt;h5 id=&#34;how-do-you-tag-shards-and-ranges&#34;&gt;How do you tag shards and ranges?&lt;/h5&gt;
 
 &lt;p&gt;All you have to do for tagging to work is mark some shards with &amp;ldquo;tags&amp;rdquo; and specify which ranges of shard key values will be associated with that tag.   The relevant commands are &lt;code&gt;sh.addTag(&amp;quot;shardName&amp;quot;,&amp;quot;tagName&amp;quot;)&lt;/code&gt; and &lt;code&gt;sh.addTagRange(&amp;quot;namespace&amp;quot;, { shardKey: minValue }, { shardKey: maxValue }, &amp;quot;tagName&amp;quot;)&lt;/code&gt;.&lt;/p&gt;
 
@@ -1459,104 +1459,104 @@ What this means is that in your sharded cluster you can assign zero, one or more
 
 &lt;p&gt;That&amp;rsquo;s all fine and good, but I&amp;rsquo;ll show you that it doesn&amp;rsquo;t have to be nearly that complex.&lt;/p&gt;
 
-&lt;h5 id=&#34;how-you-can-use-tags-to-designate-which-shards-a-sharded-collection-can-use:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;How you can use tags to designate which shards a sharded collection can use.&lt;/h5&gt;
+&lt;h5 id=&#34;how-you-can-use-tags-to-designate-which-shards-a-sharded-collection-can-use&#34;&gt;How you can use tags to designate which shards a sharded collection can use.&lt;/h5&gt;
 
 &lt;p&gt;Let&amp;rsquo;s walk through an example.   I have three shards in my test cluster:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; db.getSiblingDB(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;config&amp;quot;&lt;/span&gt;).shards.find()
-    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0000&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30000&amp;quot;&lt;/span&gt; }
-    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30001&amp;quot;&lt;/span&gt; }
-    { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0002&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30002&amp;quot;&lt;/span&gt; }
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+
+    tagdb@mongos(2.6.0) &gt; db.getSiblingDB(&#34;config&#34;).shards.find()
+    { &#34;_id&#34; : &#34;shard0000&#34;, &#34;host&#34; : &#34;localhost:30000&#34; }
+    { &#34;_id&#34; : &#34;shard0001&#34;, &#34;host&#34; : &#34;localhost:30001&#34; }
+    { &#34;_id&#34; : &#34;shard0002&#34;, &#34;host&#34; : &#34;localhost:30002&#34; }
+
 
 &lt;p&gt;I will add two tags, each to two shards.  Let&amp;rsquo;s say that shards 0000 and 0001 have a lot of RAM, and shards 0001 and 0002 have very fast flash storage and I plan to distribute my data to take advantage of the different physical resources:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0000&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt;)
-    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0002&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt;)
-    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt;)
-    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt;)
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+
+    tagdb@mongos(2.6.0) &gt; sh.addShardTag(&#34;shard0000&#34;,&#34;HI_MEM&#34;)
+    tagdb@mongos(2.6.0) &gt; sh.addShardTag(&#34;shard0002&#34;,&#34;FLASH&#34;)
+    tagdb@mongos(2.6.0) &gt; sh.addShardTag(&#34;shard0001&#34;,&#34;FLASH&#34;)
+    tagdb@mongos(2.6.0) &gt; sh.addShardTag(&#34;shard0001&#34;,&#34;HI_MEM&#34;)
+
 
 &lt;p&gt;Now that I tagged my shards, I will add tag ranges to two different collections.  Note, I don&amp;rsquo;t have these collections yet, and I haven&amp;rsquo;t even sharded them yet, but I want to have the tags ready for them when they get created:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addTagRange(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigidx&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MinKey},{_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MaxKey},&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt;);
-    tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addTagRange(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigdata&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MinKey},{_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MaxKey},&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt;);
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+
+    tagdb@mongos(2.6.0) &gt; sh.addTagRange(&#34;tagdb.bigidx&#34;, {_id:MinKey},{_id:MaxKey},&#34;HI_MEM&#34;);
+    tagdb@mongos(2.6.0) &gt; sh.addTagRange(&#34;tagdb.bigdata&#34;, {_id:MinKey},{_id:MaxKey},&#34;FLASH&#34;);
+
 
 &lt;p&gt;I have a collection with big indexes (called bigidx) that I want to constrain only to shards tagged &amp;ldquo;HI_MEM&amp;rdquo; and I have another collection with a lot of data (called bigdata) that I want to keep on shards that have flash storage because I know the data will be read from disk a lot.  Note that I only needed to know what I will be using as my shard key, and I specified MinKey to MaxKey as my range - that means &lt;em&gt;all&lt;/em&gt; of the chunks!&lt;/p&gt;
 
 &lt;p&gt;I will now shard the collections and take a look at how things are shaping up:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.enableSharding(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb&amp;quot;&lt;/span&gt;)
-{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ok&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
-tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.shardCollection(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigdata&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;hashed&amp;quot;&lt;/span&gt;})
-{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;collectionsharded&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigdata&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ok&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
-tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.shardCollection(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigidx&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;hashed&amp;quot;&lt;/span&gt;})
-{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;collectionsharded&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.bigidx&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ok&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
-tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.status()
-&lt;span style=&#34;color: #666666&#34;&gt;---&lt;/span&gt; Sharding Status &lt;span style=&#34;color: #666666&#34;&gt;---&lt;/span&gt;
-  sharding version&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; {
-     &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;,
-     &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;version&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;4&lt;/span&gt;,
-     &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;minCompatibleVersion&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;4&lt;/span&gt;,
-     &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;currentVersion&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;5&lt;/span&gt;,
-     &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;clusterId&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; ObjectId(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;535be5d7d5274545e9d01426&amp;quot;&lt;/span&gt;)
-  }
-  shards&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
-     {  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0000&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30000&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tags&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt; ] }
-     {  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30001&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tags&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;HI_MEM&amp;quot;&lt;/span&gt; ] }
-     {  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0002&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;localhost:30002&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tags&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; [ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;FLASH&amp;quot;&lt;/span&gt; ] }
-  databases&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
-     {  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;admin&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;partitioned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;primary&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;config&amp;quot;&lt;/span&gt; }
-     {  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb&amp;quot;&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;partitioned&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;,  &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;primary&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0001&amp;quot;&lt;/span&gt; }
-         tagdb.bigdata
-             shard key&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;hashed&amp;quot;&lt;/span&gt; }
-             chunks&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
-                 shard0001    &lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;
-                 shard0002    &lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0002
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0002
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0002
-              tag&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; FLASH  { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } }
-         tagdb.bigidx
-             shard key&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;hashed&amp;quot;&lt;/span&gt; }
-             chunks&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
-                 shard0000    &lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;
-                 shard0001    &lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0000
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0000
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3074457345618258602&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0000
-             { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;6148914691236517204&lt;/span&gt; } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0001
-              tag&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; HI_MEM  { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } }
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
 
-&lt;h5 id=&#34;how-you-can-use-tags-to-make-collection-migrate-from-one-shard-to-another:1bc8c2f688d199692ef36348e0b0b4a8&#34;&gt;How you can use tags to make collection migrate from one shard to another&lt;/h5&gt;
+tagdb@mongos(2.6.0) &gt; sh.enableSharding(&#34;tagdb&#34;)
+{ &#34;ok&#34; : 1 }
+tagdb@mongos(2.6.0) &gt; sh.shardCollection(&#34;tagdb.bigdata&#34;, {_id:&#34;hashed&#34;})
+{ &#34;collectionsharded&#34; : &#34;tagdb.bigdata&#34;, &#34;ok&#34; : 1 }
+tagdb@mongos(2.6.0) &gt; sh.shardCollection(&#34;tagdb.bigidx&#34;, {_id:&#34;hashed&#34;})
+{ &#34;collectionsharded&#34; : &#34;tagdb.bigidx&#34;, &#34;ok&#34; : 1 }
+tagdb@mongos(2.6.0) &gt; sh.status()
+--- Sharding Status ---
+  sharding version: {
+     &#34;_id&#34; : 1,
+     &#34;version&#34; : 4,
+     &#34;minCompatibleVersion&#34; : 4,
+     &#34;currentVersion&#34; : 5,
+     &#34;clusterId&#34; : ObjectId(&#34;535be5d7d5274545e9d01426&#34;)
+  }
+  shards:
+     {  &#34;_id&#34; : &#34;shard0000&#34;,  &#34;host&#34; : &#34;localhost:30000&#34;,  &#34;tags&#34; : [ &#34;HI_MEM&#34; ] }
+     {  &#34;_id&#34; : &#34;shard0001&#34;,  &#34;host&#34; : &#34;localhost:30001&#34;,  &#34;tags&#34; : [ &#34;FLASH&#34;, &#34;HI_MEM&#34; ] }
+     {  &#34;_id&#34; : &#34;shard0002&#34;,  &#34;host&#34; : &#34;localhost:30002&#34;,  &#34;tags&#34; : [ &#34;FLASH&#34; ] }
+  databases:
+     {  &#34;_id&#34; : &#34;admin&#34;,  &#34;partitioned&#34; : false,  &#34;primary&#34; : &#34;config&#34; }
+     {  &#34;_id&#34; : &#34;tagdb&#34;,  &#34;partitioned&#34; : true,  &#34;primary&#34; : &#34;shard0001&#34; }
+         tagdb.bigdata
+             shard key: { &#34;_id&#34; : &#34;hashed&#34; }
+             chunks:
+                 shard0001    3
+                 shard0002    3
+             { &#34;_id&#34; : { &#34;$minKey&#34; : 1 } } --&gt;&gt; { &#34;_id&#34; : -6148914691236517204 } on : shard0001
+             { &#34;_id&#34; : -6148914691236517204 } --&gt;&gt; { &#34;_id&#34; : -3074457345618258602 } on : shard0002
+             { &#34;_id&#34; : -3074457345618258602 } --&gt;&gt; { &#34;_id&#34; : 0 } on : shard0001
+             { &#34;_id&#34; : 0 } --&gt;&gt; { &#34;_id&#34; : 3074457345618258602 } on : shard0001
+             { &#34;_id&#34; : 3074457345618258602 } --&gt;&gt; { &#34;_id&#34; : 6148914691236517204 } on : shard0002
+             { &#34;_id&#34; : 6148914691236517204 } --&gt;&gt; { &#34;_id&#34; : { &#34;$maxKey&#34; : 1 } } on : shard0002
+              tag: FLASH  { &#34;_id&#34; : { &#34;$minKey&#34; : 1 } } --&gt;&gt; { &#34;_id&#34; : { &#34;$maxKey&#34; : 1 } }
+         tagdb.bigidx
+             shard key: { &#34;_id&#34; : &#34;hashed&#34; }
+             chunks:
+                 shard0000    3
+                 shard0001    3
+             { &#34;_id&#34; : { &#34;$minKey&#34; : 1 } } --&gt;&gt; { &#34;_id&#34; : -6148914691236517204 } on : shard0000
+             { &#34;_id&#34; : -6148914691236517204 } --&gt;&gt; { &#34;_id&#34; : -3074457345618258602 } on : shard0000
+             { &#34;_id&#34; : -3074457345618258602 } --&gt;&gt; { &#34;_id&#34; : 0 } on : shard0001
+             { &#34;_id&#34; : 0 } --&gt;&gt; { &#34;_id&#34; : 3074457345618258602 } on : shard0001
+             { &#34;_id&#34; : 3074457345618258602 } --&gt;&gt; { &#34;_id&#34; : 6148914691236517204 } on : shard0000
+             { &#34;_id&#34; : 6148914691236517204 } --&gt;&gt; { &#34;_id&#34; : { &#34;$maxKey&#34; : 1 } } on : shard0001
+              tag: HI_MEM  { &#34;_id&#34; : { &#34;$minKey&#34; : 1 } } --&gt;&gt; { &#34;_id&#34; : { &#34;$maxKey&#34; : 1 } }
+
+
+&lt;h5 id=&#34;how-you-can-use-tags-to-make-collection-migrate-from-one-shard-to-another&#34;&gt;How you can use tags to make collection migrate from one shard to another&lt;/h5&gt;
 
 &lt;p&gt;What if you have a number of unsharded collections in your sharded database and you don&amp;rsquo;t want for all of them to hang out on the primary shard for this DB?   Well, you might need unique tags for each shard, but then you can do this to move collection one to &lt;code&gt;shard0001&lt;/code&gt;:&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addShardTag(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard0002&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard2&amp;quot;&lt;/span&gt;)
-tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.addTagRange(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.one&amp;quot;&lt;/span&gt;, {_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MinKey},{_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;MaxKey},&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;shard2&amp;quot;&lt;/span&gt;)
-tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.shardCollection(&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.one&amp;quot;&lt;/span&gt;,{_id&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;})
-{ &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;collectionsharded&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;tagdb.one&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ok&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
-tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(&lt;span style=&#34;color: #40a070&#34;&gt;2.6&lt;/span&gt;.&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;) &lt;span style=&#34;color: #666666&#34;&gt;&amp;gt;&lt;/span&gt; sh.status()
+
+tagdb@mongos(2.6.0) &gt; sh.addShardTag(&#34;shard0002&#34;,&#34;shard2&#34;)
+tagdb@mongos(2.6.0) &gt; sh.addTagRange(&#34;tagdb.one&#34;, {_id:MinKey},{_id:MaxKey},&#34;shard2&#34;)
+tagdb@mongos(2.6.0) &gt; sh.shardCollection(&#34;tagdb.one&#34;,{_id:1})
+{ &#34;collectionsharded&#34; : &#34;tagdb.one&#34;, &#34;ok&#34; : 1 }
+tagdb@mongos(2.6.0) &gt; sh.status()
    ...
       tagdb.one
-         shard key&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; }
-         chunks&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt;
-             shard0002    &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;
-         { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } on &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard0002
-          tag&lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; shard2  { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$minKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } } &lt;span style=&#34;color: #666666&#34;&gt;--&amp;gt;&amp;gt;&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; { &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;$maxKey&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt; } }
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/p&gt;
+         shard key: { &#34;_id&#34; : 1 }
+         chunks:
+             shard0002    1
+         { &#34;_id&#34; : { &#34;$minKey&#34; : 1 } } --&gt;&gt; { &#34;_id&#34; : { &#34;$maxKey&#34; : 1 } } on : shard0002
+          tag: shard2  { &#34;_id&#34; : { &#34;$minKey&#34; : 1 } } --&gt;&gt; { &#34;_id&#34; : { &#34;$maxKey&#34; : 1 } }
+
 
 &lt;p&gt;If we peek inside the config database, we should see our tags in the &lt;code&gt;config.tags&lt;/code&gt; collection, our shard ranges attached to chunks in &lt;code&gt;config.chunks&lt;/code&gt; and we can find evidence of the chunk moves due to tag policy in the &lt;code&gt;config.changelog&lt;/code&gt; collection, as well as the &lt;code&gt;mongos&lt;/code&gt; and &lt;code&gt;mongod&lt;/code&gt; log files.&lt;/p&gt;
 
@@ -1576,13 +1576,13 @@ tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(
       <guid>http://asya999.github.io/post/dynamicattributes/</guid>
       <description>
 
-&lt;h3 id=&#34;question:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;I&amp;rsquo;ve heard that MongoDB can be effectively used to model &amp;ldquo;dynamic attributes&amp;rdquo; - where you don&amp;rsquo;t know up front all the different attributes and not all attributes apply to all items.  Can you describe how that can be done, and in particular how it can be effectively indexed?&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
-&lt;h5 id=&#34;the-problem:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;The problem:&lt;/h5&gt;
+&lt;h5 id=&#34;the-problem&#34;&gt;The problem:&lt;/h5&gt;
 
 &lt;p&gt;Imagine you are building an e-commerce site and you aspire to be as big as amazon.com some day, which means you will be selling many different types of products.  It&amp;rsquo;s easy to see that there will be sets of attributes that will only apply to some of the products you sell.&lt;/p&gt;
 
@@ -1612,7 +1612,7 @@ tagdb&lt;span style=&#34;border: 1px solid #FF0000&#34;&gt;@&lt;/span&gt;mongos(
 
 &lt;p&gt;You can see how it would be extremely challenging to manage a collection that has an incredibly wide variety of document &amp;ldquo;shapes&amp;rdquo;.  Now, while some people call MongoDB &amp;ldquo;schemaless&amp;rdquo; I am not a fan of this designation.  The schema of each document is defined by the document itself.  To be able to build a robust applications you need to decide what the schema of the documents will be, otherwise your application will spend as much time examining the documents to learn their schema as providing actual functionality.&lt;/p&gt;
 
-&lt;h5 id=&#34;possible-solutions:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Possible solutions:&lt;/h5&gt;
+&lt;h5 id=&#34;possible-solutions&#34;&gt;Possible solutions:&lt;/h5&gt;
 
 &lt;p&gt;One way to index the attributes you want to be able to search by is by creating an index on each such attribute in a schema like the one above.  This is not practical, even if you use &lt;a href=&#34;http://docs.mongodb.org/manual/core/index-sparse/&#34;&gt;&amp;ldquo;sparse&amp;rdquo; indexes&lt;/a&gt; (since many attributes will be set only on a small subset of the products), because you may end up with dozens, if not hundreds of indexes.  In addition, every time a new attribute is introduced, a new index has to be added on the collection.  Not very practical.&lt;/p&gt;
 

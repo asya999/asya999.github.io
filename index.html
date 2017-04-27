@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+	<meta name="generator" content="Hugo 0.21-DEV" />
     
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -18,7 +19,6 @@
     <link href="http://asya999.github.io/css/lavish-bootstrap.css" rel="stylesheet">
     <link href="http://asya999.github.io/css/custom.css" rel="stylesheet">
 
-    <link href="http://asya999.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Ask Asya" />
 </head>
 
 <body>
@@ -53,7 +53,9 @@
         <small>How do I match all documents where all array elements match some predicate?</small>
     </h4>
     <hr>
-    <p>Question: I need to match all documents where every element of an array matches some predicate. Can that be done? Answer: Yes, the query to do this is actually quite simple to construct. Remember that when you match an array, MongoDB will &ldquo;reach inside&rdquo; the array to compare the predicate to every single array element and return the document if the predicate matches at least one of them. I like to tell MongoDB newbies to think of arrays as a field that can hold many different values at the same time.</p>
+    <p>Question: I need to match all documents where every element of an array matches some predicate. Can that be done?
+Answer: Yes, the query to do this is actually quite simple to construct.
+Remember that when you match an array, MongoDB will &ldquo;reach inside&rdquo; the array to compare the predicate to every single array element and return the document if the predicate matches at least one of them. I like to tell MongoDB newbies to think of arrays as a field that can hold many different values at the same time.</p>
     <a class="btn btn-success btn-xs" href="http://asya999.github.io/post/matchallarrayelements/">Read More <span class="fa fa-angle-double-right"></span></a>
 </div>
 
@@ -64,7 +66,8 @@
         <small></small>
     </h4>
     <hr>
-    <p>Question: Is there a way that I can prevent slow queries in MongoDB? I&rsquo;d like to be able to set something on the server that will kill all queries running longer than a certain amount of time. Answer: There are some options available on the client side, for example $maxTimeMS starting in 2.6 release. This gives you a way to inject an option to your queries before they get to the server that tells the server to kill this query if it takes longer than a certain amount of time.</p>
+    <p>Question: Is there a way that I can prevent slow queries in MongoDB? I&rsquo;d like to be able to set something on the server that will kill all queries running longer than a certain amount of time.
+Answer: There are some options available on the client side, for example $maxTimeMS starting in 2.6 release. This gives you a way to inject an option to your queries before they get to the server that tells the server to kill this query if it takes longer than a certain amount of time.</p>
     <a class="btn btn-success btn-xs" href="http://asya999.github.io/post/findkillslowqueries/">Read More <span class="fa fa-angle-double-right"></span></a>
 </div>
 
@@ -75,18 +78,19 @@
         <small></small>
     </h4>
     <hr>
-    <p><h3 id="guest-post-by-paul-done-http-pauldone-blogspot-co-uk:a2980dc88478af7ab881c721f66e9b4d">GUEST POST by <a href="http://pauldone.blogspot.co.uk/">Paul Done</a> </h3>
+    <p><h3 id="guest-post-by-paul-done-http-pauldone-blogspot-co-uk">GUEST POST by <a href="http://pauldone.blogspot.co.uk/">Paul Done</a> </h3>
 
 <p>In a <a href="http://askasya.com/post/trackversions">previous Ask Asya blog post</a>,
 Asya outlined various approaches for preserving historical versions of records for auditing purposes, whilst allowing current versions of records to be easily inserted and queried. Having found the post to be extremely useful for one of my projects, and following some further investigations of my own, I realised that two of the choices could be refined a little to be more optimal. Upon feeding back my findings, Asya graciously asked me to document them here, so here goes.</p>
 
-<h4 id="revisit-of-choice-2-embed-versions-in-a-single-document:a2980dc88478af7ab881c721f66e9b4d">Revisit of Choice 2  (Embed Versions in a Single Document)</h4>
+<h4 id="revisit-of-choice-2-embed-versions-in-a-single-document">Revisit of Choice 2  (Embed Versions in a Single Document)</h4>
 
 <p>The presented ‘compare-and-swap&rsquo; example code, to generate a new version and update version history, is very effective at ensuring consistency of versions in a thread-safe manner. However, I felt that there was scope
 to reduce the update latency which will be particularly high when a document has grown, with many previous versions embedded.</p>
 
 <p>eor example, if a current document has tens of embedded previous versions, then projecting the whole document back to the client application, updating part of the document copy and then sending the whole document as an update to the database, will be slower than necessary. I prototyped a refactored version of the example code (shown below) which exhibits the same functional behaviour, but avoids projecting the entire document and uses an in-place update to push changes to the database.</p>
-</p>
+
+<p></p></p>
     <a class="btn btn-success btn-xs" href="http://asya999.github.io/post/revisitversions/">Read More <span class="fa fa-angle-double-right"></span></a>
 </div>
 
@@ -108,7 +112,9 @@ to reduce the update latency which will be particularly high when a document has
         <small></small>
     </h4>
     <hr>
-    <p>Question: Recall our previous discussion about ways to recreate older version of a document that ever existed in a particular collection. The goal was to preserve every state for each object, but to respond to queries with the &ldquo;current&rdquo; or &ldquo;latest&rdquo; version. We had a requirement to be able to have an infrequent audit to review all or some previous versions of the document. Answer: I had suggested at the time that there was a different way to achieve this that I liked better than the discussed methods and I&rsquo;m going to describe it now.</p>
+    <p>Question: Recall our previous discussion about ways to recreate older version of a document that ever existed in a particular collection.
+The goal was to preserve every state for each object, but to respond to queries with the &ldquo;current&rdquo; or &ldquo;latest&rdquo; version. We had a requirement to be able to have an infrequent audit to review all or some previous versions of the document.
+Answer: I had suggested at the time that there was a different way to achieve this that I liked better than the discussed methods and I&rsquo;m going to describe it now.</p>
     <a class="btn btn-success btn-xs" href="http://asya999.github.io/post/bestversion/">Read More <span class="fa fa-angle-double-right"></span></a>
 </div>
 
@@ -119,7 +125,8 @@ to reduce the update latency which will be particularly high when a document has
         <small></small>
     </h4>
     <hr>
-    <p>Question: Consider two separate shapes of data like this in a single collection: { type: &quot;A&quot;, level: 0, color: &quot;red&quot;, locale: &quot;USA&quot; } { type: &quot;A&quot;, level: 1, color: &quot;blue&quot; } The goal is to present a merged shape to the application with the level n data overridden by level n+1 if level n+1 data exists for type A, starting with n = 0. In other words, the app wants to see this shape: { type: &quot;A&quot;, level: 1, color: &quot;blue&quot;, locale: &quot;USA&quot; } If no level 1 data exists, the app would see the default (level 0) shape.</p>
+    <p>Question: Consider two separate shapes of data like this in a single collection:
+{ type: &quot;A&quot;, level: 0, color: &quot;red&quot;, locale: &quot;USA&quot; } { type: &quot;A&quot;, level: 1, color: &quot;blue&quot; }  The goal is to present a merged shape to the application with the level n data overridden by level n+1 if level n+1 data exists for type A, starting with n = 0. In other words, the app wants to see this shape:</p>
     <a class="btn btn-success btn-xs" href="http://asya999.github.io/post/mergeshapes/">Read More <span class="fa fa-angle-double-right"></span></a>
 </div>
 
@@ -130,7 +137,8 @@ to reduce the update latency which will be particularly high when a document has
         <small></small>
     </h4>
     <hr>
-    <p>Question: Consider requirement that we have to be able to recreate/query any version of a document that ever existed in a particular collection. So we start out with: { docId: &quot;A&quot;, version: 1, color: &quot;red&quot;, locale: &quot;USA&quot; } If we need to set color to &ldquo;blue&rdquo;, instead of updating the &ldquo;color&rdquo; field from &ldquo;red&rdquo; to &ldquo;blue&rdquo;, we have to create a new version of the document which now has its full &ldquo;current&rdquo; state, and preserve somehow the old version of the document.</p>
+    <p>Question: Consider requirement that we have to be able to recreate/query any version of a document that ever existed in a particular collection. So we start out with:
+{ docId: &quot;A&quot;, version: 1, color: &quot;red&quot;, locale: &quot;USA&quot; }  If we need to set color to &ldquo;blue&rdquo;, instead of updating the &ldquo;color&rdquo; field from &ldquo;red&rdquo; to &ldquo;blue&rdquo;, we have to create a new version of the document which now has its full &ldquo;current&rdquo; state, and preserve somehow the old version of the document.</p>
     <a class="btn btn-success btn-xs" href="http://asya999.github.io/post/trackversions/">Read More <span class="fa fa-angle-double-right"></span></a>
 </div>
 
@@ -141,7 +149,9 @@ to reduce the update latency which will be particularly high when a document has
         <small></small>
     </h4>
     <hr>
-    <p>Question: I saw your answer on SO about the difference between &ldquo;update&rdquo; and &ldquo;findAndModify&rdquo;, could you explain in more detail what the difference is, and why MongoDB findAndModify is named what it is? Answer: What&rsquo;s in a name? that which we call a rose By any other name would smell as sweet; - said Juliet1 As it turns out, a lot is in a name. A poorly chosen name can confuse many users, year after year.</p>
+    <p>Question: I saw your answer on SO about the difference between &ldquo;update&rdquo; and &ldquo;findAndModify&rdquo;, could you explain in more detail what the difference is, and why MongoDB findAndModify is named what it is?
+Answer: What&rsquo;s in a name? that which we call a rose
+By any other name would smell as sweet; - said Juliet1 As it turns out, a lot is in a name. A poorly chosen name can confuse many users, year after year.</p>
     <a class="btn btn-success btn-xs" href="http://asya999.github.io/post/findandmodify/">Read More <span class="fa fa-angle-double-right"></span></a>
 </div>
 
@@ -163,7 +173,8 @@ to reduce the update latency which will be particularly high when a document has
         <small></small>
     </h4>
     <hr>
-    <p>Question: I&rsquo;ve heard that MongoDB can be effectively used to model &ldquo;dynamic attributes&rdquo; - where you don&rsquo;t know up front all the different attributes and not all attributes apply to all items. Can you describe how that can be done, and in particular how it can be effectively indexed? Answer: The problem: Imagine you are building an e-commerce site and you aspire to be as big as amazon.com some day, which means you will be selling many different types of products.</p>
+    <p>Question: I&rsquo;ve heard that MongoDB can be effectively used to model &ldquo;dynamic attributes&rdquo; - where you don&rsquo;t know up front all the different attributes and not all attributes apply to all items. Can you describe how that can be done, and in particular how it can be effectively indexed?
+Answer: The problem: Imagine you are building an e-commerce site and you aspire to be as big as amazon.com some day, which means you will be selling many different types of products.</p>
     <a class="btn btn-success btn-xs" href="http://asya999.github.io/post/dynamicattributes/">Read More <span class="fa fa-angle-double-right"></span></a>
 </div>
 
@@ -196,7 +207,7 @@ to reduce the update latency which will be particularly high when a document has
             <div class="row">
                 <hr>
                 <div class="col-sm-12">
-                    <p>&copy; Asya Kamsky 2016 &middot;
+                    <p>&copy; Asya Kamsky 2017 &middot;
                     Built with <a href="https://github.com/spf13/hugo">Hugo</a></p>
                 </div>
             </div>

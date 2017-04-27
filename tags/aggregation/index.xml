@@ -16,7 +16,7 @@
       <guid>http://asya999.github.io/post/mergeshapes/</guid>
       <description>
 
-&lt;h3 id=&#34;question:03d96d95380719f8d4c3b2ad2c7c545e&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;Consider two separate shapes of data like this in a single collection:&lt;/p&gt;
 
@@ -42,15 +42,15 @@
 
 &lt;p&gt;If no level 1 data exists, the app would see the default (level 0) shape.   Think of it as a layered merge.&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:03d96d95380719f8d4c3b2ad2c7c545e&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
 &lt;p&gt;In the &lt;a href=&#34;http://askasya.com/post/trackversions&#34;&gt;previous &amp;ldquo;AskAsya&amp;rdquo; on tracking versions&lt;/a&gt; we looked at different ways of tracking all versions of changing objects, and this happens to be a complex variant of that problem that we considered as &amp;ldquo;schema 4&amp;rdquo; - it&amp;rsquo;s a possible approach to versioning, but it presents an interesting challenge returning the &amp;ldquo;full&amp;rdquo; current object back to the client.&lt;/p&gt;
 
-&lt;h4 id=&#34;merging-different-shapes:03d96d95380719f8d4c3b2ad2c7c545e&#34;&gt;Merging Different Shapes&lt;/h4&gt;
+&lt;h4 id=&#34;merging-different-shapes&#34;&gt;Merging Different Shapes&lt;/h4&gt;
 
 &lt;p&gt;This problem would be easily solved with aggregation framework query, except for the problem that we need to know the names of all the keys/fields, and we might not  know all of the possible fields that could exist in our documents. Without this information, the only way we have of merging documents is using MapReduce, which is both more complex &lt;em&gt;and&lt;/em&gt; slower.   I will show both solutions and I&amp;rsquo;ll leave it up to you to determine which will be more performant in your scenario (or whether you want to switch to a different versioning schema).&lt;/p&gt;
 
-&lt;h5 id=&#34;aggregation-framework:03d96d95380719f8d4c3b2ad2c7c545e&#34;&gt;Aggregation Framework&lt;/h5&gt;
+&lt;h5 id=&#34;aggregation-framework&#34;&gt;Aggregation Framework&lt;/h5&gt;
 
 &lt;p&gt;This will be the fastest way if you either have all possible attribute names that your documents could have, or get them via a scan of the entire collection (note that the latter immediately becomes stale, as new documents with new attributes could show up as soon as you start querying, but that&amp;rsquo;s inherently an issue that always exists in any system that doesn&amp;rsquo;t provide repeatable read isolation).&lt;/p&gt;
 

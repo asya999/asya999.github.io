@@ -16,7 +16,7 @@
       <guid>http://asya999.github.io/post/socialstatusfeed/</guid>
       <description>
 
-&lt;h3 id=&#34;socialite:36d9d7ac96775ede158c079032b00e59&#34;&gt;Socialite&lt;/h3&gt;
+&lt;h3 id=&#34;socialite&#34;&gt;Socialite&lt;/h3&gt;
 
 &lt;p&gt;At MongoDBWorld, my colleague Darren Wood and I gave &lt;a href=&#34;http://www.mongodb.com/search/google/socialite?query=socialite&amp;amp;cx=017213726194841070573%3Ak6mpwzohlje&amp;amp;cof=FORID%3A9&amp;amp;sitesearch=&#34;&gt;three back-to-back presentations&lt;/a&gt; about an &lt;a href=&#34;http://github.com/10gen-labs/socialite&#34;&gt;open source project called Socialite&lt;/a&gt; which is a reference architecture implementation of a social status feed service.  Darren was the one who wrote the bulk of the source code and I installed and ran extensive performance tests in different configurations to determine how the different schema and indexing options scale and to get an understanding of the resources required for various sizes and distributions of workloads.&lt;/p&gt;
 
@@ -61,17 +61,17 @@
       <guid>http://asya999.github.io/post/bestversion/</guid>
       <description>
 
-&lt;h3 id=&#34;question:897d8a06bfdbaecbf747ed08c519e7de&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;Recall &lt;a href=&#34;http://askasya.com/post/trackversions&#34;&gt;our previous discussion&lt;/a&gt; about ways to  recreate older version of a document that ever existed in a particular collection.&lt;/p&gt;
 
 &lt;p&gt;The goal was to preserve every state for each object, but to respond to queries with the &amp;ldquo;current&amp;rdquo; or &amp;ldquo;latest&amp;rdquo; version.   We had a requirement to be able to have an infrequent audit to review all or some previous versions of the document.&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:897d8a06bfdbaecbf747ed08c519e7de&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
 &lt;p&gt;I had suggested at the time that there was a different way to achieve this that I liked better than the discussed methods and I&amp;rsquo;m going to describe it now.&lt;/p&gt;
 
-&lt;h4 id=&#34;previous-discussion-summary:897d8a06bfdbaecbf747ed08c519e7de&#34;&gt;Previous Discussion Summary:&lt;/h4&gt;
+&lt;h4 id=&#34;previous-discussion-summary&#34;&gt;Previous Discussion Summary:&lt;/h4&gt;
 
 &lt;p&gt;Up to this point, we considered keeping versions of the same document within one MongoDB document, in separate documents within the same collection, or by &amp;ldquo;archiving off&amp;rdquo; older versions of the document into a separate collection.&lt;/p&gt;
 
@@ -86,7 +86,7 @@
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h5 id=&#34;where-we-left-off:897d8a06bfdbaecbf747ed08c519e7de&#34;&gt;Where we left off:&lt;/h5&gt;
+&lt;h5 id=&#34;where-we-left-off&#34;&gt;Where we left off:&lt;/h5&gt;
 
 &lt;p&gt;Here&amp;rsquo;s a table that shows for each schema choice that we considered how well we can handle the reads, writes and if an update has to make more than one write, how easy it is to recover or to be in a relatively &amp;ldquo;safe&amp;rdquo; state:&lt;/p&gt;
 
@@ -160,7 +160,7 @@
 
 &lt;p&gt;How do we get fast updates that keep the current document current but save the previous version somewhere else?  We know that we don&amp;rsquo;t have multi-statement transaction in MongoDB so we can&amp;rsquo;t ensure that a regular  update of one document and an insert of another document are atomic.  However, there &lt;em&gt;is&lt;/em&gt; something that&amp;rsquo;s always updated atomically along with &lt;em&gt;every&lt;/em&gt; write that happens in your collection, and that is the &amp;ldquo;Oplog&amp;rdquo;.&lt;/p&gt;
 
-&lt;h4 id=&#34;the-oplog:897d8a06bfdbaecbf747ed08c519e7de&#34;&gt;The Oplog&lt;/h4&gt;
+&lt;h4 id=&#34;the-oplog&#34;&gt;The Oplog&lt;/h4&gt;
 
 &lt;p&gt;The oplog (full name: &amp;lsquo;oplog.rs&amp;rsquo; collection in &amp;lsquo;local&amp;rsquo; database) is a special collection that&amp;rsquo;s used by the replication mechanism.  Every single write operation is persisted into the oplog atomically with being applied to the data files, indexes and the journal.  You can read more about the oplog in &lt;a href=&#34;http://docs.mongodb.org/manual/core/replica-set-oplog/&#34;&gt;the docs&lt;/a&gt;, but what I&amp;rsquo;m going to show you is what it looks like in the oplog when an insert or update happens, and how we can use that for our own purposes.&lt;/p&gt;
 
@@ -251,7 +251,7 @@ WriteResult({
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Looks like the oplog entry reflects the actual operation that was performed, &lt;strong&gt;not&lt;/strong&gt; the operation that I specified.  I asked for an update - when it&amp;rsquo;s an update, the oplog will show it as an update, when it&amp;rsquo;s turned into an upsert, the oplog will show it as an insert.  When it was an update, I had asked it to &amp;ldquo;increment&amp;rdquo; but what it put in the oplog was what the actual value saved was.&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:897d8a06bfdbaecbf747ed08c519e7de:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:897d8a06bfdbaecbf747ed08c519e7de:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;p&gt;Looks like the oplog entry reflects the actual operation that was performed, &lt;strong&gt;not&lt;/strong&gt; the operation that I specified.  I asked for an update - when it&amp;rsquo;s an update, the oplog will show it as an update, when it&amp;rsquo;s turned into an upsert, the oplog will show it as an insert.  When it was an update, I had asked it to &amp;ldquo;increment&amp;rdquo; but what it put in the oplog was what the actual value saved was.&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
 
 &lt;p&gt;I&amp;rsquo;m sure most of you see where I&amp;rsquo;m going with this.  Rather than fumbling with creating and updating documents in the &amp;ldquo;previous versions&amp;rdquo; collection when we perform an update to a document, we can do it asynchronously, the way MongoDB secondaries do it.&lt;/p&gt;
 
@@ -259,7 +259,7 @@ WriteResult({
 
 &lt;p&gt;Here is a little demo.  The code and explanations are after the video, so feel free to browse ahead before watching, or you can watch first and read the explanations after.&lt;/p&gt;
 
-&lt;h5 id=&#34;tailing-the-oplog-to-maintain-a-copy-of-a-collection-elsewhere:897d8a06bfdbaecbf747ed08c519e7de&#34;&gt;Tailing the oplog to maintain a copy of a collection elsewhere&lt;/h5&gt;
+&lt;h5 id=&#34;tailing-the-oplog-to-maintain-a-copy-of-a-collection-elsewhere&#34;&gt;Tailing the oplog to maintain a copy of a collection elsewhere&lt;/h5&gt;
 
 &lt;p&gt;For our first example, we&amp;rsquo;ll do something simple - we will watch the oplog for changes to a specific collection, and then we will apply those changes to our own copy of the collection - we will call our collection something else.  Our example stores the copy in the same database, but of course, it could be anywhere else, including in a completely different replica set or standalone server.&lt;/p&gt;
 
@@ -422,11 +422,12 @@ while (cursor.hasNext()) {
             for (i in doc.o[&#34;$set&#34;]) {
                 newDoc[i]=doc.o[&#34;$set&#34;][i];
             }
-        } else if (doc.o.hasOwnProperty(&#34;$unset&#34;)) { 
+        } 
+        if (doc.o.hasOwnProperty(&#34;$unset&#34;)) { 
             for (i in doc.o[&#34;$unset&#34;]) {
                 delete(newDoc[i]);
             }
-        } else throw &#34;Can only handle update with &#39;_id&#39;, &#39;$set&#39; or &#39;$unset&#39; &#34;;
+        }
     } else if (doc.op != &#34;c&#34;) throw &#34;Unexpected op! &#34; + tojson(doc);
 
     var  result = db.getCollection(coll).insert(newDoc);
@@ -453,7 +454,7 @@ while (cursor.hasNext()) {
 
 &lt;p&gt;It turns out that the loop will be slightly simpler because no matter what comes in, we will always do an insert into the full archive collection.&lt;/p&gt;
 
-&lt;h5 id=&#34;test-it-out:897d8a06bfdbaecbf747ed08c519e7de&#34;&gt;Test it out!&lt;/h5&gt;
+&lt;h5 id=&#34;test-it-out&#34;&gt;Test it out!&lt;/h5&gt;
 
 &lt;p&gt;Let&amp;rsquo;s run this code and then compare for a single docId the operations in the oplog, and what we end up with in the archive collection:&lt;/p&gt;
 
@@ -500,8 +501,8 @@ db.docs_full_archive.find( {&amp;ldquo;docId&amp;rdquo;:279}, {&amp;rdquo;_id&am
 &lt;hr /&gt;
 
 &lt;ol&gt;
-&lt;li id=&#34;fn:897d8a06bfdbaecbf747ed08c519e7de:1&#34;&gt;Because the oplog must write change operations in &lt;a href=&#34;http://docs.mongodb.org/manual/reference/glossary/#term-idempotent&#34;&gt;&amp;ldquo;idemponent&amp;rdquo;&lt;/a&gt; form, all update operators are transformed into their equivalent &lt;code&gt;$set&lt;/code&gt; operations.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:897d8a06bfdbaecbf747ed08c519e7de:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:1&#34;&gt;Because the oplog must write change operations in &lt;a href=&#34;http://docs.mongodb.org/manual/reference/glossary/#term-idempotent&#34;&gt;&amp;ldquo;idemponent&amp;rdquo;&lt;/a&gt; form, all update operators are transformed into their equivalent &lt;code&gt;$set&lt;/code&gt; operations.
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;
 </description>
@@ -515,7 +516,7 @@ db.docs_full_archive.find( {&amp;ldquo;docId&amp;rdquo;:279}, {&amp;rdquo;_id&am
       <guid>http://asya999.github.io/post/trackversions/</guid>
       <description>
 
-&lt;h3 id=&#34;question:4d494242d33833a567dbfba012f85510&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;Consider requirement that we have to be able to recreate/query any version of a document that ever existed in a particular collection.   So we start out with:&lt;/p&gt;
 
@@ -537,11 +538,11 @@ db.docs_full_archive.find( {&amp;ldquo;docId&amp;rdquo;:279}, {&amp;rdquo;_id&am
 
 &lt;p&gt;The goal is to preserve every state for each object, but we only respond to queries with the &amp;ldquo;current&amp;rdquo; or &amp;ldquo;latest&amp;rdquo; version, we just have a requirement to be able to have an audit (which would be very infrequent so it&amp;rsquo;s okay if it&amp;rsquo;s slow).    Is keeping each version as we do in this example the best schema/approach to this problem?&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:4d494242d33833a567dbfba012f85510&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
 &lt;p&gt;Versioning can be tricky to get right if you don&amp;rsquo;t know all of the requirements of the application and approximate expected loads for various operations.  I&amp;rsquo;ll lay out a few possible approaches and point out their strength and weaknesses.&lt;/p&gt;
 
-&lt;h4 id=&#34;problem-statement:4d494242d33833a567dbfba012f85510&#34;&gt;Problem Statement:&lt;/h4&gt;
+&lt;h4 id=&#34;problem-statement&#34;&gt;Problem Statement:&lt;/h4&gt;
 
 &lt;p&gt;In some systems, rather than updating an existing object and overwriting its various attributes there is a business requirement to preserve the original document and to create a new version of this document, instead of updating it.  This raises the following interesting challenges:&lt;/p&gt;
 
@@ -552,7 +553,7 @@ db.docs_full_archive.find( {&amp;ldquo;docId&amp;rdquo;:279}, {&amp;rdquo;_id&am
 &lt;li&gt;If the system fails at any point, you must either have a consistent state of the data, or it must be possible on re-start to infer the state of the data and clean it up, or otherwise bring it to consistent state.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h5 id=&#34;possible-schema-approaches:4d494242d33833a567dbfba012f85510&#34;&gt;Possible Schema Approaches:&lt;/h5&gt;
+&lt;h5 id=&#34;possible-schema-approaches&#34;&gt;Possible Schema Approaches:&lt;/h5&gt;
 
 &lt;ol&gt;
 &lt;li&gt;Store full document each write with monotonically increasing version number.
@@ -565,7 +566,7 @@ db.docs_full_archive.find( {&amp;ldquo;docId&amp;rdquo;:279}, {&amp;rdquo;_id&am
 &lt;li&gt;Store only &amp;ldquo;deltas&amp;rdquo; with each increasing version.&lt;br /&gt;&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h5 id=&#34;generating-correct-version-number:4d494242d33833a567dbfba012f85510&#34;&gt;Generating correct version number&lt;/h5&gt;
+&lt;h5 id=&#34;generating-correct-version-number&#34;&gt;Generating correct version number&lt;/h5&gt;
 
 &lt;p&gt;No matter which schema you choose, the issue of generating the correct &amp;ldquo;higher&amp;rdquo; version number will come down to one of three possible approaches:&lt;/p&gt;
 
@@ -577,7 +578,7 @@ db.docs_full_archive.find( {&amp;ldquo;docId&amp;rdquo;:279}, {&amp;rdquo;_id&am
 
 &lt;p&gt;I like optimistic locking option and it works well with all four of our schema options.  It involves a &amp;ldquo;compare-and-swap&amp;rdquo; technique where you read the current document,  do the appropriate calculation of new version and adding new attributes, and then try the insert or update, contingent on no one having updated the document ahead of you.  If it&amp;rsquo;s an update, you include parts of the original document in your query condition, and if it&amp;rsquo;s an insert you must have a unique constraint to prevent success of multiple simultaneous attempts to version the same document.   In both cases you must check the result of your write - knowing if it succeeded or failed is how the thread knows it has to try again.&lt;/p&gt;
 
-&lt;h4 id=&#34;how-does-each-schema:4d494242d33833a567dbfba012f85510&#34;&gt;How does each schema:&lt;/h4&gt;
+&lt;h4 id=&#34;how-does-each-schema&#34;&gt;How does each schema:&lt;/h4&gt;
 
 &lt;ul&gt;
 &lt;li&gt;return only the current document&lt;/li&gt;
@@ -590,7 +591,7 @@ db.docs_full_archive.find( {&amp;ldquo;docId&amp;rdquo;:279}, {&amp;rdquo;_id&am
 
 &lt;hr /&gt;
 
-&lt;h5 id=&#34;choice-1:4d494242d33833a567dbfba012f85510&#34;&gt;Choice 1&lt;/h5&gt;
+&lt;h5 id=&#34;choice-1&#34;&gt;Choice 1&lt;/h5&gt;
 
 &lt;p&gt;Store full document each time there is a write with monotonically increasing version number inside.&lt;/p&gt;
 
@@ -601,7 +602,7 @@ db.docs_full_archive.find( {&amp;ldquo;docId&amp;rdquo;:279}, {&amp;rdquo;_id&am
 
 &lt;p&gt;For each docId value the document with the highest &amp;ldquo;v&amp;rdquo; represents the full current object state.  In this example, docId 174 v:3 represents the total current state.   There is a unique index on &lt;code&gt;{&amp;quot;docId&amp;quot;:1,&amp;quot;v&amp;quot;:1}&lt;/code&gt;&lt;/p&gt;
 
-&lt;h6 id=&#34;to-return-only-current-document:4d494242d33833a567dbfba012f85510&#34;&gt;To return only current document&lt;/h6&gt;
+&lt;h6 id=&#34;to-return-only-current-document&#34;&gt;To return only current document&lt;/h6&gt;
 
 &lt;p&gt;If the query is for a single docId, the query would be:&lt;/p&gt;
 
@@ -635,7 +636,7 @@ db.collection.aggregate( sort, group, match )
 
 &lt;p&gt;This is not efficient, sadly, as the indexes on our collection can only be effectively used &lt;strong&gt;before&lt;/strong&gt; the first group operation.&lt;/p&gt;
 
-&lt;h6 id=&#34;to-generate-new-version-and-update:4d494242d33833a567dbfba012f85510&#34;&gt;To generate new version and update&lt;/h6&gt;
+&lt;h6 id=&#34;to-generate-new-version-and-update&#34;&gt;To generate new version and update&lt;/h6&gt;
 
 &lt;p&gt;Optimistic locking: each thread reads in the most current document (in this case &lt;code&gt;docId:174, v:3&lt;/code&gt;) makes attribute changes, increments &lt;code&gt;v&lt;/code&gt; by one and then tries the insert of this document:&lt;/p&gt;
 
@@ -646,7 +647,7 @@ db.collection.aggregate( sort, group, match )
 
 &lt;p&gt;Failure does &lt;em&gt;not&lt;/em&gt; create an inconsistent state, since there is only a single write.&lt;/p&gt;
 
-&lt;h5 id=&#34;choice-1a:4d494242d33833a567dbfba012f85510&#34;&gt;Choice 1a&lt;/h5&gt;
+&lt;h5 id=&#34;choice-1a&#34;&gt;Choice 1a&lt;/h5&gt;
 
 &lt;p&gt;In a variant of 1. we might add a field in the &amp;ldquo;current&amp;rdquo; version of each documentId&lt;/p&gt;
 
@@ -661,7 +662,7 @@ db.collection.aggregate( sort, group, match )
 
 &lt;p&gt;Now if our process fails between those two write operations, we will have two documents for a particular docId that have &amp;ldquo;current&amp;rdquo; set to true and that means all of our queries will have to guard against that possibility - that  seems unnecessarily complex, so let&amp;rsquo;s hold off on this method for now.&lt;/p&gt;
 
-&lt;h5 id=&#34;choice-2:4d494242d33833a567dbfba012f85510&#34;&gt;Choice 2&lt;/h5&gt;
+&lt;h5 id=&#34;choice-2&#34;&gt;Choice 2&lt;/h5&gt;
 
 &lt;p&gt;Store all document versions inside a single document.&lt;/p&gt;
 
@@ -677,11 +678,11 @@ db.collection.aggregate( sort, group, match )
 
 &lt;p&gt;The merits of multiple possible solutions mostly depend on how many versions of each object you expect to have and how long you have to keep them.  If the lifetime of a document usually has a number of versions that are in the single digits or low double digits, you can do well embedding the versions inside of the single document that represents each object.&lt;/p&gt;
 
-&lt;h6 id=&#34;to-return-only-current-document-1:4d494242d33833a567dbfba012f85510&#34;&gt;To return only current document&lt;/h6&gt;
+&lt;h6 id=&#34;to-return-only-current-document-1&#34;&gt;To return only current document&lt;/h6&gt;
 
 &lt;p&gt;Since there is only one document, we just search by docId or other attributes of &amp;ldquo;current&amp;rdquo; and we use projection to exclude the previous array: &lt;code&gt;db.collection.find({&amp;quot;docId&amp;quot;:174}, {&amp;quot;prev&amp;quot;:0})&lt;/code&gt; except in cases we want to see it.&lt;/p&gt;
 
-&lt;h6 id=&#34;to-generate-new-version-and-update-1:4d494242d33833a567dbfba012f85510&#34;&gt;To generate new version and update&lt;/h6&gt;
+&lt;h6 id=&#34;to-generate-new-version-and-update-1&#34;&gt;To generate new version and update&lt;/h6&gt;
 
 &lt;p&gt;Even though you only have one document per docId, you really can&amp;rsquo;t create a new version with a single update, since it depends on knowing what the current subdocument is, but what you can do is utilize the &amp;ldquo;compare-and-swap&amp;rdquo; technique where you read the current document, move &amp;ldquo;current&amp;rdquo; field to the end of the previous array, set the new &amp;ldquo;current&amp;rdquo; field appropriately, and then do the update &lt;strong&gt;contingent on no one having updated the document ahead of you&lt;/strong&gt;:&lt;/p&gt;
 
@@ -698,7 +699,7 @@ if (result.nModified != 1) {
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h6 id=&#34;atomicity-and-maintainability:4d494242d33833a567dbfba012f85510&#34;&gt;atomicity and maintainability&lt;/h6&gt;
+&lt;h6 id=&#34;atomicity-and-maintainability&#34;&gt;atomicity and maintainability&lt;/h6&gt;
 
 &lt;p&gt;There are many pros in this approach:
 - atomic updates of document (single operation both, sets new current and updates previous)
@@ -715,7 +716,7 @@ if (result.nModified != 1) {
 
 &lt;p&gt;The last &amp;ldquo;con&amp;rdquo; shouldn&amp;rsquo;t really be a concern if you are genuinely talking about a system where each document is only going to have a handful of versions (or updates) in its lifecycle, and this schema isn&amp;rsquo;t appropriate for systems where a single document will live through hundreds (or thousands) of updates.&lt;/p&gt;
 
-&lt;h5 id=&#34;choice-3:4d494242d33833a567dbfba012f85510&#34;&gt;Choice 3&lt;/h5&gt;
+&lt;h5 id=&#34;choice-3&#34;&gt;Choice 3&lt;/h5&gt;
 
 &lt;p&gt;Store current document in your &amp;ldquo;primary&amp;rdquo; collection, and keep older versions in another collection.&lt;/p&gt;
 
@@ -727,11 +728,11 @@ if (result.nModified != 1) {
 For each documentId, there is only one document which represented its current state.
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h6 id=&#34;to-return-only-current-document-2:4d494242d33833a567dbfba012f85510&#34;&gt;To return only current document&lt;/h6&gt;
+&lt;h6 id=&#34;to-return-only-current-document-2&#34;&gt;To return only current document&lt;/h6&gt;
 
 &lt;p&gt;This one is the simplest of them all.  Since the old versions are in another collection, you just query normally when you need to find a single or multiple documents - they will all be the current version.&lt;/p&gt;
 
-&lt;h6 id=&#34;to-generate-new-version-and-update-2:4d494242d33833a567dbfba012f85510&#34;&gt;To generate new version and update&lt;/h6&gt;
+&lt;h6 id=&#34;to-generate-new-version-and-update-2&#34;&gt;To generate new version and update&lt;/h6&gt;
 
 &lt;p&gt;This one may be the hardest.  Technically, you only need to do a few things: read the current document, construct out of it the new current document, save the new current document on top of previous one and if successful, then insert the old current document into the &amp;ldquo;previous&amp;rdquo; collection.   Of course we would use the same compare-and-swap update to make sure that no one changed the document between our read and our write, and only insert into previous collection if we successfully update current.&lt;/p&gt;
 
@@ -743,7 +744,7 @@ For each documentId, there is only one document which represented its current st
 
 &lt;p&gt;Luckily, clean-up may be simple, as any time we detect that there exists a docId, version in &amp;ldquo;current&amp;rdquo; that also exists in &amp;ldquo;previous&amp;rdquo; it means either there is an update &amp;ldquo;in progress&amp;rdquo; or it means that an update &amp;ldquo;died&amp;rdquo; and we should clean up.  Of course the devil is in the details - and it could cause delays in the system since you have to wait long enough to be sure that this &amp;ldquo;in progress&amp;rdquo; update actually died.  Or you can have another field that you update after successful writes in both places (now making it easier to recover, but needing to do three writes before you&amp;rsquo;re done with a single document update!)  Let&amp;rsquo;s call this Medium Hard still.&lt;/p&gt;
 
-&lt;h5 id=&#34;choice-4:4d494242d33833a567dbfba012f85510&#34;&gt;Choice 4&lt;/h5&gt;
+&lt;h5 id=&#34;choice-4&#34;&gt;Choice 4&lt;/h5&gt;
 
 &lt;p&gt;Store only &amp;ldquo;deltas&amp;rdquo; with increasing versions&lt;/p&gt;
 
@@ -756,7 +757,7 @@ For each documentId, there is only one document which represented its current st
 
 &lt;p&gt;This one is quite complex, and the answer is getting quite long, so let&amp;rsquo;s call it hard and defer the details of how we accomplish this merge till &lt;a href=&#34;http://askasya.com/post/mergeshapes&#34;&gt;next time&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h4 id=&#34;let-s-summarize:4d494242d33833a567dbfba012f85510&#34;&gt;Let&amp;rsquo;s Summarize&lt;/h4&gt;
+&lt;h4 id=&#34;let-s-summarize&#34;&gt;Let&amp;rsquo;s Summarize&lt;/h4&gt;
 
 &lt;p&gt;Here&amp;rsquo;s a table that shows for each schema choice how well we can handle the reads, writes and if an update has to make more than one write, how easy it is to recover or to be in a relatively &amp;ldquo;safe&amp;rdquo; state:&lt;/p&gt;
 
@@ -840,13 +841,13 @@ For each documentId, there is only one document which represented its current st
       <guid>http://asya999.github.io/post/dynamicattributes/</guid>
       <description>
 
-&lt;h3 id=&#34;question:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Question:&lt;/h3&gt;
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
 
 &lt;p&gt;I&amp;rsquo;ve heard that MongoDB can be effectively used to model &amp;ldquo;dynamic attributes&amp;rdquo; - where you don&amp;rsquo;t know up front all the different attributes and not all attributes apply to all items.  Can you describe how that can be done, and in particular how it can be effectively indexed?&lt;/p&gt;
 
-&lt;h3 id=&#34;answer:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Answer:&lt;/h3&gt;
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
-&lt;h5 id=&#34;the-problem:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;The problem:&lt;/h5&gt;
+&lt;h5 id=&#34;the-problem&#34;&gt;The problem:&lt;/h5&gt;
 
 &lt;p&gt;Imagine you are building an e-commerce site and you aspire to be as big as amazon.com some day, which means you will be selling many different types of products.  It&amp;rsquo;s easy to see that there will be sets of attributes that will only apply to some of the products you sell.&lt;/p&gt;
 
@@ -876,7 +877,7 @@ For each documentId, there is only one document which represented its current st
 
 &lt;p&gt;You can see how it would be extremely challenging to manage a collection that has an incredibly wide variety of document &amp;ldquo;shapes&amp;rdquo;.  Now, while some people call MongoDB &amp;ldquo;schemaless&amp;rdquo; I am not a fan of this designation.  The schema of each document is defined by the document itself.  To be able to build a robust applications you need to decide what the schema of the documents will be, otherwise your application will spend as much time examining the documents to learn their schema as providing actual functionality.&lt;/p&gt;
 
-&lt;h5 id=&#34;possible-solutions:bfa6b69d18d3a970bc8ca44586b86424&#34;&gt;Possible solutions:&lt;/h5&gt;
+&lt;h5 id=&#34;possible-solutions&#34;&gt;Possible solutions:&lt;/h5&gt;
 
 &lt;p&gt;One way to index the attributes you want to be able to search by is by creating an index on each such attribute in a schema like the one above.  This is not practical, even if you use &lt;a href=&#34;http://docs.mongodb.org/manual/core/index-sparse/&#34;&gt;&amp;ldquo;sparse&amp;rdquo; indexes&lt;/a&gt; (since many attributes will be set only on a small subset of the products), because you may end up with dozens, if not hundreds of indexes.  In addition, every time a new attribute is introduced, a new index has to be added on the collection.  Not very practical.&lt;/p&gt;
 
