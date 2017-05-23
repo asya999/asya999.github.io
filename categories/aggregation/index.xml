@@ -22,11 +22,11 @@
 
 &lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
 
-&lt;p&gt;There are new expressions available as of &lt;a href=&#34;https://docs.mongodb.com/manual/release-notes/3.4/#apr-21-2017&#34;&gt;3.4.4&lt;/a&gt; - &lt;code&gt;$objectToArray&lt;/code&gt;, &lt;code&gt;$arrayToObject&lt;/code&gt; and in 3.5.5 we also get &lt;a href=&#34;https://jira.mongodb.org/browse/SERVER-24879&#34;&gt;$mergeObjects&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;There are new expressions available as of &lt;a href=&#34;https://docs.mongodb.com/manual/release-notes/3.4/#apr-21-2017&#34;&gt;3.4.4&lt;/a&gt; - &lt;code&gt;$objectToArray&lt;/code&gt;, &lt;code&gt;$arrayToObject&lt;/code&gt; and in 3.5.5 we also get &lt;a href=&#34;https://jira.mongodb.org/browse/SERVER-24879&#34;&gt;&lt;code&gt;$mergeObjects&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h5 id=&#34;split-top-level-object-into-array-of-key-value-pairs&#34;&gt;split top level object into array of key value pairs&lt;/h5&gt;
+&lt;h4 id=&#34;split-top-level-object-into-array-of-key-value-pairs&#34;&gt;Split top level object into array of key value pairs&lt;/h4&gt;
 
-&lt;p&gt;&lt;code&gt;{&amp;quot;$objectToArray&amp;quot;:&amp;quot;$$ROOT&amp;quot;}&lt;/code&gt; will return an array of &lt;code&gt;{k:&amp;quot;keyname&amp;quot;, v:&amp;lt;value&amp;gt;}&lt;/code&gt; elements.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;{&amp;quot;$objectToArray&amp;quot;:&amp;quot;$$ROOT&amp;quot;}&lt;/code&gt; will return an array of &lt;code&gt;{&amp;quot;k&amp;quot;:&amp;quot;keyname&amp;quot;, &amp;quot;v&amp;quot;:&amp;lt;value&amp;gt;}&lt;/code&gt; elements.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;db.example.findOne()
 {
@@ -38,7 +38,7 @@
     &amp;quot;foo&amp;quot; : 1
   }
 }
-db.claims.aggregate({$limit:1},{$project:{o:{$objectToArray:&amp;quot;$$ROOT&amp;quot;}}}).pretty()
+db.claims.aggregate({&amp;quot;$limit&amp;quot;:1},{&amp;quot;$project&amp;quot;:{&amp;quot;o&amp;quot;:{&amp;quot;$objectToArray&amp;quot;:&amp;quot;$$ROOT&amp;quot;}}}).pretty()
 {
   &amp;quot;_id&amp;quot; : ObjectId(&amp;quot;5924aca1530259006a3792ca&amp;quot;),
   &amp;quot;o&amp;quot; : [
@@ -68,20 +68,20 @@ db.claims.aggregate({$limit:1},{$project:{o:{$objectToArray:&amp;quot;$$ROOT&amp
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h5 id=&#34;now-what-can-i-do&#34;&gt;Now what can I do?&lt;/h5&gt;
+&lt;h4 id=&#34;now-what-do-i-do&#34;&gt;Now what do I do?&lt;/h4&gt;
 
 &lt;pre&gt;&lt;code&gt;db.claims.aggregate([
-  {$project:{o:{$objectToArray:&amp;quot;$$ROOT&amp;quot;}}},
-  {$unwind:&amp;quot;$o&amp;quot;},
-  {$group:{_id:null, keys:{$addToSet:&amp;quot;$o.k&amp;quot;}}}
+  {&amp;quot;$project&amp;quot;:{&amp;quot;o&amp;quot;:{&amp;quot;$objectToArray&amp;quot;:&amp;quot;$$ROOT&amp;quot;}}},
+  {&amp;quot;$unwind&amp;quot;:&amp;quot;$o&amp;quot;},
+  {&amp;quot;$group&amp;quot;:{&amp;quot;_id&amp;quot;:null, &amp;quot;keys&amp;quot;:{&amp;quot;$addToSet&amp;quot;:&amp;quot;$o.k&amp;quot;}}}
 ])
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h5 id=&#34;are-there-more-efficient-ways-to-do-this&#34;&gt;Are there more efficient ways to do this?&lt;/h5&gt;
+&lt;h4 id=&#34;are-there-more-efficient-ways-to-do-this&#34;&gt;Are there more efficient ways to do this?&lt;/h4&gt;
 
 &lt;p&gt;There are other ways to do this, but none of them can escape doing a &lt;code&gt;$group&lt;/code&gt; stage over all the documents (i.e. with &lt;code&gt;_id&lt;/code&gt; as a constant, usually null).  But we could avoid &lt;code&gt;$unwind&lt;/code&gt; stage a couple of different ways.&lt;/p&gt;
 
-&lt;h6 id=&#34;using-arrays&#34;&gt;using arrays&lt;/h6&gt;
+&lt;h5 id=&#34;using-arrays&#34;&gt;Using arrays&lt;/h5&gt;
 
 &lt;p&gt;If your documents are more or less uniform, or if the collection isn&amp;rsquo;t too big, you can do this:&lt;/p&gt;
 
@@ -91,7 +91,7 @@ db.claims.aggregate({$limit:1},{$project:{o:{$objectToArray:&amp;quot;$$ROOT&amp
 ])
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h6 id=&#34;using-mergeobjects&#34;&gt;using $mergeObjects&lt;/h6&gt;
+&lt;h5 id=&#34;using-mergeobjects&#34;&gt;Using &lt;code&gt;$mergeObjects&lt;/code&gt;&lt;/h5&gt;
 
 &lt;p&gt;3.5 added a new aggregation expression to merge two or more JSON objects, and it&amp;rsquo;s an expression that can be used as an accumulator during &lt;code&gt;$group&lt;/code&gt; stage.&lt;/p&gt;
 

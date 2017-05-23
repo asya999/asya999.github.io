@@ -56,11 +56,11 @@
 
 <h3 id="answer">Answer:</h3>
 
-<p>There are new expressions available as of <a href="https://docs.mongodb.com/manual/release-notes/3.4/#apr-21-2017">3.4.4</a> - <code>$objectToArray</code>, <code>$arrayToObject</code> and in 3.5.5 we also get <a href="https://jira.mongodb.org/browse/SERVER-24879">$mergeObjects</a>.</p>
+<p>There are new expressions available as of <a href="https://docs.mongodb.com/manual/release-notes/3.4/#apr-21-2017">3.4.4</a> - <code>$objectToArray</code>, <code>$arrayToObject</code> and in 3.5.5 we also get <a href="https://jira.mongodb.org/browse/SERVER-24879"><code>$mergeObjects</code></a>.</p>
 
-<h5 id="split-top-level-object-into-array-of-key-value-pairs">split top level object into array of key value pairs</h5>
+<h4 id="split-top-level-object-into-array-of-key-value-pairs">Split top level object into array of key value pairs</h4>
 
-<p><code>{&quot;$objectToArray&quot;:&quot;$$ROOT&quot;}</code> will return an array of <code>{k:&quot;keyname&quot;, v:&lt;value&gt;}</code> elements.</p>
+<p><code>{&quot;$objectToArray&quot;:&quot;$$ROOT&quot;}</code> will return an array of <code>{&quot;k&quot;:&quot;keyname&quot;, &quot;v&quot;:&lt;value&gt;}</code> elements.</p>
 
 <pre><code>db.example.findOne()
 {
@@ -72,7 +72,7 @@
     &quot;foo&quot; : 1
   }
 }
-db.claims.aggregate({$limit:1},{$project:{o:{$objectToArray:&quot;$$ROOT&quot;}}}).pretty()
+db.claims.aggregate({&quot;$limit&quot;:1},{&quot;$project&quot;:{&quot;o&quot;:{&quot;$objectToArray&quot;:&quot;$$ROOT&quot;}}}).pretty()
 {
   &quot;_id&quot; : ObjectId(&quot;5924aca1530259006a3792ca&quot;),
   &quot;o&quot; : [
@@ -102,20 +102,20 @@ db.claims.aggregate({$limit:1},{$project:{o:{$objectToArray:&quot;$$ROOT&quot;}}
 }
 </code></pre>
 
-<h5 id="now-what-can-i-do">Now what can I do?</h5>
+<h4 id="now-what-do-i-do">Now what do I do?</h4>
 
 <pre><code>db.claims.aggregate([
-  {$project:{o:{$objectToArray:&quot;$$ROOT&quot;}}},
-  {$unwind:&quot;$o&quot;},
-  {$group:{_id:null, keys:{$addToSet:&quot;$o.k&quot;}}}
+  {&quot;$project&quot;:{&quot;o&quot;:{&quot;$objectToArray&quot;:&quot;$$ROOT&quot;}}},
+  {&quot;$unwind&quot;:&quot;$o&quot;},
+  {&quot;$group&quot;:{&quot;_id&quot;:null, &quot;keys&quot;:{&quot;$addToSet&quot;:&quot;$o.k&quot;}}}
 ])
 </code></pre>
 
-<h5 id="are-there-more-efficient-ways-to-do-this">Are there more efficient ways to do this?</h5>
+<h4 id="are-there-more-efficient-ways-to-do-this">Are there more efficient ways to do this?</h4>
 
 <p>There are other ways to do this, but none of them can escape doing a <code>$group</code> stage over all the documents (i.e. with <code>_id</code> as a constant, usually null).  But we could avoid <code>$unwind</code> stage a couple of different ways.</p>
 
-<h6 id="using-arrays">using arrays</h6>
+<h5 id="using-arrays">Using arrays</h5>
 
 <p>If your documents are more or less uniform, or if the collection isn&rsquo;t too big, you can do this:</p>
 
@@ -125,7 +125,7 @@ db.claims.aggregate({$limit:1},{$project:{o:{$objectToArray:&quot;$$ROOT&quot;}}
 ])
 </code></pre>
 
-<h6 id="using-mergeobjects">using $mergeObjects</h6>
+<h5 id="using-mergeobjects">Using <code>$mergeObjects</code></h5>
 
 <p>3.5 added a new aggregation expression to merge two or more JSON objects, and it&rsquo;s an expression that can be used as an accumulator during <code>$group</code> stage.</p>
 
