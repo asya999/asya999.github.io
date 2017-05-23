@@ -86,8 +86,19 @@ db.claims.aggregate({&amp;quot;$limit&amp;quot;:1},{&amp;quot;$project&amp;quot;
 &lt;p&gt;If your documents are more or less uniform, or if the collection isn&amp;rsquo;t too big, you can do this:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;db.claims.aggregate([
-  { &amp;quot;$group&amp;quot;: { &amp;quot;_id&amp;quot;: null, &amp;quot;keys&amp;quot;: { &amp;quot;$addToSet&amp;quot;: { &amp;quot;$map&amp;quot;: { &amp;quot;input&amp;quot;: { &amp;quot;$objectToArray&amp;quot;: &amp;quot;$$ROOT&amp;quot; }, &amp;quot;in&amp;quot;: &amp;quot;$$this.k&amp;quot; } } } } }, 
-  { &amp;quot;$project&amp;quot;: { &amp;quot;keys&amp;quot;: { &amp;quot;$reduce&amp;quot;: { &amp;quot;input&amp;quot;: &amp;quot;$keys&amp;quot;, &amp;quot;initialValue&amp;quot;: [], &amp;quot;in&amp;quot;: { &amp;quot;$setUnion&amp;quot;: [ &amp;quot;$$this&amp;quot;, &amp;quot;$$value&amp;quot; ] } } } } }
+  { &amp;quot;$group&amp;quot;: { 
+      &amp;quot;_id&amp;quot;: null, 
+      &amp;quot;keys&amp;quot;: { &amp;quot;$addToSet&amp;quot;: { 
+         &amp;quot;$map&amp;quot;: { &amp;quot;input&amp;quot;: { &amp;quot;$objectToArray&amp;quot;: &amp;quot;$$ROOT&amp;quot; }, &amp;quot;in&amp;quot;: &amp;quot;$$this.k&amp;quot; } 
+      } } 
+  } }, 
+  { &amp;quot;$project&amp;quot;: { 
+      &amp;quot;keys&amp;quot;: { &amp;quot;$reduce&amp;quot;: { 
+          &amp;quot;input&amp;quot;: &amp;quot;$keys&amp;quot;, 
+          &amp;quot;initialValue&amp;quot;: [], 
+          &amp;quot;in&amp;quot;: { &amp;quot;$setUnion&amp;quot;: [ &amp;quot;$$this&amp;quot;, &amp;quot;$$value&amp;quot; ] } 
+       } } 
+  } }
 ])
 &lt;/code&gt;&lt;/pre&gt;
 

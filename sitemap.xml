@@ -77,13 +77,13 @@
   </url>
   
   <url>
-    <loc>http://asya999.github.io/tags/aggregation/</loc>
+    <loc>http://asya999.github.io/categories/aggregation/</loc>
     <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://asya999.github.io/categories/aggregation/</loc>
+    <loc>http://asya999.github.io/tags/aggregation/</loc>
     <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
@@ -143,14 +143,14 @@
   </url>
   
   <url>
-    <loc>http://asya999.github.io/tags/mongodb/</loc>
-    <lastmod>2014-04-29T00:00:00+00:00</lastmod>
+    <loc>http://asya999.github.io/categories/mongodb/</loc>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://asya999.github.io/categories/mongodb/</loc>
-    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
+    <loc>http://asya999.github.io/tags/mongodb/</loc>
+    <lastmod>2014-04-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -185,13 +185,13 @@
   </url>
   
   <url>
-    <loc>http://asya999.github.io/tags/schema/</loc>
+    <loc>http://asya999.github.io/categories/schema/</loc>
     <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://asya999.github.io/categories/schema/</loc>
+    <loc>http://asya999.github.io/tags/schema/</loc>
     <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>

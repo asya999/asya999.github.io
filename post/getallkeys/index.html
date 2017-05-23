@@ -120,8 +120,19 @@ db.claims.aggregate({&quot;$limit&quot;:1},{&quot;$project&quot;:{&quot;o&quot;:
 <p>If your documents are more or less uniform, or if the collection isn&rsquo;t too big, you can do this:</p>
 
 <pre><code>db.claims.aggregate([
-  { &quot;$group&quot;: { &quot;_id&quot;: null, &quot;keys&quot;: { &quot;$addToSet&quot;: { &quot;$map&quot;: { &quot;input&quot;: { &quot;$objectToArray&quot;: &quot;$$ROOT&quot; }, &quot;in&quot;: &quot;$$this.k&quot; } } } } }, 
-  { &quot;$project&quot;: { &quot;keys&quot;: { &quot;$reduce&quot;: { &quot;input&quot;: &quot;$keys&quot;, &quot;initialValue&quot;: [], &quot;in&quot;: { &quot;$setUnion&quot;: [ &quot;$$this&quot;, &quot;$$value&quot; ] } } } } }
+  { &quot;$group&quot;: { 
+      &quot;_id&quot;: null, 
+      &quot;keys&quot;: { &quot;$addToSet&quot;: { 
+         &quot;$map&quot;: { &quot;input&quot;: { &quot;$objectToArray&quot;: &quot;$$ROOT&quot; }, &quot;in&quot;: &quot;$$this.k&quot; } 
+      } } 
+  } }, 
+  { &quot;$project&quot;: { 
+      &quot;keys&quot;: { &quot;$reduce&quot;: { 
+          &quot;input&quot;: &quot;$keys&quot;, 
+          &quot;initialValue&quot;: [], 
+          &quot;in&quot;: { &quot;$setUnion&quot;: [ &quot;$$this&quot;, &quot;$$value&quot; ] } 
+       } } 
+  } }
 ])
 </code></pre>
 
