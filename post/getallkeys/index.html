@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Asya Kamky"> 
+
+
+    <title>How do I get all the names of keys in my documents - http://asya999.github.io/</title>
+    <link rel="canonical" href="http://asya999.github.io/post/getallkeys/">
+    
+    <link href="http://asya999.github.io/css/bootstrap.min.css" rel="stylesheet">
+    <link href="http://asya999.github.io/css/font-awesome.css" rel="stylesheet">
+    <link href="http://asya999.github.io/css/variables.scss" rel="stylesheet">
+    <link href="http://asya999.github.io/css/lavish-bootstrap.css" rel="stylesheet">
+    <link href="http://asya999.github.io/css/custom.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                    <span class="sr-only">Toggle Navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="http://asya999.github.io/">Ask Asya</a>
+            </div>
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="http://asya999.github.io/post/">Posts</a></li>
+                    <li><a href="http://asya999.github.io/about/">About Me</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-9">
+            <div class="well well-sm">
+                    <h3>How do I get all the names of keys in my documents<br> <small></small></h3>
+                    <hr>
+                    
+
+<h3 id="question">Question:</h3>
+
+<p>I heard there are new operators in aggregation to extract keys from my documents.  How can I use them to get a list of all key names for all documents in my collection?</p>
+
+<h3 id="answer">Answer:</h3>
+
+<p>There are new expressions available as of <a href="https://docs.mongodb.com/manual/release-notes/3.4/#apr-21-2017">3.4.4</a> - <code>$objectToArray</code>, <code>$arrayToObject</code> and in 3.5.5 we also get <a href="https://jira.mongodb.org/browse/SERVER-24879">$mergeObjects</a>.</p>
+
+<h5 id="split-top-level-object-into-array-of-key-value-pairs">split top level object into array of key value pairs</h5>
+
+<p><code>{&quot;$objectToArray&quot;:&quot;$$ROOT&quot;}</code> will return an array of <code>{k:&quot;keyname&quot;, v:&lt;value&gt;}</code> elements.</p>
+
+<pre><code>db.example.findOne()
+{
+  &quot;_id&quot; : ObjectId(&quot;5924aca1530259006a3792ca&quot;),
+  &quot;member_id&quot; : &quot;m1&quot;,
+  &quot;claim_id&quot; : &quot;c1&quot;,
+  &quot;last_updated&quot; : ISODate(&quot;2017-01-01T00:00:00Z&quot;),
+  &quot;details&quot; : {
+    &quot;foo&quot; : 1
+  }
+}
+db.claims.aggregate({$limit:1},{$project:{o:{$objectToArray:&quot;$$ROOT&quot;}}}).pretty()
+{
+  &quot;_id&quot; : ObjectId(&quot;5924aca1530259006a3792ca&quot;),
+  &quot;o&quot; : [
+    {
+      &quot;k&quot; : &quot;_id&quot;,
+      &quot;v&quot; : ObjectId(&quot;5924aca1530259006a3792ca&quot;)
+    },
+    {
+      &quot;k&quot; : &quot;member_id&quot;,
+      &quot;v&quot; : &quot;m1&quot;
+    },
+    {
+      &quot;k&quot; : &quot;claim_id&quot;,
+      &quot;v&quot; : &quot;c1&quot;
+    },
+    {
+      &quot;k&quot; : &quot;last_updated&quot;,
+      &quot;v&quot; : ISODate(&quot;2017-01-01T00:00:00Z&quot;)
+    },
+    {
+      &quot;k&quot; : &quot;details&quot;,
+      &quot;v&quot; : {
+        &quot;foo&quot; : 1
+      }
+    }
+  ]
+}
+</code></pre>
+
+<h5 id="now-what-can-i-do">Now what can I do?</h5>
+
+<pre><code>db.claims.aggregate([
+  {$project:{o:{$objectToArray:&quot;$$ROOT&quot;}}},
+  {$unwind:&quot;$o&quot;},
+  {$group:{_id:null, keys:{$addToSet:&quot;$o.k&quot;}}}
+])
+</code></pre>
+
+<h5 id="are-there-more-efficient-ways-to-do-this">Are there more efficient ways to do this?</h5>
+
+<p>There are other ways to do this, but none of them can escape doing a <code>$group</code> stage over all the documents (i.e. with <code>_id</code> as a constant, usually null).  But we could avoid <code>$unwind</code> stage a couple of different ways.</p>
+
+<h6 id="using-arrays">using arrays</h6>
+
+<p>If your documents are more or less uniform, or if the collection isn&rsquo;t too big, you can do this:</p>
+
+<pre><code>db.claims.aggregate([
+  { &quot;$group&quot;: { &quot;_id&quot;: null, &quot;keys&quot;: { &quot;$addToSet&quot;: { &quot;$map&quot;: { &quot;input&quot;: { &quot;$objectToArray&quot;: &quot;$$ROOT&quot; }, &quot;in&quot;: &quot;$$this.k&quot; } } } } }, 
+  { &quot;$project&quot;: { &quot;keys&quot;: { &quot;$reduce&quot;: { &quot;input&quot;: &quot;$keys&quot;, &quot;initialValue&quot;: [], &quot;in&quot;: { &quot;$setUnion&quot;: [ &quot;$$this&quot;, &quot;$$value&quot; ] } } } } }
+])
+</code></pre>
+
+<h6 id="using-mergeobjects">using $mergeObjects</h6>
+
+<p>3.5 added a new aggregation expression to merge two or more JSON objects, and it&rsquo;s an expression that can be used as an accumulator during <code>$group</code> stage.</p>
+
+<p>Basic example: <code>{&quot;$mergeObjects&quot;:[ { &quot;a&quot;: 1, &quot;b&quot;: &quot;foo&quot;}, { &quot;a&quot;: 99, &quot;c&quot;: &quot;bar&quot;} ]}</code> results in <code>{ &quot;a&quot;: 99, &quot;b&quot;: &quot;foo&quot;, &quot;c&quot;: &quot;bar&quot; }</code>.  When a field exists in more than one object being merged, the last one (going from left to right) &ldquo;wins&rdquo;.</p>
+
+<p>More fancy example for schema key analysis:</p>
+
+<pre><code>db.claims.aggregate([
+  {&quot;$group&quot;:{&quot;_id&quot;:null, &quot;keys&quot;:{&quot;$mergeObjects&quot;:&quot;$$ROOT&quot;}}},
+  {&quot;$project&quot;:{&quot;keys&quot;: { &quot;$map&quot;: { &quot;input&quot;: { &quot;$objectToArray&quot;: &quot;$keys&quot; }, &quot;in&quot;: &quot;$$this.k&quot; } } } }
+])
+</code></pre>
+
+<p>All the above aggregations return the same result:</p>
+
+<pre><code>{ &quot;_id&quot; : null, &quot;keys&quot; : [ &quot;details&quot;, &quot;_id&quot;, &quot;member_id&quot;, &quot;last_updated&quot;, &quot;claim_id&quot; ] }
+</code></pre>
+
+<p>Though &ldquo;keys&rdquo; being a set, the order of fields in the array is not guaranteed to be the same.</p>
+
+<p>Next time I&rsquo;ll show you how you can do more sophisticated schema analysis with aggregation, handling embedded object (i.e. subdocuments) as well as tracking types of values for each key.</p>
+
+                               <hr>
+           <h2>Comments</h2>
+           <div id="disqus_thread"></div>
+           <script type="text/javascript">
+               (function() {
+                   var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+			  dsq.src = '//askasya.disqus.com/embed.js';
+                          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+           </script>
+
+            </div>
+        </div>
+
+        
+        <div class="col-md-3">
+            <div class="well well-sm"> 
+                <h4>May 23, 2017<br>
+                <small>446 words</small></h4>
+                <hr>
+                <strong>Categories</strong>
+                <ul class="list-unstyled">
+                
+                    <li><a href="http://asya999.github.io/categories/mongodb">MongoDB</a></li>
+                
+                    <li><a href="http://asya999.github.io/categories/schema">Schema</a></li>
+                
+                    <li><a href="http://asya999.github.io/categories/aggregation">aggregation</a></li>
+                
+                </ul>
+                <hr>
+                <strong>Tags</strong><br>
+                <a class="label label-default" href="http://asya999.github.io/tags/keys">keys</a> <a class="label label-default" href="http://asya999.github.io/tags/aggregation">aggregation</a> <a class="label label-default" href="http://asya999.github.io/tags/schema">schema</a> 
+            </div>
+                <div class="panel panel-default">
+        <div class="panel-heading" style="padding: 2px 15px;">
+            <h4>Connect. Explore.</h4>
+        </div>
+        <div class="panel-body">
+            <a href="https://github.com/asya999/" class="btn btn-success btn-xs"><i class="fa fa-github-square fa-2x"></i></a>
+            <a href="https://www.twitter.com/asya999" class="btn btn-success btn-xs"><i class="fa fa-twitter-square fa-2x"></i></a>
+            <a href="https://www.linkedin.com/asya999" class="btn btn-success btn-xs"><i class="fa fa-linkedin-square fa-2x"></i></a>
+            <a href="https://www.facebook.com/mongodb" class="btn btn-success btn-xs"><i class="fa fa-facebook-square fa-2x"></i></a>
+            <br><br>
+            <a href="http://www.kamsky.org/stupid-tricks-with-mongodb" class="label label-default"><small>More ramblings about MongoDB</small></a>
+            <br>
+            <a href="http://stackoverflow.com/search?tab=votes&q=user%3a431012%20%5bmongodb%5d" class="label label-default"><small>My Answers on StackOverflow</small></a>
+
+            
+        </div>
+    </div>
+
+        </div>
+    </div>
+        <footer>
+            <div class="row">
+                <hr>
+                <div class="col-sm-12">
+                    <p>&copy; Asya Kamsky 2017 &middot;
+                    Built with <a href="https://github.com/spf13/hugo">Hugo</a></p>
+                </div>
+            </div>
+        </footer>
+
+</div>
+
+    <script src="http://asya999.github.io/js/jquery-1.11.3.min.js"></script>
+    <script src="http://asya999.github.io/js/bootstrap.js"></script>
+</body>
+</html>
+

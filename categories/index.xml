@@ -6,14 +6,32 @@
     <language>en-US</language>
     <author>Asya Kamsky</author>
     <rights>Copyright (c) 2016, Asya Kamsky; all rights reserved.</rights>
-    <updated>Mon, 01 Jan 0001 00:00:00 UTC</updated>
+    <updated>Tue, 23 May 2017 00:00:00 UTC</updated>
+    
+    <item>
+      <title>Aggregation</title>
+      <link>http://asya999.github.io/categories/aggregation/</link>
+      <pubDate>Tue, 23 May 2017 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/categories/aggregation/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Mongodb</title>
       <link>http://asya999.github.io/categories/mongodb/</link>
-      <pubDate>Sun, 09 Oct 2016 00:00:00 UTC</pubDate>
+      <pubDate>Tue, 23 May 2017 00:00:00 UTC</pubDate>
       <author>Asya Kamsky</author>
       <guid>http://asya999.github.io/categories/mongodb/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Schema</title>
+      <link>http://asya999.github.io/categories/schema/</link>
+      <pubDate>Tue, 23 May 2017 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/categories/schema/</guid>
       <description></description>
     </item>
     

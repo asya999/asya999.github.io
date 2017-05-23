@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+      <title>Schema on Ask Asya </title>
+    <link>http://asya999.github.io/categories/schema/</link>
+    <language>en-US</language>
+    <author>Asya Kamsky</author>
+    <rights>Copyright (c) 2016, Asya Kamsky; all rights reserved.</rights>
+    <updated>Tue, 23 May 2017 00:00:00 UTC</updated>
+    
+    <item>
+      <title>How do I get all the names of keys in my documents</title>
+      <link>http://asya999.github.io/post/getallkeys/</link>
+      <pubDate>Tue, 23 May 2017 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/getallkeys/</guid>
+      <description>
+
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
+
+&lt;p&gt;I heard there are new operators in aggregation to extract keys from my documents.  How can I use them to get a list of all key names for all documents in my collection?&lt;/p&gt;
+
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
+
+&lt;p&gt;There are new expressions available as of &lt;a href=&#34;https://docs.mongodb.com/manual/release-notes/3.4/#apr-21-2017&#34;&gt;3.4.4&lt;/a&gt; - &lt;code&gt;$objectToArray&lt;/code&gt;, &lt;code&gt;$arrayToObject&lt;/code&gt; and in 3.5.5 we also get &lt;a href=&#34;https://jira.mongodb.org/browse/SERVER-24879&#34;&gt;$mergeObjects&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h5 id=&#34;split-top-level-object-into-array-of-key-value-pairs&#34;&gt;split top level object into array of key value pairs&lt;/h5&gt;
+
+&lt;p&gt;&lt;code&gt;{&amp;quot;$objectToArray&amp;quot;:&amp;quot;$$ROOT&amp;quot;}&lt;/code&gt; will return an array of &lt;code&gt;{k:&amp;quot;keyname&amp;quot;, v:&amp;lt;value&amp;gt;}&lt;/code&gt; elements.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.example.findOne()
+{
+  &amp;quot;_id&amp;quot; : ObjectId(&amp;quot;5924aca1530259006a3792ca&amp;quot;),
+  &amp;quot;member_id&amp;quot; : &amp;quot;m1&amp;quot;,
+  &amp;quot;claim_id&amp;quot; : &amp;quot;c1&amp;quot;,
+  &amp;quot;last_updated&amp;quot; : ISODate(&amp;quot;2017-01-01T00:00:00Z&amp;quot;),
+  &amp;quot;details&amp;quot; : {
+    &amp;quot;foo&amp;quot; : 1
+  }
+}
+db.claims.aggregate({$limit:1},{$project:{o:{$objectToArray:&amp;quot;$$ROOT&amp;quot;}}}).pretty()
+{
+  &amp;quot;_id&amp;quot; : ObjectId(&amp;quot;5924aca1530259006a3792ca&amp;quot;),
+  &amp;quot;o&amp;quot; : [
+    {
+      &amp;quot;k&amp;quot; : &amp;quot;_id&amp;quot;,
+      &amp;quot;v&amp;quot; : ObjectId(&amp;quot;5924aca1530259006a3792ca&amp;quot;)
+    },
+    {
+      &amp;quot;k&amp;quot; : &amp;quot;member_id&amp;quot;,
+      &amp;quot;v&amp;quot; : &amp;quot;m1&amp;quot;
+    },
+    {
+      &amp;quot;k&amp;quot; : &amp;quot;claim_id&amp;quot;,
+      &amp;quot;v&amp;quot; : &amp;quot;c1&amp;quot;
+    },
+    {
+      &amp;quot;k&amp;quot; : &amp;quot;last_updated&amp;quot;,
+      &amp;quot;v&amp;quot; : ISODate(&amp;quot;2017-01-01T00:00:00Z&amp;quot;)
+    },
+    {
+      &amp;quot;k&amp;quot; : &amp;quot;details&amp;quot;,
+      &amp;quot;v&amp;quot; : {
+        &amp;quot;foo&amp;quot; : 1
+      }
+    }
+  ]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h5 id=&#34;now-what-can-i-do&#34;&gt;Now what can I do?&lt;/h5&gt;
+
+&lt;pre&gt;&lt;code&gt;db.claims.aggregate([
+  {$project:{o:{$objectToArray:&amp;quot;$$ROOT&amp;quot;}}},
+  {$unwind:&amp;quot;$o&amp;quot;},
+  {$group:{_id:null, keys:{$addToSet:&amp;quot;$o.k&amp;quot;}}}
+])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h5 id=&#34;are-there-more-efficient-ways-to-do-this&#34;&gt;Are there more efficient ways to do this?&lt;/h5&gt;
+
+&lt;p&gt;There are other ways to do this, but none of them can escape doing a &lt;code&gt;$group&lt;/code&gt; stage over all the documents (i.e. with &lt;code&gt;_id&lt;/code&gt; as a constant, usually null).  But we could avoid &lt;code&gt;$unwind&lt;/code&gt; stage a couple of different ways.&lt;/p&gt;
+
+&lt;h6 id=&#34;using-arrays&#34;&gt;using arrays&lt;/h6&gt;
+
+&lt;p&gt;If your documents are more or less uniform, or if the collection isn&amp;rsquo;t too big, you can do this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.claims.aggregate([
+  { &amp;quot;$group&amp;quot;: { &amp;quot;_id&amp;quot;: null, &amp;quot;keys&amp;quot;: { &amp;quot;$addToSet&amp;quot;: { &amp;quot;$map&amp;quot;: { &amp;quot;input&amp;quot;: { &amp;quot;$objectToArray&amp;quot;: &amp;quot;$$ROOT&amp;quot; }, &amp;quot;in&amp;quot;: &amp;quot;$$this.k&amp;quot; } } } } }, 
+  { &amp;quot;$project&amp;quot;: { &amp;quot;keys&amp;quot;: { &amp;quot;$reduce&amp;quot;: { &amp;quot;input&amp;quot;: &amp;quot;$keys&amp;quot;, &amp;quot;initialValue&amp;quot;: [], &amp;quot;in&amp;quot;: { &amp;quot;$setUnion&amp;quot;: [ &amp;quot;$$this&amp;quot;, &amp;quot;$$value&amp;quot; ] } } } } }
+])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h6 id=&#34;using-mergeobjects&#34;&gt;using $mergeObjects&lt;/h6&gt;
+
+&lt;p&gt;3.5 added a new aggregation expression to merge two or more JSON objects, and it&amp;rsquo;s an expression that can be used as an accumulator during &lt;code&gt;$group&lt;/code&gt; stage.&lt;/p&gt;
+
+&lt;p&gt;Basic example: &lt;code&gt;{&amp;quot;$mergeObjects&amp;quot;:[ { &amp;quot;a&amp;quot;: 1, &amp;quot;b&amp;quot;: &amp;quot;foo&amp;quot;}, { &amp;quot;a&amp;quot;: 99, &amp;quot;c&amp;quot;: &amp;quot;bar&amp;quot;} ]}&lt;/code&gt; results in &lt;code&gt;{ &amp;quot;a&amp;quot;: 99, &amp;quot;b&amp;quot;: &amp;quot;foo&amp;quot;, &amp;quot;c&amp;quot;: &amp;quot;bar&amp;quot; }&lt;/code&gt;.  When a field exists in more than one object being merged, the last one (going from left to right) &amp;ldquo;wins&amp;rdquo;.&lt;/p&gt;
+
+&lt;p&gt;More fancy example for schema key analysis:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.claims.aggregate([
+  {&amp;quot;$group&amp;quot;:{&amp;quot;_id&amp;quot;:null, &amp;quot;keys&amp;quot;:{&amp;quot;$mergeObjects&amp;quot;:&amp;quot;$$ROOT&amp;quot;}}},
+  {&amp;quot;$project&amp;quot;:{&amp;quot;keys&amp;quot;: { &amp;quot;$map&amp;quot;: { &amp;quot;input&amp;quot;: { &amp;quot;$objectToArray&amp;quot;: &amp;quot;$keys&amp;quot; }, &amp;quot;in&amp;quot;: &amp;quot;$$this.k&amp;quot; } } } }
+])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;All the above aggregations return the same result:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{ &amp;quot;_id&amp;quot; : null, &amp;quot;keys&amp;quot; : [ &amp;quot;details&amp;quot;, &amp;quot;_id&amp;quot;, &amp;quot;member_id&amp;quot;, &amp;quot;last_updated&amp;quot;, &amp;quot;claim_id&amp;quot; ] }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Though &amp;ldquo;keys&amp;rdquo; being a set, the order of fields in the array is not guaranteed to be the same.&lt;/p&gt;
+
+&lt;p&gt;Next time I&amp;rsquo;ll show you how you can do more sophisticated schema analysis with aggregation, handling embedded object (i.e. subdocuments) as well as tracking types of values for each key.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

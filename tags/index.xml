@@ -6,12 +6,12 @@
     <language>en-US</language>
     <author>Asya Kamsky</author>
     <rights>Copyright (c) 2016, Asya Kamsky; all rights reserved.</rights>
-    <updated>Sat, 24 May 2014 00:00:00 UTC</updated>
+    <updated>Tue, 23 May 2017 00:00:00 UTC</updated>
     
     <item>
       <title>Aggregation</title>
       <link>http://asya999.github.io/tags/aggregation/</link>
-      <pubDate>Sat, 24 May 2014 00:00:00 UTC</pubDate>
+      <pubDate>Tue, 23 May 2017 00:00:00 UTC</pubDate>
       <author>Asya Kamsky</author>
       <guid>http://asya999.github.io/tags/aggregation/</guid>
       <description></description>
@@ -63,6 +63,15 @@
     </item>
     
     <item>
+      <title>Keys</title>
+      <link>http://asya999.github.io/tags/keys/</link>
+      <pubDate>Tue, 23 May 2017 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/tags/keys/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Modeling</title>
       <link>http://asya999.github.io/tags/modeling/</link>
       <pubDate>Sun, 07 Sep 2014 00:00:00 UTC</pubDate>
@@ -86,15 +95,6 @@
       <pubDate>Wed, 29 Oct 2014 00:00:00 UTC</pubDate>
       <author>Asya Kamsky</author>
       <guid>http://asya999.github.io/tags/ops/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Performance</title>
-      <link>http://asya999.github.io/tags/performance/</link>
-      <pubDate>Wed, 29 Oct 2014 00:00:00 UTC</pubDate>
-      <author>Asya Kamsky</author>
-      <guid>http://asya999.github.io/tags/performance/</guid>
       <description></description>
     </item>
     

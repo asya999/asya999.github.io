@@ -6,7 +6,115 @@
     <language>en-US</language>
     <author>Asya Kamsky</author>
     <rights>Copyright (c) 2016, Asya Kamsky; all rights reserved.</rights>
-    <updated>Sun, 09 Oct 2016 00:00:00 UTC</updated>
+    <updated>Tue, 23 May 2017 00:00:00 UTC</updated>
+    
+    <item>
+      <title>How do I get all the names of keys in my documents</title>
+      <link>http://asya999.github.io/post/getallkeys/</link>
+      <pubDate>Tue, 23 May 2017 00:00:00 UTC</pubDate>
+      <author>Asya Kamsky</author>
+      <guid>http://asya999.github.io/post/getallkeys/</guid>
+      <description>
+
+&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
+
+&lt;p&gt;I heard there are new operators in aggregation to extract keys from my documents.  How can I use them to get a list of all key names for all documents in my collection?&lt;/p&gt;
+
+&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
+
+&lt;p&gt;There are new expressions available as of &lt;a href=&#34;https://docs.mongodb.com/manual/release-notes/3.4/#apr-21-2017&#34;&gt;3.4.4&lt;/a&gt; - &lt;code&gt;$objectToArray&lt;/code&gt;, &lt;code&gt;$arrayToObject&lt;/code&gt; and in 3.5.5 we also get &lt;a href=&#34;https://jira.mongodb.org/browse/SERVER-24879&#34;&gt;$mergeObjects&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h5 id=&#34;split-top-level-object-into-array-of-key-value-pairs&#34;&gt;split top level object into array of key value pairs&lt;/h5&gt;
+
+&lt;p&gt;&lt;code&gt;{&amp;quot;$objectToArray&amp;quot;:&amp;quot;$$ROOT&amp;quot;}&lt;/code&gt; will return an array of &lt;code&gt;{k:&amp;quot;keyname&amp;quot;, v:&amp;lt;value&amp;gt;}&lt;/code&gt; elements.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.example.findOne()
+{
+  &amp;quot;_id&amp;quot; : ObjectId(&amp;quot;5924aca1530259006a3792ca&amp;quot;),
+  &amp;quot;member_id&amp;quot; : &amp;quot;m1&amp;quot;,
+  &amp;quot;claim_id&amp;quot; : &amp;quot;c1&amp;quot;,
+  &amp;quot;last_updated&amp;quot; : ISODate(&amp;quot;2017-01-01T00:00:00Z&amp;quot;),
+  &amp;quot;details&amp;quot; : {
+    &amp;quot;foo&amp;quot; : 1
+  }
+}
+db.claims.aggregate({$limit:1},{$project:{o:{$objectToArray:&amp;quot;$$ROOT&amp;quot;}}}).pretty()
+{
+  &amp;quot;_id&amp;quot; : ObjectId(&amp;quot;5924aca1530259006a3792ca&amp;quot;),
+  &amp;quot;o&amp;quot; : [
+    {
+      &amp;quot;k&amp;quot; : &amp;quot;_id&amp;quot;,
+      &amp;quot;v&amp;quot; : ObjectId(&amp;quot;5924aca1530259006a3792ca&amp;quot;)
+    },
+    {
+      &amp;quot;k&amp;quot; : &amp;quot;member_id&amp;quot;,
+      &amp;quot;v&amp;quot; : &amp;quot;m1&amp;quot;
+    },
+    {
+      &amp;quot;k&amp;quot; : &amp;quot;claim_id&amp;quot;,
+      &amp;quot;v&amp;quot; : &amp;quot;c1&amp;quot;
+    },
+    {
+      &amp;quot;k&amp;quot; : &amp;quot;last_updated&amp;quot;,
+      &amp;quot;v&amp;quot; : ISODate(&amp;quot;2017-01-01T00:00:00Z&amp;quot;)
+    },
+    {
+      &amp;quot;k&amp;quot; : &amp;quot;details&amp;quot;,
+      &amp;quot;v&amp;quot; : {
+        &amp;quot;foo&amp;quot; : 1
+      }
+    }
+  ]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h5 id=&#34;now-what-can-i-do&#34;&gt;Now what can I do?&lt;/h5&gt;
+
+&lt;pre&gt;&lt;code&gt;db.claims.aggregate([
+  {$project:{o:{$objectToArray:&amp;quot;$$ROOT&amp;quot;}}},
+  {$unwind:&amp;quot;$o&amp;quot;},
+  {$group:{_id:null, keys:{$addToSet:&amp;quot;$o.k&amp;quot;}}}
+])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h5 id=&#34;are-there-more-efficient-ways-to-do-this&#34;&gt;Are there more efficient ways to do this?&lt;/h5&gt;
+
+&lt;p&gt;There are other ways to do this, but none of them can escape doing a &lt;code&gt;$group&lt;/code&gt; stage over all the documents (i.e. with &lt;code&gt;_id&lt;/code&gt; as a constant, usually null).  But we could avoid &lt;code&gt;$unwind&lt;/code&gt; stage a couple of different ways.&lt;/p&gt;
+
+&lt;h6 id=&#34;using-arrays&#34;&gt;using arrays&lt;/h6&gt;
+
+&lt;p&gt;If your documents are more or less uniform, or if the collection isn&amp;rsquo;t too big, you can do this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.claims.aggregate([
+  { &amp;quot;$group&amp;quot;: { &amp;quot;_id&amp;quot;: null, &amp;quot;keys&amp;quot;: { &amp;quot;$addToSet&amp;quot;: { &amp;quot;$map&amp;quot;: { &amp;quot;input&amp;quot;: { &amp;quot;$objectToArray&amp;quot;: &amp;quot;$$ROOT&amp;quot; }, &amp;quot;in&amp;quot;: &amp;quot;$$this.k&amp;quot; } } } } }, 
+  { &amp;quot;$project&amp;quot;: { &amp;quot;keys&amp;quot;: { &amp;quot;$reduce&amp;quot;: { &amp;quot;input&amp;quot;: &amp;quot;$keys&amp;quot;, &amp;quot;initialValue&amp;quot;: [], &amp;quot;in&amp;quot;: { &amp;quot;$setUnion&amp;quot;: [ &amp;quot;$$this&amp;quot;, &amp;quot;$$value&amp;quot; ] } } } } }
+])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h6 id=&#34;using-mergeobjects&#34;&gt;using $mergeObjects&lt;/h6&gt;
+
+&lt;p&gt;3.5 added a new aggregation expression to merge two or more JSON objects, and it&amp;rsquo;s an expression that can be used as an accumulator during &lt;code&gt;$group&lt;/code&gt; stage.&lt;/p&gt;
+
+&lt;p&gt;Basic example: &lt;code&gt;{&amp;quot;$mergeObjects&amp;quot;:[ { &amp;quot;a&amp;quot;: 1, &amp;quot;b&amp;quot;: &amp;quot;foo&amp;quot;}, { &amp;quot;a&amp;quot;: 99, &amp;quot;c&amp;quot;: &amp;quot;bar&amp;quot;} ]}&lt;/code&gt; results in &lt;code&gt;{ &amp;quot;a&amp;quot;: 99, &amp;quot;b&amp;quot;: &amp;quot;foo&amp;quot;, &amp;quot;c&amp;quot;: &amp;quot;bar&amp;quot; }&lt;/code&gt;.  When a field exists in more than one object being merged, the last one (going from left to right) &amp;ldquo;wins&amp;rdquo;.&lt;/p&gt;
+
+&lt;p&gt;More fancy example for schema key analysis:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.claims.aggregate([
+  {&amp;quot;$group&amp;quot;:{&amp;quot;_id&amp;quot;:null, &amp;quot;keys&amp;quot;:{&amp;quot;$mergeObjects&amp;quot;:&amp;quot;$$ROOT&amp;quot;}}},
+  {&amp;quot;$project&amp;quot;:{&amp;quot;keys&amp;quot;: { &amp;quot;$map&amp;quot;: { &amp;quot;input&amp;quot;: { &amp;quot;$objectToArray&amp;quot;: &amp;quot;$keys&amp;quot; }, &amp;quot;in&amp;quot;: &amp;quot;$$this.k&amp;quot; } } } }
+])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;All the above aggregations return the same result:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{ &amp;quot;_id&amp;quot; : null, &amp;quot;keys&amp;quot; : [ &amp;quot;details&amp;quot;, &amp;quot;_id&amp;quot;, &amp;quot;member_id&amp;quot;, &amp;quot;last_updated&amp;quot;, &amp;quot;claim_id&amp;quot; ] }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Though &amp;ldquo;keys&amp;rdquo; being a set, the order of fields in the array is not guaranteed to be the same.&lt;/p&gt;
+
+&lt;p&gt;Next time I&amp;rsquo;ll show you how you can do more sophisticated schema analysis with aggregation, handling embedded object (i.e. subdocuments) as well as tracking types of values for each key.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>How to match documents where all array elements match predicate.</title>
@@ -1858,60 +1966,6 @@ PRIMARY(2.6.0) &gt; db.products.find( { &#34;attr&#34; : { &#34;$all&#34; : [
  &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:fn-f1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Why shouldn&#39;t I embed large arrays in my documents?</title>
-      <link>http://asya999.github.io/post/largeembeddedarrays/</link>
-      <pubDate>Thu, 13 Feb 2014 00:00:00 UTC</pubDate>
-      <author>Asya Kamsky</author>
-      <guid>http://asya999.github.io/post/largeembeddedarrays/</guid>
-      <description>
-
-&lt;p&gt;+++
-Categories = [&amp;ldquo;MongoDB&amp;rdquo;]
-Title= &amp;ldquo;Why shouldn&amp;rsquo;t I embed large arrays in my documents?&amp;rdquo;
-Date= &amp;ldquo;2014-02-13&amp;rdquo;
-Slug= &amp;ldquo;largeembeddedarrays&amp;rdquo;
-Tags= [&amp;ldquo;schema&amp;rdquo;,&amp;ldquo;performance&amp;rdquo;,&amp;ldquo;arrays&amp;rdquo;,&amp;ldquo;mongodb&amp;rdquo;]
-+++&lt;/p&gt;
-
-&lt;h3 id=&#34;question&#34;&gt;Question:&lt;/h3&gt;
-
-&lt;p&gt;Why shouldn&amp;rsquo;t I embed large arrays in my documents?  It seems incredibly convenient and intuitive but I&amp;rsquo;ve heard there are performance penalties.  What causes them and how do I know if I should avoid using arrays?&lt;/p&gt;
-
-&lt;h3 id=&#34;answer&#34;&gt;Answer:&lt;/h3&gt;
-
-&lt;p&gt;Arrays are wonderful when used properly.  When talking about performance, the main reason to be wary of arrays is when they grow without bounds.&lt;/p&gt;
-
-&lt;p&gt;Imagine you create a document:
-&lt;pre class=&#34;prettyprint&#34;&gt;
-{ user: &amp;ldquo;Asya&amp;rdquo;,
-  email: &amp;ldquo;asya@mongodb.com&amp;rdquo;,
-  twitter: [&amp;ldquo;@asya999&amp;rdquo;, &amp;ldquo;@ask-asya&amp;rdquo;]
-}
-&lt;/pre&gt;&lt;/p&gt;
-
-&lt;p&gt;Notice that twitter field is an array.  That&amp;rsquo;s perfectly fine and excellent - we don&amp;rsquo;t want to create a separate collection like we&amp;rsquo;d have to do in relational model, just because a person might have multiple twitter accounts/handles.&lt;/p&gt;
-
-&lt;p&gt;Now that the document has been created, a certain amount of space has been allocated for it.  If we continue growing the document by adding new fields to it, it will have to be moved and a larger allocation will be made for it because MongoDB dynamically tracks how often documents outgrow their allocation and tries to allocate more space for newly written or moved documents to account for the future growth.&lt;/p&gt;
-
-&lt;p&gt;Compare the cost of an update to a document when you can make an in-place change, versus rewriting the entire document somewhere else.  First, instead of just rewriting part of a document &amp;ldquo;in place&amp;rdquo; we have to allocate new space for it.  We have to rewrite the entire document, put the space that it used to occupy on the free list so that it can get re-used, and then repoint all the index entries that used to point to the old document location to the new location.  All of this must be done atomically, so your single write suddenly took a bit longer than a few microseconds that it used to take when the document didn&amp;rsquo;t have to move.&lt;/p&gt;
-
-&lt;p&gt;Now imagine what happens if you add a new array field to the document representing something that&amp;rsquo;s not naturally bound the way someone&amp;rsquo;s twitter handles or shipping addresses would be bound.  What if we want to embed into this document every time I perform some activity, let&amp;rsquo;s say click on a like button, or make a comment on someone&amp;rsquo;s blog?&lt;/p&gt;
-
-&lt;p&gt;First of all, we have to consider why we would want to do such a thing.  Normally, I would advise people to embed things that they always want to get back when they are fetching this document.  The flip side of this is that you don&amp;rsquo;t want to embed things in the document that you don&amp;rsquo;t want to get back with it.&lt;/p&gt;
-
-&lt;p&gt;If you embed activity I perform into the document, it&amp;rsquo;ll work great at first because all of my activity is right there and with a single read you can get back everything you might want to show me: &amp;ldquo;you recently clicked on this and here are your last two comments&amp;rdquo; but what happens after six months go by and I don&amp;rsquo;t care about things I did a long time ago and you don&amp;rsquo;t want to show them to me unless I specifically go to look for some old activity?&lt;/p&gt;
-
-&lt;p&gt;First, you&amp;rsquo;ll end up returning bigger and bigger document and caring about smaller and smaller portion of it.  But you can use projection to only return some of the array, the real pain is that the document on disk will get bigger and it will still all be read even if you&amp;rsquo;re only going to return part of it to the end user, but since my activity is not going to stop as long as I&amp;rsquo;m active, the document will continue growing and growing.&lt;/p&gt;
-
-&lt;p&gt;The most obvious problem with this is eventually you&amp;rsquo;ll hit the 16MB document limit, but that&amp;rsquo;s not at all what you should be concerned about.  A document that continuously grows will incur higher and higher cost every time it has to get relocated on disk, and even if you take steps to mitigate the effects of fragmentation, your writes will overall be unnecessarily long, impacting overall performance of your entire application.&lt;/p&gt;
-
-&lt;p&gt;There is one more thing that you can do that will completely kill your application&amp;rsquo;s performance and that&amp;rsquo;s to index this ever-increasing array.  What that means is that every single time the document with this array is relocated, the number of index entries that need to be updated is directly proportional to the number of indexed values in that document, and the bigger the array, the larger that number will be.&lt;/p&gt;
-
-&lt;p&gt;I don&amp;rsquo;t want this to scare you from using arrays when they are a good fit for the data model - they are a powerful feature of the document database data model, but like all powerful tools, it needs to be used in the right circumstances and it should be used with care.&lt;/p&gt;
 </description>
     </item>
     

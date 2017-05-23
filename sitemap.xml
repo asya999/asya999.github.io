@@ -2,6 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://asya999.github.io/post/getallkeys/</loc>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://asya999.github.io/post/matchallarrayelements/</loc>
     <lastmod>2016-10-09T00:00:00+00:00</lastmod>
   </url>
@@ -73,7 +78,13 @@
   
   <url>
     <loc>http://asya999.github.io/tags/aggregation/</loc>
-    <lastmod>2014-05-24T00:00:00+00:00</lastmod>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://asya999.github.io/categories/aggregation/</loc>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -85,7 +96,7 @@
   
   <url>
     <loc>http://asya999.github.io/</loc>
-    <lastmod>2016-10-09T00:00:00+00:00</lastmod>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -97,7 +108,7 @@
   
   <url>
     <loc>http://asya999.github.io/categories/</loc>
-    <lastmod>0001-01-01T00:00:00+00:00</lastmod>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -120,6 +131,12 @@
   </url>
   
   <url>
+    <loc>http://asya999.github.io/tags/keys/</loc>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>http://asya999.github.io/tags/modeling/</loc>
     <lastmod>2014-09-07T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -133,7 +150,7 @@
   
   <url>
     <loc>http://asya999.github.io/categories/mongodb/</loc>
-    <lastmod>2016-10-09T00:00:00+00:00</lastmod>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -151,7 +168,7 @@
   
   <url>
     <loc>http://asya999.github.io/post/</loc>
-    <lastmod>2016-10-09T00:00:00+00:00</lastmod>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -169,7 +186,13 @@
   
   <url>
     <loc>http://asya999.github.io/tags/schema/</loc>
-    <lastmod>2016-10-09T00:00:00+00:00</lastmod>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://asya999.github.io/categories/schema/</loc>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -193,7 +216,7 @@
   
   <url>
     <loc>http://asya999.github.io/tags/</loc>
-    <lastmod>2014-05-24T00:00:00+00:00</lastmod>
+    <lastmod>2017-05-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

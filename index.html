@@ -49,6 +49,19 @@
         
             <div class="well well-sm">
     <h4>
+        <a href="http://asya999.github.io/post/getallkeys/">How do I get all the names of keys in my documents</a> <small class="pull-right">Posted on May 23, 2017</small><br>
+        <small></small>
+    </h4>
+    <hr>
+    <p>Question: I heard there are new operators in aggregation to extract keys from my documents. How can I use them to get a list of all key names for all documents in my collection?
+Answer: There are new expressions available as of 3.4.4 - $objectToArray, $arrayToObject and in 3.5.5 we also get $mergeObjects.
+split top level object into array of key value pairs {&quot;$objectToArray&quot;:&quot;$$ROOT&quot;} will return an array of {k:&quot;keyname&quot;, v:&lt;value&gt;} elements.</p>
+    <a class="btn btn-success btn-xs" href="http://asya999.github.io/post/getallkeys/">Read More <span class="fa fa-angle-double-right"></span></a>
+</div>
+
+        
+            <div class="well well-sm">
+    <h4>
         <a href="http://asya999.github.io/post/matchallarrayelements/">How to match documents where all array elements match predicate.</a> <small class="pull-right">Posted on Oct 9, 2016</small><br>
         <small>How do I match all documents where all array elements match some predicate?</small>
     </h4>
@@ -164,18 +177,6 @@ By any other name would smell as sweet; - said Juliet1 As it turns out, a lot is
     <hr>
     <p>Question: Is it possible to use &ldquo;Tag aware sharding&rdquo; feature without having to use a special shard key? The example in the tutorial makes it look like we would have to change our shard key to have a prefix value that we can define tag ranges on but we&rsquo;re already sharded. We have many collections in this database and we want to limit each collection to a subset of the shards so we can isolate the busy ones from each other.</p>
     <a class="btn btn-success btn-xs" href="http://asya999.github.io/post/taggedcollectionbalancing/">Read More <span class="fa fa-angle-double-right"></span></a>
-</div>
-
-        
-            <div class="well well-sm">
-    <h4>
-        <a href="http://asya999.github.io/post/dynamicattributes/">How to Model Dynamic Attributes</a> <small class="pull-right">Posted on Apr 15, 2014</small><br>
-        <small></small>
-    </h4>
-    <hr>
-    <p>Question: I&rsquo;ve heard that MongoDB can be effectively used to model &ldquo;dynamic attributes&rdquo; - where you don&rsquo;t know up front all the different attributes and not all attributes apply to all items. Can you describe how that can be done, and in particular how it can be effectively indexed?
-Answer: The problem: Imagine you are building an e-commerce site and you aspire to be as big as amazon.com some day, which means you will be selling many different types of products.</p>
-    <a class="btn btn-success btn-xs" href="http://asya999.github.io/post/dynamicattributes/">Read More <span class="fa fa-angle-double-right"></span></a>
 </div>
 
         
