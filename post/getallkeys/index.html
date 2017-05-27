@@ -62,7 +62,7 @@
 
 <p><code>{&quot;$objectToArray&quot;:&quot;$$ROOT&quot;}</code> will return an array of <code>{&quot;k&quot;:&quot;keyname&quot;, &quot;v&quot;:&lt;value&gt;}</code> elements.</p>
 
-<pre><code>db.example.findOne()
+<pre><code>db.claims.findOne()
 {
   &quot;_id&quot; : ObjectId(&quot;5924aca1530259006a3792ca&quot;),
   &quot;member_id&quot; : &quot;m1&quot;,
@@ -109,6 +109,7 @@ db.claims.aggregate({&quot;$limit&quot;:1},{&quot;$project&quot;:{&quot;o&quot;:
   {&quot;$unwind&quot;:&quot;$o&quot;},
   {&quot;$group&quot;:{&quot;_id&quot;:null, &quot;keys&quot;:{&quot;$addToSet&quot;:&quot;$o.k&quot;}}}
 ])
+{ &quot;_id&quot; : null, &quot;keys&quot; : [ &quot;claim_id&quot;, &quot;details&quot;, &quot;last_updated&quot;, &quot;member_id&quot;, &quot;_id&quot; ] }
 </code></pre>
 
 <h4 id="are-there-more-efficient-ways-to-do-this">Are there more efficient ways to do this?</h4>
@@ -134,13 +135,16 @@ db.claims.aggregate({&quot;$limit&quot;:1},{&quot;$project&quot;:{&quot;o&quot;:
        } } 
   } }
 ])
+{ &quot;_id&quot; : null, &quot;keys&quot; : [ &quot;_id&quot;, &quot;claim_id&quot;, &quot;details&quot;, &quot;last_updated&quot;, &quot;member_id&quot; ] }
 </code></pre>
+
+<p>Note that this could fail for very large number of documents because the group accumulates array of arrays of keys.  However, because it uses $addToSet, if your documents are uniform, it won&rsquo;t grow very big (it will have an array element for every different set of keys across all your documents).</p>
 
 <h5 id="using-mergeobjects">Using <code>$mergeObjects</code></h5>
 
 <p>3.5 added a new aggregation expression to merge two or more JSON objects, and it&rsquo;s an expression that can be used as an accumulator during <code>$group</code> stage.</p>
 
-<p>Basic example: <code>{&quot;$mergeObjects&quot;:[ { &quot;a&quot;: 1, &quot;b&quot;: &quot;foo&quot;}, { &quot;a&quot;: 99, &quot;c&quot;: &quot;bar&quot;} ]}</code> results in <code>{ &quot;a&quot;: 99, &quot;b&quot;: &quot;foo&quot;, &quot;c&quot;: &quot;bar&quot; }</code>.  When a field exists in more than one object being merged, the last one (going from left to right) &ldquo;wins&rdquo;.</p>
+<p>Basic example: <code>{&quot;$mergeObjects&quot;:[ { &quot;a&quot;: 1, &quot;b&quot;: &quot;foo&quot;}, { &quot;a&quot;: 99, &quot;c&quot;: &quot;bar&quot;} ]}</code> results in <code>{ &quot;a&quot;: 99, &quot;b&quot;: &quot;foo&quot;, &quot;c&quot;: &quot;bar&quot; }</code>.  When a field exists in more than one object being merged, the last one (going from left to right) &ldquo;wins&rdquo;.  We don&rsquo;t care about order, since we are going to throw away the values anyway.</p>
 
 <p>More fancy example for schema key analysis:</p>
 
@@ -148,14 +152,15 @@ db.claims.aggregate({&quot;$limit&quot;:1},{&quot;$project&quot;:{&quot;o&quot;:
   {&quot;$group&quot;:{&quot;_id&quot;:null, &quot;keys&quot;:{&quot;$mergeObjects&quot;:&quot;$$ROOT&quot;}}},
   {&quot;$project&quot;:{&quot;keys&quot;: { &quot;$map&quot;: { &quot;input&quot;: { &quot;$objectToArray&quot;: &quot;$keys&quot; }, &quot;in&quot;: &quot;$$this.k&quot; } } } }
 ])
+{ &quot;_id&quot; : null, &quot;keys&quot; : [ &quot;_id&quot;, &quot;member_id&quot;, &quot;claim_id&quot;, &quot;last_updated&quot;, &quot;details&quot; ] }
 </code></pre>
 
-<p>All the above aggregations return the same result:</p>
+<p>All the above aggregations return the same result set:</p>
 
-<pre><code>{ &quot;_id&quot; : null, &quot;keys&quot; : [ &quot;details&quot;, &quot;_id&quot;, &quot;member_id&quot;, &quot;last_updated&quot;, &quot;claim_id&quot; ] }
+<pre><code>{ &quot;_id&quot; : null, &quot;keys&quot; : [ &quot;_id&quot;, &quot;member_id&quot;, &quot;claim_id&quot;, &quot;last_updated&quot;, &quot;details&quot; ] }
 </code></pre>
 
-<p>Though &ldquo;keys&rdquo; being a set, the order of fields in the array is not guaranteed to be the same.</p>
+<p>Because &ldquo;keys&rdquo; is a set, the order of them in the array is not guaranteed to be the same.</p>
 
 <p>Next time I&rsquo;ll show you how you can do more sophisticated schema analysis with aggregation, handling embedded object (i.e. subdocuments) as well as tracking types of values for each key.</p>
 
@@ -177,7 +182,7 @@ db.claims.aggregate({&quot;$limit&quot;:1},{&quot;$project&quot;:{&quot;o&quot;:
         <div class="col-md-3">
             <div class="well well-sm"> 
                 <h4>May 23, 2017<br>
-                <small>446 words</small></h4>
+                <small>555 words</small></h4>
                 <hr>
                 <strong>Categories</strong>
                 <ul class="list-unstyled">
