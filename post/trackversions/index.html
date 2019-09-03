@@ -55,7 +55,7 @@
 <p>Consider requirement that we have to be able to recreate/query any version of a document that ever existed in a particular collection.   So we start out with:</p>
 
 <pre><code>{   docId: &quot;A&quot;,
-    version: 1,
+    v: 1,
     color: &quot;red&quot;,
     locale: &quot;USA&quot;
 }
@@ -64,7 +64,7 @@
 <p>If we need to set color to &ldquo;blue&rdquo;, instead of updating the &ldquo;color&rdquo; field from &ldquo;red&rdquo; to &ldquo;blue&rdquo;, we have to create a new version of the document which now has its full &ldquo;current&rdquo; state, and preserve somehow the old version of the document.   So we insert</p>
 
 <pre><code>{   docId: &quot;A&quot;,
-    version: 2,
+    v: 2,
     color: &quot;blue&quot;,
     locale: &quot;USA&quot;
 }
@@ -160,8 +160,8 @@
 
 <p>Instead we have to do this:</p>
 
-<pre><code>sort={&quot;$sort&quot;: { &quot;documentId&quot; : 1, &quot;version&quot; : -1 } };
-group={&quot;$group&quot; : { &quot;_id&quot; : &quot;$documentId&quot;,
+<pre><code>sort={&quot;$sort&quot;: { &quot;docId&quot; : 1, &quot;v&quot; : -1 } };
+group={&quot;$group&quot; : { &quot;_id&quot; : &quot;$docId&quot;,
                     &quot;doc&quot;: { &quot;$first&quot; : &quot;$$ROOT&quot; }
                    } };
 match={&quot;$match&quot;:{&quot;doc.attrN&quot;:&lt;value&gt;}}; /* RIGHT */
@@ -183,7 +183,7 @@ db.collection.aggregate( sort, group, match )
 
 <h5 id="choice-1a">Choice 1a</h5>
 
-<p>In a variant of 1. we might add a field in the &ldquo;current&rdquo; version of each documentId</p>
+<p>In a variant of 1. we might add a field in the &ldquo;current&rdquo; version of each docId</p>
 
 <pre><code>     {  &quot;docId&quot; : 174, &quot;v&quot; : 1,  &quot;attr1&quot;: 165 }
      {  &quot;docId&quot; : 174, &quot;v&quot; : 2,  &quot;attr1&quot;: 165, &quot;attr2&quot;: &quot;A-1&quot; }
@@ -259,7 +259,7 @@ if (result.nModified != 1) {
               {  &quot;docId&quot; : 174, &quot;v&quot; : 1,  &quot;attr1&quot;: 165 }
               {  &quot;docId&quot; : 174, &quot;v&quot; : 2,  &quot;attr1&quot;: 165, &quot;attr2&quot;: &quot;A-1&quot; }
 
-For each documentId, there is only one document which represented its current state.
+For each docId, there is only one document which represented its current state.
 </code></pre>
 
 <h6 id="to-return-only-current-document-2">To return only current document</h6>
@@ -274,7 +274,7 @@ For each documentId, there is only one document which represented its current st
 
 <p>What if we  switch the order of writes to save into the previous collection first?   We read the current document, we write it to previous collection, we now change it to be &ldquo;new&rdquo; current and save it into &ldquo;current&rdquo; collection.  This has several advantages:
 - if someone else is trying to update this document, they will also be saving into &ldquo;previous&rdquo; collection, so having a unique index on docId, version will tell us if we lost the race and now have to try again.<br />
-- if the thread dies in the middle (after insert into previous and before updating current) it&rsquo;s not the end of the world, as your current collection was not affected, but you do need a way to &ldquo;clean up&rdquo; your &ldquo;previous&rdquo; collection, first because you need to remove the version of the document that never existed in &ldquo;current&rdquo; and second because it will block all other &ldquo;updates&rdquo; on this document by using an invalid &ldquo;docId&rdquo;, &ldquo;version&rdquo;.</p>
+- if the thread dies in the middle (after insert into previous and before updating current) it&rsquo;s not the end of the world, as your current collection was not affected, but you do need a way to &ldquo;clean up&rdquo; your &ldquo;previous&rdquo; collection, first because you need to remove the version of the document that never existed in &ldquo;current&rdquo; and second because it will block all other &ldquo;updates&rdquo; on this document by using an invalid &ldquo;docId&rdquo;, &ldquo;v&rdquo;.</p>
 
 <p>Luckily, clean-up may be simple, as any time we detect that there exists a docId, version in &ldquo;current&rdquo; that also exists in &ldquo;previous&rdquo; it means either there is an update &ldquo;in progress&rdquo; or it means that an update &ldquo;died&rdquo; and we should clean up.  Of course the devil is in the details - and it could cause delays in the system since you have to wait long enough to be sure that this &ldquo;in progress&rdquo; update actually died.  Or you can have another field that you update after successful writes in both places (now making it easier to recover, but needing to do three writes before you&rsquo;re done with a single document update!)  Let&rsquo;s call this Medium Hard still.</p>
 
@@ -282,9 +282,9 @@ For each documentId, there is only one document which represented its current st
 
 <p>Store only &ldquo;deltas&rdquo; with increasing versions</p>
 
-<pre><code>    {  &quot;documentId&quot; : 174, &quot;v&quot; : 1,  &quot;attr1&quot;: 165 }
-    {  &quot;documentId&quot; : 174, &quot;v&quot; : 2,  &quot;attr2&quot;: &quot;A-1&quot; }
-    {  &quot;documentId&quot; : 174, &quot;v&quot; : 3,  &quot;attr1&quot;: 184 }
+<pre><code>    {  &quot;docId&quot; : 174, &quot;v&quot; : 1,  &quot;attr1&quot;: 165 }
+    {  &quot;docId&quot; : 174, &quot;v&quot; : 2,  &quot;attr2&quot;: &quot;A-1&quot; }
+    {  &quot;docId&quot; : 174, &quot;v&quot; : 3,  &quot;attr1&quot;: 184 }
 </code></pre>
 
 <p>For each docId, the current state must be derived by &ldquo;merging&rdquo; all the documents with matching docId, keeping the &ldquo;latest&rdquo; or &ldquo;highest&rdquo; version&rsquo;s value of each attribute if it occurs in more than one version.</p>
@@ -419,7 +419,7 @@ For each documentId, there is only one document which represented its current st
             <div class="row">
                 <hr>
                 <div class="col-sm-12">
-                    <p>&copy; Asya Kamsky 2017 &middot;
+                    <p>&copy; Asya Kamsky 2019 &middot;
                     Built with <a href="https://github.com/spf13/hugo">Hugo</a></p>
                 </div>
             </div>

@@ -1161,7 +1161,7 @@ reduce = function (key,values) {
 &lt;p&gt;Consider requirement that we have to be able to recreate/query any version of a document that ever existed in a particular collection.   So we start out with:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;{   docId: &amp;quot;A&amp;quot;,
-    version: 1,
+    v: 1,
     color: &amp;quot;red&amp;quot;,
     locale: &amp;quot;USA&amp;quot;
 }
@@ -1170,7 +1170,7 @@ reduce = function (key,values) {
 &lt;p&gt;If we need to set color to &amp;ldquo;blue&amp;rdquo;, instead of updating the &amp;ldquo;color&amp;rdquo; field from &amp;ldquo;red&amp;rdquo; to &amp;ldquo;blue&amp;rdquo;, we have to create a new version of the document which now has its full &amp;ldquo;current&amp;rdquo; state, and preserve somehow the old version of the document.   So we insert&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;{   docId: &amp;quot;A&amp;quot;,
-    version: 2,
+    v: 2,
     color: &amp;quot;blue&amp;quot;,
     locale: &amp;quot;USA&amp;quot;
 }
@@ -1266,8 +1266,8 @@ reduce = function (key,values) {
 
 &lt;p&gt;Instead we have to do this:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;sort={&amp;quot;$sort&amp;quot;: { &amp;quot;documentId&amp;quot; : 1, &amp;quot;version&amp;quot; : -1 } };
-group={&amp;quot;$group&amp;quot; : { &amp;quot;_id&amp;quot; : &amp;quot;$documentId&amp;quot;,
+&lt;pre&gt;&lt;code&gt;sort={&amp;quot;$sort&amp;quot;: { &amp;quot;docId&amp;quot; : 1, &amp;quot;v&amp;quot; : -1 } };
+group={&amp;quot;$group&amp;quot; : { &amp;quot;_id&amp;quot; : &amp;quot;$docId&amp;quot;,
                     &amp;quot;doc&amp;quot;: { &amp;quot;$first&amp;quot; : &amp;quot;$$ROOT&amp;quot; }
                    } };
 match={&amp;quot;$match&amp;quot;:{&amp;quot;doc.attrN&amp;quot;:&amp;lt;value&amp;gt;}}; /* RIGHT */
@@ -1289,7 +1289,7 @@ db.collection.aggregate( sort, group, match )
 
 &lt;h5 id=&#34;choice-1a&#34;&gt;Choice 1a&lt;/h5&gt;
 
-&lt;p&gt;In a variant of 1. we might add a field in the &amp;ldquo;current&amp;rdquo; version of each documentId&lt;/p&gt;
+&lt;p&gt;In a variant of 1. we might add a field in the &amp;ldquo;current&amp;rdquo; version of each docId&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;     {  &amp;quot;docId&amp;quot; : 174, &amp;quot;v&amp;quot; : 1,  &amp;quot;attr1&amp;quot;: 165 }
      {  &amp;quot;docId&amp;quot; : 174, &amp;quot;v&amp;quot; : 2,  &amp;quot;attr1&amp;quot;: 165, &amp;quot;attr2&amp;quot;: &amp;quot;A-1&amp;quot; }
@@ -1365,7 +1365,7 @@ if (result.nModified != 1) {
               {  &amp;quot;docId&amp;quot; : 174, &amp;quot;v&amp;quot; : 1,  &amp;quot;attr1&amp;quot;: 165 }
               {  &amp;quot;docId&amp;quot; : 174, &amp;quot;v&amp;quot; : 2,  &amp;quot;attr1&amp;quot;: 165, &amp;quot;attr2&amp;quot;: &amp;quot;A-1&amp;quot; }
 
-For each documentId, there is only one document which represented its current state.
+For each docId, there is only one document which represented its current state.
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h6 id=&#34;to-return-only-current-document-2&#34;&gt;To return only current document&lt;/h6&gt;
@@ -1380,7 +1380,7 @@ For each documentId, there is only one document which represented its current st
 
 &lt;p&gt;What if we  switch the order of writes to save into the previous collection first?   We read the current document, we write it to previous collection, we now change it to be &amp;ldquo;new&amp;rdquo; current and save it into &amp;ldquo;current&amp;rdquo; collection.  This has several advantages:
 - if someone else is trying to update this document, they will also be saving into &amp;ldquo;previous&amp;rdquo; collection, so having a unique index on docId, version will tell us if we lost the race and now have to try again.&lt;br /&gt;
-- if the thread dies in the middle (after insert into previous and before updating current) it&amp;rsquo;s not the end of the world, as your current collection was not affected, but you do need a way to &amp;ldquo;clean up&amp;rdquo; your &amp;ldquo;previous&amp;rdquo; collection, first because you need to remove the version of the document that never existed in &amp;ldquo;current&amp;rdquo; and second because it will block all other &amp;ldquo;updates&amp;rdquo; on this document by using an invalid &amp;ldquo;docId&amp;rdquo;, &amp;ldquo;version&amp;rdquo;.&lt;/p&gt;
+- if the thread dies in the middle (after insert into previous and before updating current) it&amp;rsquo;s not the end of the world, as your current collection was not affected, but you do need a way to &amp;ldquo;clean up&amp;rdquo; your &amp;ldquo;previous&amp;rdquo; collection, first because you need to remove the version of the document that never existed in &amp;ldquo;current&amp;rdquo; and second because it will block all other &amp;ldquo;updates&amp;rdquo; on this document by using an invalid &amp;ldquo;docId&amp;rdquo;, &amp;ldquo;v&amp;rdquo;.&lt;/p&gt;
 
 &lt;p&gt;Luckily, clean-up may be simple, as any time we detect that there exists a docId, version in &amp;ldquo;current&amp;rdquo; that also exists in &amp;ldquo;previous&amp;rdquo; it means either there is an update &amp;ldquo;in progress&amp;rdquo; or it means that an update &amp;ldquo;died&amp;rdquo; and we should clean up.  Of course the devil is in the details - and it could cause delays in the system since you have to wait long enough to be sure that this &amp;ldquo;in progress&amp;rdquo; update actually died.  Or you can have another field that you update after successful writes in both places (now making it easier to recover, but needing to do three writes before you&amp;rsquo;re done with a single document update!)  Let&amp;rsquo;s call this Medium Hard still.&lt;/p&gt;
 
@@ -1388,9 +1388,9 @@ For each documentId, there is only one document which represented its current st
 
 &lt;p&gt;Store only &amp;ldquo;deltas&amp;rdquo; with increasing versions&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;    {  &amp;quot;documentId&amp;quot; : 174, &amp;quot;v&amp;quot; : 1,  &amp;quot;attr1&amp;quot;: 165 }
-    {  &amp;quot;documentId&amp;quot; : 174, &amp;quot;v&amp;quot; : 2,  &amp;quot;attr2&amp;quot;: &amp;quot;A-1&amp;quot; }
-    {  &amp;quot;documentId&amp;quot; : 174, &amp;quot;v&amp;quot; : 3,  &amp;quot;attr1&amp;quot;: 184 }
+&lt;pre&gt;&lt;code&gt;    {  &amp;quot;docId&amp;quot; : 174, &amp;quot;v&amp;quot; : 1,  &amp;quot;attr1&amp;quot;: 165 }
+    {  &amp;quot;docId&amp;quot; : 174, &amp;quot;v&amp;quot; : 2,  &amp;quot;attr2&amp;quot;: &amp;quot;A-1&amp;quot; }
+    {  &amp;quot;docId&amp;quot; : 174, &amp;quot;v&amp;quot; : 3,  &amp;quot;attr1&amp;quot;: 184 }
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;For each docId, the current state must be derived by &amp;ldquo;merging&amp;rdquo; all the documents with matching docId, keeping the &amp;ldquo;latest&amp;rdquo; or &amp;ldquo;highest&amp;rdquo; version&amp;rsquo;s value of each attribute if it occurs in more than one version.&lt;/p&gt;
